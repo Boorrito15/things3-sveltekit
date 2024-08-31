@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createCheckbox, melt } from '@melt-ui/svelte';
-	import { Check, Minus } from '$icons/index.js';
+	import Minus from 'virtual:icons/mdi/remove';
+	import Check from 'virtual:icons/mdi/check';
 
 	const {
 		elements: { root, input },
