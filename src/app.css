@@ -1,3 +1,101 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+h1 {
+	@apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+	color: #090c1a;
+}
+
+h2 {
+	@apply scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0;
+	color: #090c1a;
+}
+
+h3 {
+	@apply scroll-m-20 text-2xl font-semibold tracking-tight;
+	color: #090c1a;
+}
+
+h4 {
+	@apply scroll-m-20 text-xl font-semibold tracking-tight;
+	color: #090c1a;
+}
+
+p {
+	@apply leading-7 text-sm;
+	color: #090c1a;
+}
+
+blockquote {
+	@apply mt-6 border-l-2 pl-6 italic;
+	color: #090c1a;
+	border-left-color: #d9dee6;
+}
+
+lead {
+	@apply text-xl;
+	color: #969ea8; /* muted-foreground */
+}
+
+large {
+	@apply text-lg font-semibold;
+	color: #090c1a;
+}
+
+small {
+	@apply text-sm font-medium leading-none;
+	color: #090c1a;
+}
+
+muted {
+	@apply text-sm;
+	color: #969ea8; /* muted-foreground */
+}
+
+* {
+	border-color: #d9dee6; /* border */
+}
+
+body {
+	background-color: #f9fafb; /* background */
+	color: #090c1a; /* foreground */
+}
+
+@layer components {
+	/* Table styles */
+	table {
+		@apply w-full;
+	}
+
+	thead tr {
+		@apply m-0 border-t p-0;
+		background-color: #e4e7eb; /* muted */
+		border-color: #d9dee6; /* border */
+	}
+
+	th,
+	td {
+		@apply border px-4 py-2 text-left;
+		border-color: #d9dee6; /* border */
+	}
+
+	tbody tr {
+		@apply m-0 border-t p-0;
+		background-color: #e4e7eb; /* muted */
+		border-color: #d9dee6; /* border */
+	}
+
+	/* List styles */
+	ul {
+		@apply my-6 ml-6;
+		@apply [&>li]:mt-2;
+	}
+
+	/* Inline code styles */
+	code {
+		@apply relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+		background-color: #e4e7eb; /* muted */
+		color: #090c1a; /* foreground */
+	}
+}
