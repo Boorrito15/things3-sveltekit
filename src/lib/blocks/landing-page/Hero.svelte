@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Button, Avatar } from '$lib/global-components';
 </script>
 
 <section class="flex items-center justify-center min-h-screen text-center">
@@ -22,10 +21,5 @@
 			projects, and make real progress toward your goals.
 		</p>
 		<button class="px-4 py-2 font-semibold text-blue-500 bg-white rounded">Get Started</button>
-		<Button>ShadCN</Button>
-		<Avatar.Root>
-			<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
-			<Avatar.Fallback>CN</Avatar.Fallback>
-		</Avatar.Root>
 	</div>
 </section>
