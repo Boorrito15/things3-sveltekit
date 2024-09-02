@@ -27,6 +27,16 @@ p {
 	color: #090c1a;
 }
 
+input {
+	@apply leading-7 text-sm;
+	color: #090c1a;
+}
+
+textarea {
+	@apply leading-7 text-sm;
+	color: #090c1a;
+}
+
 blockquote {
 	@apply mt-6 border-l-2 pl-6 italic;
 	color: #090c1a;
