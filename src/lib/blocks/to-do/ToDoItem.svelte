@@ -30,9 +30,10 @@
 		checklist?: ChecklistItem[];
 	}
 
-	let { task, onSelect } = $props<{
+	let { task, onSelect, onDelete } = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
+		onDelete: (taskId: number) => void;
 	}>();
 
 	let taskRef = $state<HTMLElement | null>(null);
@@ -117,7 +118,7 @@
 		onSelect(task.id); // Notify the parent component to select this task
 	}
 
-	function toggleEdit() {
+	function editTask() {
 		if (!task.expanded) {
 			task.expanded = true;
 			tick().then(() => {
@@ -128,9 +129,13 @@
 		}
 	}
 
-	function complete() {
+	function completeTask() {
 		task.completed = true;
 		console.log(task.completed);
+	}
+
+	function deleteTask() {
+		onDelete(task.id);
 	}
 
 	$effect(() => {
@@ -166,14 +171,14 @@
 	role="button"
 	tabindex="0"
 	onmousedown={selectTask}
-	ondblclick={toggleEdit}
+	ondblclick={editTask}
 	onkeydown={(event) => {
-		if (event.key === 'Enter') toggleEdit();
+		if (event.key === 'Enter') editTask();
 	}}
 >
 	<div class="task-content">
 		<div class="task-header">
-			<Checkbox on:click={complete} />
+			<Checkbox on:click={completeTask} />
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
 				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
@@ -181,6 +186,9 @@
 				<!-- Display the current value of editableName -->
 				<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
 			{/if}
+			<button class="h-full flex items-center" onclick={deleteTask}
+				><span class="material-symbols-outlined"> backspace </span></button
+			>
 		</div>
 		<div class="notes-container">
 			{#if task.expanded}
@@ -226,7 +234,7 @@
 		background-color: white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 		margin: 2rem 0;
-		padding: 1rem 0.5rem 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
+		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
 		height: fit-content;
 		width: 100%;
 	}
