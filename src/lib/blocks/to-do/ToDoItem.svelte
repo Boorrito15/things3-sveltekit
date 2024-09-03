@@ -148,12 +148,12 @@
 	// Update task.name whenever editableName changes
 
 	$effect(() => {
-		if (task.expanded) {
+		if (task.expanded || task.selected) {
 			const handleClickOutside = (event: MouseEvent) => {
 				if (taskRef && !taskRef.contains(event.target as Node)) {
-					task.expanded = false; // Collapse the task if the click is outside
+					task.selected = false; // Collapse the task if the click is outside
+					task.expanded = false;
 				}
-				selectTask();
 			};
 
 			document.addEventListener('mousedown', handleClickOutside);
