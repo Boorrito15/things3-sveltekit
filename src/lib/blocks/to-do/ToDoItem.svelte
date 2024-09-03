@@ -2,13 +2,32 @@
 	import { Checkbox, Tooltip } from '$lib/global-components';
 	import { tick } from 'svelte';
 
+	interface Tag {
+		id: number;
+		name: string;
+		color?: string;
+		description?: string;
+	}
+
+	interface ChecklistItem {
+		id: number;
+		name: string;
+		completed: boolean;
+	}
+
 	interface Task {
 		id: number;
 		name: string;
+		notes?: string;
+
 		selected: boolean;
 		expanded: boolean;
-		notes?: string;
 		completed?: false;
+
+		dueDate?: Date;
+		tags?: Tag[];
+		priority?: 'low' | 'medium' | 'high';
+		checklist?: ChecklistItem[];
 	}
 
 	let { task, onSelect } = $props<{
