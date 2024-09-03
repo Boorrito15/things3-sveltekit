@@ -5,25 +5,21 @@
 
 	const {
 		elements: { root, input },
-		helpers: { isChecked, isIndeterminate }
-	} = createCheckbox({
-		defaultChecked: 'indeterminate'
-	});
+		helpers: { isChecked }
+	} = createCheckbox({});
 </script>
 
 <form>
-	<div class="flex items-center justify-center">
-		<button
-			use:melt={$root}
-			class="flex items-center justify-center bg-white rounded-lg shadow appearance-none size-7 text-magnum-600 hover:opacity-75"
-			id="checkbox"
-		>
-			{#if $isIndeterminate}
-				<Minus class="size-5" />
-			{:else if $isChecked}
-				<Check class="size-5" />
-			{/if}
-			<input use:melt={$input} />
-		</button>
-	</div>
+	<button
+		use:melt={$root}
+		class="flex items-center justify-center bg-white rounded-sm shadow appearance-none size-3 text-white hover:opacity-75 ease-in duration-100 transform active:scale-105"
+		id="checkbox"
+	>
+		{#if $isChecked}
+			<Check
+				class="size-3 bg-[#1C61C2] rounded-sm ease-in duration-100 transform active:scale-105"
+			/>
+		{/if}
+		<input use:melt={$input} />
+	</button>
 </form>

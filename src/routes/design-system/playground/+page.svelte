@@ -1,0 +1,25 @@
+<script lang="ts">
+	import ToDoItem from '$lib/blocks/to-do/ToDoItem.svelte';
+
+	let tasks = $state([
+		{ id: 1, name: 'Task 1', selected: false, expanded: false },
+		{ id: 2, name: 'Task 2', selected: false, expanded: false }
+	]);
+
+	let selectedTaskId = $state<number | null>(null);
+
+	function handleSelectTask(taskId: number) {
+		// Update task selection
+		tasks = tasks.map((task) => ({
+			...task,
+			selected: task.id === taskId
+		}));
+		selectedTaskId = taskId;
+	}
+</script>
+
+<div class="flex flex-col items-center">
+	{#each tasks as task}
+		<ToDoItem {task} onSelect={handleSelectTask} />
+	{/each}
+</div>
