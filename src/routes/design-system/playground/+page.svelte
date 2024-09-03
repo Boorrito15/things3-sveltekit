@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TaskItem from '$lib/blocks/tasks/TaskItem.svelte';
+	import ToDoItem from '$lib/blocks/to-do/ToDoItem.svelte';
 
 	let tasks = $state([
 		{ id: 1, name: 'Task 1', selected: false, expanded: false },
@@ -20,6 +20,6 @@
 
 <div class="flex flex-col items-center">
 	{#each tasks as task}
-		<TaskItem {task} onSelect={handleSelectTask} />
+		<ToDoItem {task} onSelect={handleSelectTask} />
 	{/each}
 </div>
