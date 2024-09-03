@@ -4,7 +4,7 @@
 
 	interface Task {
 		id: number;
-		text: string;
+		name: string;
 		selected: boolean;
 		expanded: boolean;
 		notes?: string;
@@ -102,6 +102,12 @@
 		}
 	}
 
+	let editedTaskName = task.name;
+	// Update task.name whenever editableName changes
+	$effect(() => {
+		task.name = editedTaskName;
+	});
+
 	$effect(() => {
 		if (task.expanded) {
 			const handleClickOutside = (event: MouseEvent) => {
@@ -134,7 +140,13 @@
 	<div class="task-content">
 		<div class="task-header">
 			<Checkbox />
-			<p class="task-text">{task.text}</p>
+			{#if task.expanded}
+				<!-- Bind the input value to editableName -->
+				<input class="task-text" bind:value={editedTaskName} />
+			{:else}
+				<!-- Display the current value of editableName -->
+				<p class="task-text">{editedTaskName}</p>
+			{/if}
 		</div>
 		<div class="notes-container">
 			{#if task.expanded}
@@ -250,5 +262,9 @@
 	.task-footer {
 		display: flex;
 		justify-content: end;
+	}
+
+	input {
+		outline: none;
 	}
 </style>

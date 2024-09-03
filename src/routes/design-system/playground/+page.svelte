@@ -2,8 +2,8 @@
 	import TaskItem from '$lib/blocks/tasks/TaskItem.svelte';
 
 	let tasks = $state([
-		{ id: 1, text: 'Task 1', selected: false, expanded: false },
-		{ id: 2, text: 'Task 2', selected: false, expanded: false }
+		{ id: 1, name: 'Task 1', selected: false, expanded: false },
+		{ id: 2, name: 'Task 2', selected: false, expanded: false }
 	]);
 
 	let selectedTaskId = $state<number | null>(null);
