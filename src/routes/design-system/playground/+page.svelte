@@ -17,6 +17,10 @@
 		selectedTaskId = taskId;
 	}
 
+	async function handleDeleteTask(taskId: number) {
+		tasks = tasks.filter((task) => task.id !== taskId);
+	}
+
 	async function addNewTask() {
 		tasks = tasks.map((task) => {
 			if (task.selected) {
@@ -50,7 +54,7 @@
 
 <div class="flex flex-col items-center">
 	{#each tasks as task}
-		<ToDoItem {task} onSelect={handleSelectTask} />
+		<ToDoItem {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
 	{/each}
 
 	<button onclick={addNewTask}>+ New Task</button>

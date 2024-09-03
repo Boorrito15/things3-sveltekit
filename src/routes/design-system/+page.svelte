@@ -89,7 +89,7 @@
 		<h4>To do</h4>
 		<div class="flex flex-col items-center">
 			{#each tasks as task}
-				<ToDoItem {task} onSelect={handleSelectTask} />
+				<ToDoItem {task} onSelect={handleSelectTask} onDelete={handleSelectTask} />
 			{/each}
 		</div>
 	</section>
