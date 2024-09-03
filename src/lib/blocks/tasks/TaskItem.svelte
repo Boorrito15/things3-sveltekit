@@ -102,11 +102,8 @@
 		}
 	}
 
-	let editedTaskName = task.name;
+	let editedTaskName = $state(task.name);
 	// Update task.name whenever editableName changes
-	$effect(() => {
-		task.name = editedTaskName;
-	});
 
 	$effect(() => {
 		if (task.expanded) {
