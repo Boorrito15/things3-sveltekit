@@ -8,6 +8,7 @@
 		selected: boolean;
 		expanded: boolean;
 		notes?: string;
+		completed?: false;
 	}
 
 	let { task, onSelect } = $props<{
@@ -108,6 +109,11 @@
 		}
 	}
 
+	function complete() {
+		task.completed = true;
+		console.log(task.completed);
+	}
+
 	$effect(() => {
 		if (task.expanded && inputRef) {
 			inputRef.focus(); // Focus the input when the task is expanded
@@ -148,7 +154,7 @@
 >
 	<div class="task-content">
 		<div class="task-header">
-			<Checkbox />
+			<Checkbox on:click={complete} />
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
 				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />

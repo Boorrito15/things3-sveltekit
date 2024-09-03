@@ -18,6 +18,14 @@
 	}
 
 	async function addNewTask() {
+		tasks = tasks.map((task) => {
+			if (task.selected) {
+				return { ...task, selected: false };
+			}
+
+			return task;
+		});
+
 		const newTask = {
 			id: tasks.length + 1, // Assign a unique ID
 			name: ``,
