@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Checkbox from '$lib/components/ui/checkbox.svelte';
-	import Tooltip from '$lib/components/ui/tooltip.svelte';
+	import { Checkbox, Tooltip } from '$lib/global-components';
+	import { tick } from 'svelte';
 
 	interface Task {
 		id: number;
@@ -16,6 +16,7 @@
 	}>();
 
 	let taskRef = $state<HTMLElement | null>(null);
+	let inputRef: HTMLInputElement | null = null; // Reference to the input element
 
 	const icons = {
 		calendar: {
@@ -99,8 +100,19 @@
 	function toggleEdit() {
 		if (!task.expanded) {
 			task.expanded = true;
+			tick().then(() => {
+				if (inputRef) {
+					inputRef.focus();
+				}
+			});
 		}
 	}
+
+	$effect(() => {
+		if (task.expanded && inputRef) {
+			inputRef.focus(); // Focus the input when the task is expanded
+		}
+	});
 
 	let editedTaskName = $state(task.name);
 	// Update task.name whenever editableName changes
@@ -139,10 +151,10 @@
 			<Checkbox />
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
-				<input class="task-text" bind:value={editedTaskName} />
+				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
 			{:else}
 				<!-- Display the current value of editableName -->
-				<p class="task-text">{editedTaskName}</p>
+				<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
 			{/if}
 		</div>
 		<div class="notes-container">
@@ -205,11 +217,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		min-height: 28px;
 	}
 
 	.task-text {
 		margin-left: 1rem;
 		flex-grow: 1;
+	}
+
+	.task-text:empty::before {
+		content: attr(data-placeholder);
+		color: #999;
 	}
 
 	/* Notes Container */
