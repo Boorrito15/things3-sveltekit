@@ -1,9 +1,8 @@
-<svelte:options runes={true} />
-
 <script lang="ts">
 	import { createCombobox, melt, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { Check, ChevronDown, ChevronUp } from '$lib/global-icons';
 	import { fly } from 'svelte/transition';
+	import { get } from 'svelte/store'; // Import `get` to retrieve store values
 
 	type Manga = {
 		author: string;
@@ -11,6 +10,7 @@
 		disabled: boolean;
 	};
 
+	// Reactive state for mangas
 	let mangas = $state<Manga[]>([
 		{
 			author: 'Kentaro Miura',
@@ -64,14 +64,14 @@
 		}
 	]);
 
-	let filteredMangas = $state();
-
+	// Convert each Manga to a ComboboxOptionProps
 	const toOption = (manga: Manga): ComboboxOptionProps<Manga> => ({
 		value: manga,
 		label: manga.title,
 		disabled: manga.disabled
 	});
 
+	// Setup combobox
 	const {
 		elements: { menu, input, option, label },
 		states: { open, inputValue, touchedInput, selected },
@@ -80,25 +80,25 @@
 		forceVisible: true
 	});
 
-	// $: if (!$open) {
-	// 	$inputValue = $selected?.label ?? '';
-	// }
+	// Handle input value and assign value properly
 	$effect(() => {
-		// Subscribe to the `selected` store to access its value
 		selected.subscribe((value) => {
 			if (open && value) {
-				$inputValue = value.label ?? ''; // Access label from `value`
+				$inputValue = value.label ?? '';
 			} else {
-				// console.log($inputValue);
-				$inputValue = ''; // Handle case when no option is selected
+				$inputValue = '';
 			}
 		});
 	});
 
+	let filteredMangas = $state<Manga[]>(mangas);
+
+	// Filter mangas based on the current input value
 	$effect(() => {
-		filteredMangas = $touchedInput
+		const inputVal = get(inputValue).toLowerCase(); // Get the current value of inputValue
+		filteredMangas = get(touchedInput)
 			? mangas.filter(({ title, author }) => {
-					const normalizedInput = $inputValue.toLowerCase();
+					const normalizedInput = inputVal.toLowerCase();
 					return (
 						title.toLowerCase().includes(normalizedInput) ||
 						author.toLowerCase().includes(normalizedInput)
@@ -109,16 +109,17 @@
 </script>
 
 <div class="flex flex-col gap-1">
-	<!-- svelte-ignore a11y_label_has_associated_control -->
-	<label use:melt={$label}>
+	<!-- Ensure the label has a `for` attribute associated with the input -->
+	<label use:melt={$label} for="manga-input">
 		<span class="text-sm font-medium text-magnum-900">Choose your favorite manga:</span>
 	</label>
 
 	<div class="relative">
+		<!-- Ensure the input has an `id` -->
 		<input
+			id="manga-input"
 			use:melt={$input}
-			class="flex h-10 items-center justify-between rounded-lg bg-white
-          px-3 pr-12 text-black"
+			class="flex h-10 items-center justify-between rounded-lg bg-white px-3 pr-12 text-black"
 			placeholder="Best book ever"
 		/>
 		<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900">
@@ -130,25 +131,18 @@
 		</div>
 	</div>
 </div>
+
 {#if $open}
-	<!-- svelte-ignore legacy_code -->
 	<ul
-		class=" z-10 flex max-h-[300px] flex-col overflow-hidden rounded-lg"
+		class="z-10 flex max-h-[300px] flex-col overflow-hidden rounded-lg"
 		use:melt={$menu}
 		transition:fly={{ duration: 150, y: -5 }}
 	>
-		<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-		<div
-			class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black"
-			tabindex="0"
-		>
+		<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black">
 			{#each filteredMangas as manga, index (index)}
 				<li
 					use:melt={$option(toOption(manga))}
-					class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4
-        hover:bg-magnum-100
-        data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900
-          data-[disabled]:opacity-50"
+					class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
 				>
 					{#if $isSelected(manga)}
 						<div class="check absolute left-2 top-1/2 z-10 text-magnum-900">
