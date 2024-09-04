@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { Calendar } from '$lib/global-components';
+	import { Calendar, Combobox } from '$lib/global-components';
 </script>
 
-<div class="max-w-xs mx-auto"><Calendar /></div>
+<Combobox />
+
+<!-- <div class="max-w-xs mx-auto"><Calendar /></div> -->

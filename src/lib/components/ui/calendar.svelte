@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createCalendar, melt } from '@melt-ui/svelte';
-	import ChevronLeft from '~icons/mdi/chevron-left';
-	import ChevronRight from '~icons/mdi/chevron-right';
+	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
 	import { CalendarDate } from '@internationalized/date';
 	import dayjs from 'dayjs';
