@@ -6,7 +6,13 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		Icons({
-			compiler: 'svelte'
+			compiler: 'svelte',
+			autoInstall: true
 		})
-	]
+	],
+	server: {
+		hmr: {
+			overlay: true // Ensures the error overlay is shown
+		}
+	}
 });
