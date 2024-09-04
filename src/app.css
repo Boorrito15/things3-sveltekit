@@ -73,6 +73,10 @@ body {
 }
 
 @layer components {
+	input {
+		@apply leading-7 text-sm outline-none;
+		color: #090c1a;
+	}
 	/* Table styles */
 	table {
 		@apply w-full;

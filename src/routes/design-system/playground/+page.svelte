@@ -2,4 +2,4 @@
 	import { Calendar } from '$lib/global-components';
 </script>
 
-<div class="max-w-sm mx-auto"><Calendar /></div>
+<div class="max-w-xs mx-auto"><Calendar /></div>

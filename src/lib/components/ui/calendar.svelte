@@ -12,7 +12,7 @@
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			console.log(next);
+			// console.log(next);
 			return next;
 		}
 	});
@@ -24,78 +24,74 @@
 	function parseNLP() {
 		parsedDate = chrono.parseDate(nlpInput);
 		console.log(parsedDate);
-	}
 
-	// Function to parse natural language input
-	function setNewDate() {
-		// Vanilla JS Date (October 15, 2024)
-		const jsDate = new Date(2024, 10, 15); // JS Date months are 0-indexed
+		if (parsedDate) {
+			// Convert JS Date to CalendarDate for the calendar
+			// new CalendarDate(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
+			let year = parsedDate.getFullYear();
+			let month = parsedDate.getMonth() + 1;
+			let date = parsedDate.getDate();
 
-		// Convert it to CalendarDate (1-indexed month)
-		const newDate = new CalendarDate(jsDate.getFullYear(), jsDate.getMonth(), jsDate.getDate());
+			let calendarDate = new CalendarDate(year, month, date);
 
-		// Set the new date
-		value.set(newDate);
-
-		console.log('New date set');
+			// Update the calendar with the parsed date
+			value.set(calendarDate);
+		}
 	}
 
 	// setNewDate();
 </script>
 
-<div>
-	Input for NLP
+<!-- Calendar rendered with Melt UI -->
+<div use:melt={$calendar}>
 	<input
 		type="text"
-		placeholder="Enter a natural language date (e.g., 'next Friday')"
+		class="w-full text-center mb-4"
+		placeholder="when"
 		bind:value={nlpInput}
 		oninput={parseNLP}
 	/>
-
-	<!-- Calendar rendered with Melt UI -->
-	<div use:melt={$calendar}>
-		<header>
-			<button use:melt={$prevButton}>
-				<ChevronLeft />
-			</button>
-			<div use:melt={$heading}>
-				{$headingValue}
-			</div>
-			<button use:melt={$nextButton}>
-				<ChevronRight />
-			</button>
-		</header>
-		<div>
-			{#each $months as month}
-				<table use:melt={$grid}>
-					<thead aria-hidden="true">
+	<header>
+		<button use:melt={$prevButton}>
+			<ChevronLeft />
+		</button>
+		<div use:melt={$heading}>
+			{$headingValue}
+		</div>
+		<button use:melt={$nextButton}>
+			<ChevronRight />
+		</button>
+	</header>
+	<div>
+		{#each $months as month}
+			<table use:melt={$grid}>
+				<thead aria-hidden="true">
+					<tr>
+						{#each $weekdays as day}
+							<th>
+								<div>{day}</div>
+							</th>
+						{/each}
+					</tr>
+				</thead>
+				<tbody>
+					{#each month.weeks as weekDates}
 						<tr>
-							{#each $weekdays as day}
-								<th>
-									<div>{day}</div>
-								</th>
+							{#each weekDates as date}
+								<td
+									role="gridcell"
+									aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
+								>
+									<div use:melt={$cell(date, month.value)}>
+										{date.day}
+									</div>
+								</td>
 							{/each}
 						</tr>
-					</thead>
-					<tbody>
-						{#each month.weeks as weekDates}
-							<tr>
-								{#each weekDates as date}
-									<td
-										role="gridcell"
-										aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
-									>
-										<div use:melt={$cell(date, month.value)}>
-											{date.day}
-										</div>
-									</td>
-								{/each}
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			{/each}
-		</div>
+					{/each}
+				</tbody>
+			</table>
+		{/each}
 	</div>
 </div>
 
