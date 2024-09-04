@@ -2,59 +2,100 @@
 	import { createCalendar, melt } from '@melt-ui/svelte';
 	import ChevronLeft from '~icons/mdi/chevron-left';
 	import ChevronRight from '~icons/mdi/chevron-right';
+	import * as chrono from 'chrono-node';
+	import { CalendarDate } from '@internationalized/date';
 
+	// Create calendar states and helpers
 	const {
 		elements: { calendar, heading, grid, cell, prevButton, nextButton },
-		states: { months, headingValue, weekdays },
-		helpers: { isDateDisabled, isDateUnavailable },
-		options: { locale }
-	} = createCalendar();
+		states: { months, headingValue, weekdays, value },
+		helpers: { isDateDisabled, isDateUnavailable }
+	} = createCalendar({
+		onValueChange: ({ curr, next }) => {
+			console.log(next);
+			return next;
+		}
+	});
+
+	// Add natural language input
+	let nlpInput = $state('');
+	let parsedDate = $state(Date);
+
+	function parseNLP() {
+		parsedDate = chrono.parseDate(nlpInput);
+		console.log(parsedDate);
+	}
+
+	// Function to parse natural language input
+	function setNewDate() {
+		// Vanilla JS Date (October 15, 2024)
+		const jsDate = new Date(2024, 10, 15); // JS Date months are 0-indexed
+
+		// Convert it to CalendarDate (1-indexed month)
+		const newDate = new CalendarDate(jsDate.getFullYear(), jsDate.getMonth(), jsDate.getDate());
+
+		// Set the new date
+		value.set(newDate);
+
+		console.log('New date set');
+	}
+
+	// setNewDate();
 </script>
 
-<div use:melt={$calendar}>
-	<header>
-		<button use:melt={$prevButton}>
-			<ChevronLeft />
-		</button>
-		<div use:melt={$heading}>
-			{$headingValue}
-		</div>
-		<button use:melt={$nextButton}>
-			<ChevronRight />
-		</button>
-	</header>
-	<div>
-		{#each $months as month}
-			<table use:melt={$grid}>
-				<thead aria-hidden="true">
-					<tr>
-						{#each $weekdays as day}
-							<th>
-								<div>
-									{day}
-								</div>
-							</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each month.weeks as weekDates}
+<div>
+	Input for NLP
+	<input
+		type="text"
+		placeholder="Enter a natural language date (e.g., 'next Friday')"
+		bind:value={nlpInput}
+		oninput={parseNLP}
+	/>
+
+	<!-- Calendar rendered with Melt UI -->
+	<div use:melt={$calendar}>
+		<header>
+			<button use:melt={$prevButton}>
+				<ChevronLeft />
+			</button>
+			<div use:melt={$heading}>
+				{$headingValue}
+			</div>
+			<button use:melt={$nextButton}>
+				<ChevronRight />
+			</button>
+		</header>
+		<div>
+			{#each $months as month}
+				<table use:melt={$grid}>
+					<thead aria-hidden="true">
 						<tr>
-							{#each weekDates as date}
-								<td
-									role="gridcell"
-									aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
-								>
-									<div use:melt={$cell(date, month.value)}>
-										{date.day}
-									</div>
-								</td>
+							{#each $weekdays as day}
+								<th>
+									<div>{day}</div>
+								</th>
 							{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/each}
+					</thead>
+					<tbody>
+						{#each month.weeks as weekDates}
+							<tr>
+								{#each weekDates as date}
+									<td
+										role="gridcell"
+										aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
+									>
+										<div use:melt={$cell(date, month.value)}>
+											{date.day}
+										</div>
+									</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/each}
+		</div>
 	</div>
 </div>
 
