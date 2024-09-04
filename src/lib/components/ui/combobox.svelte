@@ -77,7 +77,8 @@
 		states: { open, inputValue, touchedInput, selected },
 		helpers: { isSelected }
 	} = createCombobox<Manga>({
-		forceVisible: true
+		forceVisible: true,
+		portal: null // Disable portal to keep dropdown within the normal DOM flow
 	});
 
 	// Handle input value and assign value properly
@@ -165,5 +166,9 @@
 	.check {
 		@apply absolute left-2 top-1/2 text-magnum-500;
 		translate: 0 calc(-50% + 1px);
+	}
+
+	ul {
+		@apply m-0;
 	}
 </style>
