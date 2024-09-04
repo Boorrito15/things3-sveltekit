@@ -4,6 +4,7 @@
 	import ChevronRight from '~icons/mdi/chevron-right';
 	import * as chrono from 'chrono-node';
 	import { CalendarDate } from '@internationalized/date';
+	import dayjs from 'dayjs';
 
 	// Create calendar states and helpers
 	const {
@@ -12,7 +13,7 @@
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			// console.log(next);
+			console.log(next);
 			return next;
 		}
 	});
@@ -23,18 +24,12 @@
 
 	function parseNLP() {
 		parsedDate = chrono.parseDate(nlpInput);
-		console.log(parsedDate);
-
 		if (parsedDate) {
-			// Convert JS Date to CalendarDate for the calendar
-			// new CalendarDate(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
 			let year = parsedDate.getFullYear();
 			let month = parsedDate.getMonth() + 1;
 			let date = parsedDate.getDate();
-
 			let calendarDate = new CalendarDate(year, month, date);
-
-			// Update the calendar with the parsed date
+			// console.log(parsedDate);
 			value.set(calendarDate);
 		}
 	}
