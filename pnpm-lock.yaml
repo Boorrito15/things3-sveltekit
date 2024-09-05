@@ -11,9 +11,15 @@ importers:
       bits-ui:
         specifier: ^0.21.13
         version: 0.21.13(svelte@5.0.0-next.241)
+      chrono-node:
+        specifier: ^1.4.9
+        version: 1.4.9
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       svelte-preprocess:
         specifier: ^6.0.2
         version: 6.0.2(postcss-load-config@4.0.2(postcss@8.4.41))(postcss@8.4.41)(svelte@5.0.0-next.241)(typescript@5.5.4)
@@ -673,6 +679,9 @@ packages:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
 
+  chrono-node@1.4.9:
+    resolution: {integrity: sha512-mz0jOeqJLDKlbiYUjTbncNdfqm9odeuKVlxRvY15ZkFcRsUsSVJ6Rsf7V7ME6kkcfxbcG+CqnIafqqx1nu9C7A==}
+
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
@@ -706,6 +715,9 @@ packages:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
     hasBin: true
+
+  dayjs@1.11.13:
+    resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
   debug@4.3.6:
     resolution: {integrity: sha512-O/09Bd4Z1fBrU4VzkhFqVgpPzaGbw6Sm9FEkBT1A/YBXQFGuuSxa1dN2nxgxS34JmKXqYx8CZAwEVoJFImUXIg==}
@@ -2262,6 +2274,10 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
+  chrono-node@1.4.9:
+    dependencies:
+      dayjs: 1.11.13
+
   clsx@2.1.1: {}
 
   color-convert@2.0.1:
@@ -2285,6 +2301,8 @@ snapshots:
       which: 2.0.2
 
   cssesc@3.0.0: {}
+
+  dayjs@1.11.13: {}
 
   debug@4.3.6:
     dependencies:

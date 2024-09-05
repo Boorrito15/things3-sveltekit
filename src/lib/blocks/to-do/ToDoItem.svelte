@@ -37,7 +37,7 @@
 	}>();
 
 	let taskRef = $state<HTMLElement | null>(null);
-	let inputRef: HTMLInputElement | null = null; // Reference to the input element
+	let inputRef = $state<HTMLInputElement | null>(null); // Reference to the input element
 
 	const icons = {
 		calendar: {
@@ -313,6 +313,7 @@
 	}
 
 	input {
+		background: none;
 		outline: none;
 	}
 </style>
