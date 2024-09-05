@@ -4,50 +4,42 @@
 	import { get } from 'svelte/store';
 	import { fly } from 'svelte/transition';
 
-	// Define the item type
 	type Item = {
 		description: string;
 		title: string;
 		disabled?: boolean;
 	};
 
-	// Props to receive items dynamically from parent component
 	let { items = [] }: { items: Item[] } = $props();
 
-	// Convert each Item to a ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
 		value: item,
 		label: item.title,
 		disabled: item.disabled
 	});
 
-	// Setup combobox
 	const {
 		elements: { menu, input, option, label },
 		states: { open, inputValue, touchedInput, selected },
 		helpers: { isSelected }
 	} = createCombobox<Item>({
 		forceVisible: true,
-		portal: null // Disable portal to keep dropdown within the normal DOM flow
+		portal: null
 	});
 
-	// Handle selected item updates
+	// Handle selected item updates and avoid blank value when combobox closes
 	$effect(() => {
-		selected.subscribe((value) => {
-			if ($open && value) {
-				$inputValue = value.label ?? '';
-			} else {
-				$inputValue = '';
-			}
-		});
+		const selectedValue = $selected;
+		if (selectedValue) {
+			$inputValue = selectedValue.label ?? '';
+		} else {
+			console.log('Reset inputValue to empty');
+			$inputValue = '';
+		}
 	});
 
-	// Use $derived.by to create filtered items based on input value and touched input
 	let filteredItems = $derived.by(() => {
-		// Get the input value and normalize it
 		const inputVal = $inputValue.toLowerCase();
-
-		// If the input is touched, filter items based on title or description, otherwise return all items
 		return $touchedInput
 			? items.filter(
 					({ title, description }) =>
@@ -67,7 +59,6 @@
 			id="item-input"
 			use:melt={$input}
 			class="flex h-10 items-center justify-between rounded-lg bg-white px-3 pr-12 text-black"
-			placeholder="Best item ever"
 		/>
 		<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900">
 			{#if $open}
@@ -87,7 +78,6 @@
 	>
 		<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black">
 			{#each filteredItems as item, index (index)}
-				<!-- Use $filteredItems to access the store's value -->
 				<li
 					use:melt={$option(toOption(item))}
 					class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
