@@ -8,7 +8,7 @@
 	type Item = {
 		description: string;
 		title: string;
-		disabled: boolean;
+		disabled?: boolean;
 	};
 
 	// Props to receive items dynamically from parent component
