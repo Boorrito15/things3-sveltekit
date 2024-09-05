@@ -3,21 +3,27 @@
 	import { Check, ChevronDown, ChevronUp } from '$lib/global-icons';
 	import { get } from 'svelte/store';
 	import { fly } from 'svelte/transition';
+	import dayjs from 'dayjs';
+	import chrono from 'chrono-node';
 
+	// Define the item type
 	type Item = {
-		description: string;
 		title: string;
+		description: string;
 		disabled?: boolean;
 	};
 
-	let { items = [] }: { items: Item[] } = $props();
+	// Declare props all in one $props() call
+	let { items = [], mode = 'items' }: { items: Item[]; mode: 'items' | 'dates' } = $props();
 
+	// Convert each Item to a ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
 		value: item,
 		label: item.title,
 		disabled: item.disabled
 	});
 
+	// Setup combobox
 	const {
 		elements: { menu, input, option, label },
 		states: { open, inputValue, touchedInput, selected },
@@ -27,7 +33,6 @@
 		portal: null
 	});
 
-	// Handle selected item updates and avoid blank value when combobox closes
 	$effect(() => {
 		const selectedValue = $selected;
 		if (selectedValue) {
@@ -38,8 +43,20 @@
 		}
 	});
 
+	// Date suggestion logic when mode is 'dates'
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
+
+		if (mode === 'dates') {
+			const results = chrono.parse(inputVal);
+			return results.map((result) => {
+				const date = result.start.date();
+				const formattedDate = dayjs(date).format('D MMM');
+				return { title: result.text, description: formattedDate };
+			});
+		}
+
+		// Default behavior for 'items' mode
 		return $touchedInput
 			? items.filter(
 					({ title, description }) =>
