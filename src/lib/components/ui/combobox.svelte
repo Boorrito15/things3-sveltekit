@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createCombobox, melt, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { Check, ChevronDown, ChevronUp } from '$lib/global-icons';
-	import { fly } from 'svelte/transition';
 	import { get } from 'svelte/store';
+	import { fly } from 'svelte/transition';
 
 	// Define the item type
 	type Item = {
@@ -12,7 +12,7 @@
 	};
 
 	// Props to receive items dynamically from parent component
-	let { items = [] }: { items: Item[] } = $props(); // Declare 'items' as a prop
+	let { items = [] }: { items: Item[] } = $props();
 
 	// Convert each Item to a ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
@@ -31,10 +31,10 @@
 		portal: null // Disable portal to keep dropdown within the normal DOM flow
 	});
 
-	// Handle input value and assign value properly
+	// Handle selected item updates
 	$effect(() => {
 		selected.subscribe((value) => {
-			if (open && value) {
+			if ($open && value) {
 				$inputValue = value.label ?? '';
 			} else {
 				$inputValue = '';
@@ -42,25 +42,21 @@
 		});
 	});
 
-	// Reactive state to hold filtered items
-	let filteredItems = $state<Item[]>(items);
+	// Use $derived.by to create filtered items based on input value and touched input
+	let filteredItems = $derived.by(() => {
+		// Get the input value and normalize it
+		const inputVal = $inputValue.toLowerCase();
 
-	// Filter items based on the current input value
-	$effect(() => {
-		const inputVal = get(inputValue).toLowerCase(); // Get the current value of inputValue
-		filteredItems = get(touchedInput)
-			? items.filter(({ title, description }) => {
-					const normalizedInput = inputVal.toLowerCase();
-					return (
-						title.toLowerCase().includes(normalizedInput) ||
-						description.toLowerCase().includes(normalizedInput)
-					);
-				})
+		// If the input is touched, filter items based on title or description, otherwise return all items
+		return $touchedInput
+			? items.filter(
+					({ title, description }) =>
+						title.toLowerCase().includes(inputVal) || description.toLowerCase().includes(inputVal)
+				)
 			: items;
 	});
 </script>
 
-<!-- The layout stays the same -->
 <div class="flex flex-col gap-1">
 	<label use:melt={$label} for="item-input">
 		<span class="text-sm font-medium text-magnum-900">Choose your favorite item:</span>
@@ -91,6 +87,7 @@
 	>
 		<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black">
 			{#each filteredItems as item, index (index)}
+				<!-- Use $filteredItems to access the store's value -->
 				<li
 					use:melt={$option(toOption(item))}
 					class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
