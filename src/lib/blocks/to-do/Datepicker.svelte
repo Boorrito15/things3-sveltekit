@@ -1,27 +1,28 @@
 <script lang="ts">
+	// Import statements
 	import { melt, createCalendar, createCombobox, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
 	import { CalendarDate } from '@internationalized/date';
 	import dayjs from 'dayjs';
-	import { Check, ChevronDown, ChevronUp } from '$lib/global-icons';
-	import { get } from 'svelte/store';
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
+	// Apply dayjs plugin
 	dayjs.extend(relativeTime);
 
-	// Define the item type
+	// Define TypeScript types
 	type Item = {
 		title: string;
 		description?: string;
 		disabled?: boolean;
 	};
 
+	// Initialize variables
 	let { items = [] }: { items: Item[] } = $props();
 
-	// Utility function to format dates for both dropdown and input
-	function formatDate(date: Date, forInput: boolean = false) {
+	// Utility function to format dates
+	function formatDate(date: Date, forInput: boolean = false): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
 		const daysDiff = targetDate.diff(today, 'day');
@@ -46,15 +47,16 @@
 		if (results.length === 0) return [];
 
 		return results.map((result) => {
+			const title = result.text;
 			const date = result.start.date();
 			return {
-				title: result.text, // Use the raw text for input display
-				description: formatDate(date) // Use formatted date for dropdown
+				title: title.charAt(0).toUpperCase() + title.slice(1),
+				description: formatDate(date)
 			};
 		});
 	}
 
-	// Convert each Item to a ComboboxOptionProps
+	// Convert Item to ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
 		value: item,
 		label: item.title,
@@ -71,65 +73,61 @@
 		portal: null
 	});
 
-	$effect(() => {
-		const selectedValue = $selected;
-		if (selectedValue) {
-			const parsedDate = chrono.parseDate(selectedValue.label);
-			// Display formatted date in the input if it was parsed
-			$inputValue = parsedDate ? formatDate(parsedDate, true) : (selectedValue.label ?? '');
-		} else {
-			$inputValue = '';
-		}
-	});
-
-	// Create filtered items based on input and parsed dates
-	let filteredItems = $derived.by(() => {
-		const inputVal = $inputValue.toLowerCase();
-
-		// If the input is a valid date, use chrono to parse and format it
-		if (inputVal) {
-			return parseDateInput(inputVal);
-		}
-
-		// Filter default items if no valid date is parsed
-		return $touchedInput
-			? items.filter(({ title }) => title.toLowerCase().includes(inputVal))
-			: items;
-	});
-
-	// Create calendar states and helpers
+	// Setup calendar
 	const {
 		elements: { calendar, heading, grid, cell, prevButton, nextButton },
 		states: { months, headingValue, weekdays, value },
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			console.log(next);
 			return next;
 		}
 	});
 
-	// Add natural language input
-	let parsedDate = $state(Date);
-
-	function parseNLP(e) {
-		parsedDate = chrono.parseDate(e);
-		if (parsedDate) {
-			let year = parsedDate.getFullYear();
-			let month = parsedDate.getMonth() + 1;
-			let date = parsedDate.getDate();
-			let calendarDate = new CalendarDate(year, month, date);
-			// console.log(parsedDate);
-			value.set(calendarDate);
+	// Parse natural language input and update calendar
+	function parseAndSetDate(input: string | undefined) {
+		if (input) {
+			const parsedDate = chrono.parseDate(input);
+			if (parsedDate) {
+				const year = parsedDate.getFullYear();
+				const month = parsedDate.getMonth() + 1;
+				const day = parsedDate.getDate();
+				const calendarDate = new CalendarDate(year, month, day);
+				value.set(calendarDate);
+			}
 		}
 	}
 
-	// setNewDate();
+	// Filter items based on input
+	let filteredItems = $derived.by(() => {
+		const inputVal = $inputValue.toLowerCase();
+
+		// Parse date from input and update items
+		if (inputVal) {
+			return parseDateInput(inputVal);
+		}
+
+		// Filter items if input is touched
+		return $touchedInput
+			? items.filter(({ title }) => title.toLowerCase().includes(inputVal))
+			: items;
+	});
+
+	// Update inputValue based on selected item
+	$effect(() => {
+		const selectedItem = $selected;
+		if (selectedItem && selectedItem.label) {
+			const parsedDate = chrono.parseDate(selectedItem.label);
+			$inputValue = parsedDate ? formatDate(parsedDate, true) : '';
+		} else {
+			$inputValue = '';
+		}
+	});
 </script>
 
-<!-- Calendar rendered with Melt UI -->
+<!-- Calendar and Combobox rendered with Melt UI -->
 <div use:melt={$calendar} class="w-full">
-	<!-- Component Template -->
+	<!-- Combobox Template -->
 	<div class="flex flex-col gap-1 w-full">
 		<label use:melt={$label} for="item-input"> </label>
 
@@ -137,15 +135,10 @@
 			<input
 				id="item-input"
 				use:melt={$input}
-				class="flex h-10 items-center justify-between rounded-lg bg-white px-3 text-black w-full text-center"
+				class="flex h-10 items-center justify-between rounded-lg bg-white text-black w-full pl-4"
+				placeholder="when"
 			/>
-			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900">
-				<!-- {#if $open}
-					<ChevronUp class="size-4" />
-				{:else}
-					<ChevronDown class="size-4" />
-				{/if} -->
-			</div>
+			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
 		</div>
 	</div>
 
@@ -155,19 +148,14 @@
 			use:melt={$menu}
 			transition:fly={{ duration: 150, y: -5 }}
 		>
-			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 text-black">
+			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white text-black">
 				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				{#each filteredItems as item, index (index)}
 					<li
 						use:melt={$option(toOption(item))}
-						onclick={() => parseNLP(item.description)}
-						class="relative cursor-pointer scroll-my-2 rounded-md py-4 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
+						onclick={() => parseAndSetDate(item.description)}
+						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
 					>
-						{#if $isSelected(item)}
-							<div class="check absolute left-2 top-1/2 z-10 text-magnum-900">
-								<Check class="size-4" />
-							</div>
-						{/if}
 						<div class="pl-4">
 							<span class="font-medium">{item.title}</span>
 							{#if item.description}
@@ -179,6 +167,7 @@
 			</div>
 		</ul>
 	{/if}
+
 	<header>
 		<button use:melt={$prevButton}>
 			<ChevronLeft />
@@ -190,6 +179,7 @@
 			<ChevronRight />
 		</button>
 	</header>
+
 	<div>
 		{#each $months as month}
 			<table use:melt={$grid}>
@@ -268,21 +258,17 @@
 		@apply opacity-0 bg-transparent;
 	}
 
-	/* Add resets using @apply */
 	table {
-		@apply bg-transparent border-collapse w-full; /* Reset table background and ensure no gaps between cells */
+		@apply bg-transparent border-collapse w-full;
 	}
 
 	td,
 	th {
-		@apply bg-transparent border-0 p-0; /* Reset background color, border, and padding */
-	}
-
-	td {
+		@apply bg-transparent border-0 p-0;
 	}
 
 	tr {
-		@apply bg-transparent border-none; /* Reset row background */
+		@apply bg-transparent border-none;
 	}
 
 	.check {
