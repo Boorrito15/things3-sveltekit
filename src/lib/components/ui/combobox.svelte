@@ -12,55 +12,30 @@
 	// Define the item type
 	type Item = {
 		title: string;
-		description: string;
+		description?: string;
 		disabled?: boolean;
 	};
 
 	let { items = [] }: { items: Item[] } = $props();
 
-	// Utility function to format dates for the dropdown
-	function formatDateForDropdown(date: Date) {
+	// Utility function to format dates for both dropdown and input
+	function formatDate(date: Date, forInput: boolean = false) {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
 		const daysDiff = targetDate.diff(today, 'day');
 
-		if (daysDiff === 0) return 'today';
-		if (daysDiff === 1) return 'tomorrow';
+		if (daysDiff === 0) return forInput ? 'Today' : 'today';
+		if (daysDiff === 1) return forInput ? 'Tomorrow' : 'tomorrow';
 
-		// For short-term future dates (within 5 days)
 		if (daysDiff >= 2 && daysDiff <= 5) {
-			return `Next ${targetDate.format('dddd')}`;
+			return forInput ? `Next ${targetDate.format('dddd')}` : `Next ${targetDate.format('dddd')}`;
 		}
 
-		// If the date is more than 5 days but within the same year, return 'Wed, 11 Sep'
 		if (targetDate.year() === today.year()) {
 			return targetDate.format('ddd, D MMM');
 		}
 
-		// For dates in the next year, return '1 Jan 2025'
 		return targetDate.format('D MMM YYYY');
-	}
-
-	// Utility function to format the input when selected (e.g., "Next Wednesday")
-	function formatDateForInput(date: Date) {
-		const today = dayjs().startOf('day');
-		const targetDate = dayjs(date).startOf('day');
-		const daysDiff = targetDate.diff(today, 'day');
-
-		if (daysDiff === 0) return 'Today';
-		if (daysDiff === 1) return 'Tomorrow';
-
-		// If within 5 days, return "Next Wednesday"
-		if (daysDiff >= 2 && daysDiff <= 5) {
-			return `Next ${targetDate.format('dddd')}`;
-		}
-
-		if (targetDate.year() > today.year() || targetDate.year() < today.year()) {
-			return `${targetDate.format('D MMM YYYY')}`;
-		}
-
-		// For all other dates, return the formatted date
-		return targetDate.format('ddd, D MMM');
 	}
 
 	// Handle parsed results from chrono
@@ -70,12 +45,9 @@
 
 		return results.map((result) => {
 			const date = result.start.date();
-			const description = formatDateForDropdown(date); // Use for dropdown
-			const label = result.text; // Use the raw text for input display
-
 			return {
-				title: label, // The user input (e.g., "next Wednesday")
-				description // The formatted dropdown display (e.g., "Wed, 11 Sep")
+				title: result.text, // Use the raw text for input display
+				description: formatDate(date) // Use formatted date for dropdown
 			};
 		});
 	}
@@ -83,8 +55,7 @@
 	// Convert each Item to a ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
 		value: item,
-		label: item.title, // Show input or parsed text like "next Wednesday"
-		description: item.description, // Show parsed date like "Wed, 11 Sep"
+		label: item.title,
 		disabled: item.disabled
 	});
 
@@ -102,28 +73,25 @@
 		const selectedValue = $selected;
 		if (selectedValue) {
 			const parsedDate = chrono.parseDate(selectedValue.label);
-			// After selection, display "Next Wednesday" or similar in the input
-			$inputValue = parsedDate ? formatDateForInput(parsedDate) : selectedValue.label;
+			// Display formatted date in the input if it was parsed
+			$inputValue = parsedDate ? formatDate(parsedDate, true) : (selectedValue.label ?? '');
 		} else {
 			$inputValue = '';
 		}
 	});
 
-	// Use $derived.by to create filtered items based on input value and parsed dates
+	// Create filtered items based on input and parsed dates
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
 
-		// If the input is a date, use chrono to parse and format it
+		// If the input is a valid date, use chrono to parse and format it
 		if (inputVal) {
 			return parseDateInput(inputVal);
 		}
 
-		// Default to regular items if no date parsing occurs
+		// Filter default items if no valid date is parsed
 		return $touchedInput
-			? items.filter(
-					({ title, description }) =>
-						title.toLowerCase().includes(inputVal) || description.toLowerCase().includes(inputVal)
-				)
+			? items.filter(({ title }) => title.toLowerCase().includes(inputVal))
 			: items;
 	});
 </script>
@@ -169,7 +137,9 @@
 					{/if}
 					<div class="pl-4">
 						<span class="font-medium">{item.title}</span>
-						<span class="block text-sm opacity-75">{item.description}</span>
+						{#if item.description}
+							<span class="block text-sm opacity-75">{item.description}</span>
+						{/if}
 					</div>
 				</li>
 			{/each}
