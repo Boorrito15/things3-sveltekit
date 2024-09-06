@@ -52,6 +52,8 @@
 			tasks = tasks.map((task) => (task.id === newTask.id ? { ...task, expanded: true } : task));
 		}, 0); // Small delay to allow the initial rendering to complete
 	}
+
+	import { ChevronDown } from '$lib/global-icons';
 </script>
 
 <h4>To do</h4>

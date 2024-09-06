@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Checkbox, Tooltip } from '$lib/global-components';
 	import { tick } from 'svelte';
-	import { ChevronDown } from '$lib/global-icons';
+	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
 
 	interface Tag {
 		id: number;
@@ -42,19 +42,19 @@
 
 	const icons = {
 		calendar: {
-			svg: ChevronDown,
+			svg: Calendar,
 			message: 'When'
 		},
 		tag: {
-			svg: ChevronDown,
+			svg: TagOutline,
 			message: 'Tags'
 		},
 		checklist: {
-			svg: ChevronDown,
+			svg: Checklist,
 			message: 'Add checklist'
 		},
 		flag: {
-			svg: ChevronDown,
+			svg: FlagOutline,
 			message: 'Deadline'
 		}
 	};
@@ -153,7 +153,7 @@
 		{#if task.expanded}
 			<div class="task-footer space-x-3">
 				{#each Object.entries(icons) as [key, icon]}
-					<Tooltip message={icon.message} TriggerElement={ChevronDown} />
+					<Tooltip message={icon.message} TriggerElement={icon.svg} />
 				{/each}
 			</div>
 		{/if}

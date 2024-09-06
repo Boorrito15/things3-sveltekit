@@ -27,7 +27,7 @@
 </script>
 
 <button type="button" class="trigger" use:melt={$trigger} aria-label="Add">
-	<TriggerElement />
+	<TriggerElement class="text-[#D2D4DA]" />
 </button>
 
 {#if $open}
