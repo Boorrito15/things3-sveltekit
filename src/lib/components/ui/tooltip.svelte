@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { createTooltip, melt } from '@melt-ui/svelte';
 	import { fade } from 'svelte/transition';
+	import { ChevronDown } from '$lib/global-icons';
+	import type { SvelteComponent } from 'svelte';
 
 	interface TooltipProps {
 		message: string;
-		triggerElement: string;
+		TriggerElement: any;
 		iconColor?: string;
 	}
 
-	let { message, triggerElement, iconColor = '#A1A3A9' }: TooltipProps = $props();
+	let { message, TriggerElement, iconColor = '#A1A3A9' }: TooltipProps = $props();
 
 	const {
 		elements: { trigger, content, arrow },
@@ -25,7 +27,7 @@
 </script>
 
 <button type="button" class="trigger" use:melt={$trigger} aria-label="Add">
-	{@html triggerElement}
+	<TriggerElement class="text-[#D2D4DA]" />
 </button>
 
 {#if $open}
