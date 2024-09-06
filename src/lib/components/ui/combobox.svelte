@@ -3,16 +3,54 @@
 	import { Check, ChevronDown, ChevronUp } from '$lib/global-icons';
 	import { get } from 'svelte/store';
 	import { fly } from 'svelte/transition';
+	import dayjs from 'dayjs';
+	import relativeTime from 'dayjs/plugin/relativeTime';
+	import chrono from 'chrono-node';
+
+	dayjs.extend(relativeTime);
 
 	// Define the item type
 	type Item = {
-		description: string;
 		title: string;
+		description?: string;
 		disabled?: boolean;
 	};
 
-	// Props to receive items dynamically from parent component
 	let { items = [] }: { items: Item[] } = $props();
+
+	// Utility function to format dates for both dropdown and input
+	function formatDate(date: Date, forInput: boolean = false) {
+		const today = dayjs().startOf('day');
+		const targetDate = dayjs(date).startOf('day');
+		const daysDiff = targetDate.diff(today, 'day');
+
+		if (daysDiff === 0) return forInput ? 'Today' : 'today';
+		if (daysDiff === 1) return forInput ? 'Tomorrow' : 'tomorrow';
+
+		if (daysDiff >= 2 && daysDiff <= 5) {
+			return forInput ? `Next ${targetDate.format('dddd')}` : `Next ${targetDate.format('dddd')}`;
+		}
+
+		if (targetDate.year() === today.year()) {
+			return targetDate.format('ddd, D MMM');
+		}
+
+		return targetDate.format('D MMM YYYY');
+	}
+
+	// Handle parsed results from chrono
+	function parseDateInput(input: string): Item[] {
+		const results = chrono.parse(input);
+		if (results.length === 0) return [];
+
+		return results.map((result) => {
+			const date = result.start.date();
+			return {
+				title: result.text, // Use the raw text for input display
+				description: formatDate(date) // Use formatted date for dropdown
+			};
+		});
+	}
 
 	// Convert each Item to a ComboboxOptionProps
 	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
@@ -28,38 +66,40 @@
 		helpers: { isSelected }
 	} = createCombobox<Item>({
 		forceVisible: true,
-		portal: null // Disable portal to keep dropdown within the normal DOM flow
+		portal: null
 	});
 
-	// Handle selected item updates
 	$effect(() => {
-		selected.subscribe((value) => {
-			if ($open && value) {
-				$inputValue = value.label ?? '';
-			} else {
-				$inputValue = '';
-			}
-		});
+		const selectedValue = $selected;
+		if (selectedValue) {
+			const parsedDate = chrono.parseDate(selectedValue.label);
+			// Display formatted date in the input if it was parsed
+			$inputValue = parsedDate ? formatDate(parsedDate, true) : (selectedValue.label ?? '');
+		} else {
+			$inputValue = '';
+		}
 	});
 
-	// Use $derived.by to create filtered items based on input value and touched input
+	// Create filtered items based on input and parsed dates
 	let filteredItems = $derived.by(() => {
-		// Get the input value and normalize it
 		const inputVal = $inputValue.toLowerCase();
 
-		// If the input is touched, filter items based on title or description, otherwise return all items
+		// If the input is a valid date, use chrono to parse and format it
+		if (inputVal) {
+			return parseDateInput(inputVal);
+		}
+
+		// Filter default items if no valid date is parsed
 		return $touchedInput
-			? items.filter(
-					({ title, description }) =>
-						title.toLowerCase().includes(inputVal) || description.toLowerCase().includes(inputVal)
-				)
+			? items.filter(({ title }) => title.toLowerCase().includes(inputVal))
 			: items;
 	});
 </script>
 
+<!-- Component Template -->
 <div class="flex flex-col gap-1">
 	<label use:melt={$label} for="item-input">
-		<span class="text-sm font-medium text-magnum-900">Choose your favorite item:</span>
+		<span class="text-sm font-medium text-magnum-900">Choose your favorite date:</span>
 	</label>
 
 	<div class="relative">
@@ -67,7 +107,6 @@
 			id="item-input"
 			use:melt={$input}
 			class="flex h-10 items-center justify-between rounded-lg bg-white px-3 pr-12 text-black"
-			placeholder="Best item ever"
 		/>
 		<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900">
 			{#if $open}
@@ -85,12 +124,11 @@
 		use:melt={$menu}
 		transition:fly={{ duration: 150, y: -5 }}
 	>
-		<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black">
+		<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 text-black">
 			{#each filteredItems as item, index (index)}
-				<!-- Use $filteredItems to access the store's value -->
 				<li
 					use:melt={$option(toOption(item))}
-					class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
+					class="relative cursor-pointer scroll-my-2 rounded-md py-4 pl-4 pr-4 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
 				>
 					{#if $isSelected(item)}
 						<div class="check absolute left-2 top-1/2 z-10 text-magnum-900">
@@ -99,11 +137,11 @@
 					{/if}
 					<div class="pl-4">
 						<span class="font-medium">{item.title}</span>
-						<span class="block text-sm opacity-75">{item.description}</span>
+						{#if item.description}
+							<span class="block text-sm opacity-75">{item.description}</span>
+						{/if}
 					</div>
 				</li>
-			{:else}
-				<li class="relative cursor-pointer rounded-md py-1 pl-8 pr-4">No results found</li>
 			{/each}
 		</div>
 	</ul>
