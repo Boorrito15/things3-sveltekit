@@ -8,4 +8,4 @@
 <!-- <Combobox mode="dates" /> -->
 <!-- <Calendar /> -->
 
-<div class="max-w-xs mx-auto"><Datepicker mode="dates" /></div>
+<div class="max-w-xs mx-auto"><Datepicker /></div>

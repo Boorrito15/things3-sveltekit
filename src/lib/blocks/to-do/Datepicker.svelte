@@ -19,7 +19,7 @@
 	};
 
 	// Initialize variables
-	let { items = [] }: { items: Item[] } = $props();
+	// Use an empty object to signify no props expected
 
 	// Utility function to format dates
 	function formatDate(date: Date, forInput: boolean = false): string {
@@ -27,11 +27,11 @@
 		const targetDate = dayjs(date).startOf('day');
 		const daysDiff = targetDate.diff(today, 'day');
 
-		if (daysDiff === 0) return forInput ? 'Today' : 'today';
-		if (daysDiff === 1) return forInput ? 'Tomorrow' : 'tomorrow';
+		if (daysDiff === 0) return 'Today';
+		if (daysDiff === 1) return 'Tomorrow';
 
 		if (daysDiff >= 2 && daysDiff <= 5) {
-			return forInput ? `Next ${targetDate.format('dddd')}` : `Next ${targetDate.format('dddd')}`;
+			return `Next ${targetDate.format('dddd')}`;
 		}
 
 		if (targetDate.year() === today.year()) {
@@ -80,7 +80,11 @@
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			return next;
+			if (next && next.year && next.month && next.day) {
+				const date = dayjs(`${next.year}-${next.month}-${next.day}`).toDate();
+				$inputValue = formatDate(date);
+			}
+			return curr;
 		}
 	});
 
@@ -98,19 +102,18 @@
 		}
 	}
 
-	// Filter items based on input
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
 
-		// Parse date from input and update items
+		// Parse date from input and generate items
 		if (inputVal) {
-			return parseDateInput(inputVal);
+			// Generate items based on parsed input
+			const parsedItems = parseDateInput(inputVal);
+			return parsedItems;
 		}
 
-		// Filter items if input is touched
-		return $touchedInput
-			? items.filter(({ title }) => title.toLowerCase().includes(inputVal))
-			: items;
+		// If input is empty, return an empty array or default value
+		return [];
 	});
 
 	// Update inputValue based on selected item
