@@ -11,7 +11,7 @@
 
 	// To do
 	import { Checkbox } from '$lib/global-components';
-	import ToDoItem from '$lib/blocks/to-do/ToDoItem.svelte';
+	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
 	let tasks = $state([
@@ -114,7 +114,7 @@
 		<h4>To do</h4>
 		<div class="flex flex-col items-center">
 			{#each tasks as task}
-				<ToDoItem {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+				<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
 			{/each}
 
 			<button onclick={addNewTask}>+ New Task</button>
