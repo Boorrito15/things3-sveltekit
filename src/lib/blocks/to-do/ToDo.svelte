@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Checkbox, Tooltip } from '$lib/global-components';
+	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
 	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
+	import Datepicker from './Datepicker.svelte';
 
 	interface Tag {
 		id: number;
@@ -39,11 +40,18 @@
 
 	let taskRef = $state<HTMLElement | null>(null);
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to the input element
+	let isPopoverOpen = $state(false); // Local popover state
+	let editedTaskName = $state(task.name);
+
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen; // Directly update the state to match the popover's state
+	}
 
 	const icons = {
 		calendar: {
 			svg: Calendar,
-			message: 'When'
+			message: 'When',
+			content: Datepicker
 		},
 		tag: {
 			svg: TagOutline,
@@ -59,12 +67,12 @@
 		}
 	};
 
-	console.log(icons.calendar.svg);
-
+	// Handle task selection
 	function selectTask() {
 		onSelect(task.id); // Notify the parent component to select this task
 	}
 
+	// Handle task editing
 	function editTask() {
 		if (!task.expanded) {
 			task.expanded = true;
@@ -76,30 +84,48 @@
 		}
 	}
 
+	// Handle task completion
 	function completeTask() {
 		task.completed = true;
-		console.log(task.completed);
 	}
 
+	// Handle task deletion
 	function deleteTask() {
 		onDelete(task.id);
 	}
 
+	// Automatically focus the input when the task is expanded
 	$effect(() => {
 		if (task.expanded && inputRef) {
-			inputRef.focus(); // Focus the input when the task is expanded
+			inputRef.focus();
 		}
 	});
 
-	let editedTaskName = $state(task.name);
-	// Update task.name whenever editableName changes
-
+	// Handle outside click logic
 	$effect(() => {
 		if (task.expanded || task.selected) {
 			const handleClickOutside = (event: MouseEvent) => {
+				const popoverElements = document.querySelectorAll('[data-melt-popover-content]');
+				const clickedInsidePopover = Array.from(popoverElements).some((el) =>
+					el.contains(event.target as Node)
+				);
+
+				// If clicked inside popover, do nothing
+				if (clickedInsidePopover) return;
+
+				// If clicked outside task, handle based on popover state
 				if (taskRef && !taskRef.contains(event.target as Node)) {
-					task.selected = false; // Collapse the task if the click is outside
-					task.expanded = false;
+					if (isPopoverOpen) {
+						// Close popover if open
+						console.log('closing popover');
+						isPopoverOpen = false;
+					} else {
+						// Collapse task if popover is closed
+						console.log('closing task');
+
+						task.selected = false;
+						task.expanded = false;
+					}
 				}
 			};
 
@@ -110,6 +136,10 @@
 			};
 		}
 	});
+
+	// function handlePopoverOpenChange(isOpen: boolean) {
+	// 	console.log(isOpen);
+	// }
 </script>
 
 <div
@@ -153,7 +183,15 @@
 		{#if task.expanded}
 			<div class="task-footer space-x-3">
 				{#each Object.entries(icons) as [key, icon]}
-					<Tooltip message={icon.message} TriggerElement={icon.svg} />
+					<!-- Popover component with open state synced -->
+					<Popover Icon={icon.svg} message={icon.message} onOpenChange={handlePopoverOpenChange}>
+						{#snippet contentBlock()}
+							{@const ContentComponent = icon.content}
+							<div style="width: 300px">
+								<ContentComponent />
+							</div>
+						{/snippet}
+					</Popover>
 				{/each}
 			</div>
 		{/if}

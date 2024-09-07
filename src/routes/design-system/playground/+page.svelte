@@ -1,7 +1,7 @@
 <!-- src/routes/design-system/playground/+page.svelte -->
 <script lang="ts">
 	// To do
-	import ToDoItem from '$lib/blocks/to-do/ToDoItem.svelte';
+	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
 	let tasks = $state([
@@ -52,15 +52,32 @@
 			tasks = tasks.map((task) => (task.id === newTask.id ? { ...task, expanded: true } : task));
 		}, 0); // Small delay to allow the initial rendering to complete
 	}
-
-	import { ChevronDown } from '$lib/global-icons';
 </script>
 
 <h4>To do</h4>
 <div class="flex flex-col items-center">
 	{#each tasks as task}
-		<ToDoItem {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
 	{/each}
 
 	<button onclick={addNewTask}>+ New Task</button>
 </div>
+<!--
+<script>
+	import { Calendar } from '$lib/global-components';
+</script>
+
+<Calendar /> -->
+
+<!-- <script>
+	import { Popover, Tooltip } from '$lib/global-components';
+	import { ChevronDown } from '$lib/global-icons';
+</script>
+
+<Popover Icon={ChevronDown} message={'When'}>
+	{#snippet contentBlock()}
+		<p>This is the popover content!</p>
+	{/snippet}
+</Popover> -->
+<!--
+<Tooltip message={'This is the tooltip'} TriggerElement={ChevronDown} /> -->
