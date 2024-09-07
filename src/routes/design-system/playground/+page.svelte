@@ -70,12 +70,14 @@
 <Calendar /> -->
 
 <script>
-	import { Popover } from '$lib/global-components';
+	import { Popover, Tooltip } from '$lib/global-components';
 	import { ChevronDown } from '$lib/global-icons';
 </script>
 
-<Popover Icon={ChevronDown}>
+<Popover Icon={ChevronDown} message={'When'}>
 	{#snippet contentBlock()}
 		<p>This is the popover content!</p>
 	{/snippet}
 </Popover>
+<!--
+<Tooltip message={'This is the tooltip'} TriggerElement={ChevronDown} /> -->

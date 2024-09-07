@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createPopover, createSync, melt } from '@melt-ui/svelte';
+	import { createPopover, createTooltip, createSync, melt } from '@melt-ui/svelte';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 
@@ -8,9 +8,10 @@
 	interface PopoverProps {
 		Icon: any;
 		contentBlock?: Snippet;
+		message?: string;
 	}
 
-	let { Icon, contentBlock }: PopoverProps = $props();
+	let { Icon, contentBlock, message }: PopoverProps = $props();
 
 	const {
 		elements: { trigger, content, arrow, close },
@@ -19,21 +20,54 @@
 		forceVisible: true
 	});
 
+	const {
+		elements: { trigger: tooltipTrigger, content: tooltipContent, arrow: tooltipArrow },
+		states: { open: tooltipOpen }
+	} = createTooltip({
+		positioning: {
+			placement: 'bottom'
+		},
+		openDelay: 0,
+		closeDelay: 0,
+		closeOnPointerDown: false,
+		forceVisible: false,
+		disableHoverableContent: true
+	});
+
 	const sync = createSync(states);
 	$effect(() => {
 		sync.open(open, (v) => {
 			open = v;
+			if (open) {
+				// Close the tooltip when popover opens
+				tooltipOpen.set(false); // Update the tooltip's open store to close it
+			}
 		});
 	});
 </script>
 
-<button type="button" class="trigger" use:melt={$trigger} aria-label="Update dimensions">
-	<Icon class="size-4" />
-	<span class="sr-only">Open Popover</span>
-</button>
+<div class="tooltip-trigger w-fit" use:melt={$tooltipTrigger}>
+	<button type="button" use:melt={$trigger}>
+		<Icon class="size-4" />
+	</button>
+</div>
 
+<!-- Tooltip Content -->
+{#if $tooltipOpen && message}
+	<div
+		use:melt={$tooltipContent}
+		transition:fade={{ duration: 100 }}
+		class="z-10 rounded-lg bg-white shadow w-fit"
+	>
+		<div use:melt={$tooltipArrow}></div>
+		<p class="px-2 text-[hsl(213,100%,60%)]">{message}</p>
+	</div>
+{/if}
+
+<!-- Popover Content -->
 {#if open}
-	<div use:melt={$content} transition:fade={{ duration: 100 }} class=" content">
+	<div use:melt={$content} transition:fade={{ duration: 100 }} class="content">
+		<!-- svelte-ignore element_invalid_self_closing_tag -->
 		<div use:melt={$arrow} />
 		{#if contentBlock}
 			{@render contentBlock()}
@@ -65,5 +99,13 @@
 
 	.content {
 		@apply z-10 w-60 rounded-[4px] bg-white p-5 shadow-sm;
+	}
+
+	.trigger {
+		@apply inline-flex items-center justify-center;
+		@apply text-magnum-900 transition-colors;
+		@apply border border-transparent hover:border hover:border-gray-300 rounded-sm;
+		@apply focus-visible:ring focus-visible:ring-magnum-400 focus-visible:ring-offset-2;
+		@apply p-0 text-sm font-medium;
 	}
 </style>

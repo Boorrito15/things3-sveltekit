@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { createTooltip, melt } from '@melt-ui/svelte';
 	import { fade } from 'svelte/transition';
-	import { ChevronDown } from '$lib/global-icons';
-	import type { SvelteComponent } from 'svelte';
 
 	interface TooltipProps {
 		message: string;
