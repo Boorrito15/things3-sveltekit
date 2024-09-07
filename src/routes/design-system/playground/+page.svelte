@@ -1,5 +1,5 @@
 <!-- src/routes/design-system/playground/+page.svelte -->
-<!-- <script lang="ts">
+<script lang="ts">
 	// To do
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
@@ -61,7 +61,7 @@
 	{/each}
 
 	<button onclick={addNewTask}>+ New Task</button>
-</div> -->
+</div>
 <!--
 <script>
 	import { Calendar } from '$lib/global-components';
@@ -69,7 +69,7 @@
 
 <Calendar /> -->
 
-<script>
+<!-- <script>
 	import { Popover, Tooltip } from '$lib/global-components';
 	import { ChevronDown } from '$lib/global-icons';
 </script>
@@ -78,6 +78,6 @@
 	{#snippet contentBlock()}
 		<p>This is the popover content!</p>
 	{/snippet}
-</Popover>
+</Popover> -->
 <!--
 <Tooltip message={'This is the tooltip'} TriggerElement={ChevronDown} /> -->

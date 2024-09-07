@@ -3,23 +3,31 @@
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 
+	// Local state for popover
 	let open = $state(false);
 
 	interface PopoverProps {
 		Icon: any;
 		contentBlock?: Snippet;
 		message?: string;
+		onOpenChange?: (isOpen: boolean) => void;
 	}
 
-	let { Icon, contentBlock, message }: PopoverProps = $props();
+	let { Icon, contentBlock, message, onOpenChange }: PopoverProps = $props();
 
+	// Create the popover and tooltip
 	const {
 		elements: { trigger, content, arrow, close },
 		states
 	} = createPopover({
-		forceVisible: true
+		forceVisible: true,
+		positioning: {
+			placement: 'bottom-end' // Adjust placement if needed
+		},
+		closeOnOutsideClick: true // Ensure clicking outside closes the popover
 	});
 
+	// Tooltip configuration
 	const {
 		elements: { trigger: tooltipTrigger, content: tooltipContent, arrow: tooltipArrow },
 		states: { open: tooltipOpen }
@@ -34,25 +42,29 @@
 		disableHoverableContent: true
 	});
 
+	// Sync popover and tooltip open state
 	const sync = createSync(states);
 	$effect(() => {
 		sync.open(open, (v) => {
 			open = v;
+			if (onOpenChange) onOpenChange(open);
 			if (open) {
 				// Close the tooltip when popover opens
-				tooltipOpen.set(false); // Update the tooltip's open store to close it
+				tooltipOpen.set(false);
 			}
 		});
 	});
 </script>
 
+<!-- Tooltip trigger (wrapping the popover trigger) -->
 <div class="tooltip-trigger w-fit" use:melt={$tooltipTrigger}>
+	<!-- Popover trigger (Icon button) -->
 	<button type="button" use:melt={$trigger}>
 		<Icon class="size-4" />
 	</button>
 </div>
 
-<!-- Tooltip Content -->
+<!-- Tooltip content -->
 {#if $tooltipOpen && message}
 	<div
 		use:melt={$tooltipContent}
@@ -64,11 +76,12 @@
 	</div>
 {/if}
 
-<!-- Popover Content -->
+<!-- Popover content -->
 {#if open}
 	<div use:melt={$content} transition:fade={{ duration: 100 }} class="content">
-		<!-- svelte-ignore element_invalid_self_closing_tag -->
-		<div use:melt={$arrow} />
+		<!-- Arrow for popover -->
+		<div use:melt={$arrow}></div>
+		<!-- Popover content block passed via snippet -->
 		{#if contentBlock}
 			{@render contentBlock()}
 		{/if}
@@ -76,36 +89,26 @@
 {/if}
 
 <style lang="postcss">
-	.input {
-		@apply flex h-8 w-full rounded-md border border-magnum-800 bg-transparent px-2.5 text-sm;
-		@apply ring-offset-magnum-300 focus-visible:ring;
-		@apply focus-visible:ring-magnum-400 focus-visible:ring-offset-1;
-		@apply flex-1 items-center justify-center;
-		@apply px-2.5 text-sm leading-none text-magnum-700;
-	}
-
 	.trigger {
-		@apply inline-flex h-9 w-9 items-center justify-center rounded-full bg-white p-0;
+		@apply inline-flex items-center justify-center rounded-full bg-white p-0;
 		@apply text-sm font-medium text-magnum-900 transition-colors hover:bg-white/90;
 		@apply focus-visible:ring focus-visible:ring-magnum-400 focus-visible:ring-offset-2;
 	}
 
-	.close {
-		@apply absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full;
-		@apply text-magnum-900 transition-colors hover:bg-magnum-500/10;
-		@apply focus-visible:ring focus-visible:ring-magnum-400 focus-visible:ring-offset-2;
-		@apply bg-white p-0 text-sm font-medium;
-	}
-
 	.content {
-		@apply z-10 w-60 rounded-[4px] bg-white p-5 shadow-sm;
+		@apply z-10 w-fit rounded-[4px] bg-white shadow-sm;
+		@apply p-5;
 	}
 
-	.trigger {
-		@apply inline-flex items-center justify-center;
-		@apply text-magnum-900 transition-colors;
-		@apply border border-transparent hover:border hover:border-gray-300 rounded-sm;
-		@apply focus-visible:ring focus-visible:ring-magnum-400 focus-visible:ring-offset-2;
-		@apply p-0 text-sm font-medium;
+	.tooltip-trigger {
+		@apply w-fit;
+	}
+
+	.tooltip-content {
+		@apply z-10 rounded-lg bg-white shadow w-fit;
+	}
+
+	.tooltip-arrow {
+		@apply z-10;
 	}
 </style>
