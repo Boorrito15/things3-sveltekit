@@ -97,7 +97,6 @@
 
 	.content {
 		@apply z-10 w-fit rounded-[4px] bg-white shadow-sm;
-		@apply p-5;
 	}
 
 	.tooltip-trigger {

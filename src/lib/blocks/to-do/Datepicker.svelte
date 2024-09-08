@@ -8,20 +8,17 @@
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
-	// Apply dayjs plugin
+	// Extend dayjs with plugins
 	dayjs.extend(relativeTime);
 
-	// Define TypeScript types
-	type Item = {
+	// Type definitions
+	type DateItem = {
 		title: string;
 		description?: string;
 		disabled?: boolean;
 	};
 
-	// Initialize variables
-	// Use an empty object to signify no props expected
-
-	// Utility function to format dates
+	// Utility functions
 	function formatDate(date: Date, forInput: boolean = false): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
@@ -29,20 +26,12 @@
 
 		if (daysDiff === 0) return 'Today';
 		if (daysDiff === 1) return 'Tomorrow';
-
-		if (daysDiff >= 2 && daysDiff <= 5) {
-			return `Next ${targetDate.format('dddd')}`;
-		}
-
-		if (targetDate.year() === today.year()) {
-			return targetDate.format('ddd, D MMM');
-		}
-
+		if (daysDiff >= 2 && daysDiff <= 5) return `Next ${targetDate.format('dddd')}`;
+		if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
 		return targetDate.format('D MMM YYYY');
 	}
 
-	// Handle parsed results from chrono
-	function parseDateInput(input: string): Item[] {
+	function parseDateInput(input: string): DateItem[] {
 		const results = chrono.parse(input);
 		if (results.length === 0) return [];
 
@@ -56,90 +45,73 @@
 		});
 	}
 
-	// Convert Item to ComboboxOptionProps
-	const toOption = (item: Item): ComboboxOptionProps<Item> => ({
+	const toOption = (item: DateItem): ComboboxOptionProps<DateItem> => ({
 		value: item,
 		label: item.title,
 		disabled: item.disabled
 	});
 
-	// Setup combobox
+	// Combobox setup
 	const {
 		elements: { menu, input, option, label },
-		states: { open, inputValue, touchedInput, selected },
+		states: { open, inputValue, selected },
 		helpers: { isSelected }
-	} = createCombobox<Item>({
-		forceVisible: true,
-		portal: null
-	});
+	} = createCombobox<DateItem>({ forceVisible: true, portal: null });
 
-	// Setup calendar
+	// Calendar setup
 	const {
 		elements: { calendar, heading, grid, cell, prevButton, nextButton },
 		states: { months, headingValue, weekdays, value },
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
-		onValueChange: ({ curr, next }) => {
-			if (next && next.year && next.month && next.day) {
-				const date = dayjs(`${next.year}-${next.month}-${next.day}`).toDate();
-				$inputValue = formatDate(date);
+		onValueChange: ({ next }) => {
+			if (next) {
+				const date = new Date(next.year, next.month - 1, next.day);
+				$inputValue = formatDate(date, true);
 			}
-			return curr;
+			return next;
 		}
 	});
 
-	// Parse natural language input and update calendar
-	function parseAndSetDate(input: string | undefined) {
-		if (input) {
-			const parsedDate = chrono.parseDate(input);
-			if (parsedDate) {
-				const year = parsedDate.getFullYear();
-				const month = parsedDate.getMonth() + 1;
-				const day = parsedDate.getDate();
-				const calendarDate = new CalendarDate(year, month, day);
-				value.set(calendarDate);
-			}
+	// State variables
+	let nlpInput = $state('');
+	let parsedDate = $state<Date | null>(null);
+
+	// Functions
+	function setDateFromInput(input: string) {
+		parsedDate = chrono.parseDate(input);
+		if (parsedDate instanceof Date) {
+			const year = parsedDate.getFullYear();
+			const month = parsedDate.getMonth() + 1;
+			const day = parsedDate.getDate();
+			const calendarDate = new CalendarDate(year, month, day);
+			value.set(calendarDate);
 		}
 	}
 
+	// Filtered items for combobox
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
-
-		// Parse date from input and generate items
 		if (inputVal) {
-			// Generate items based on parsed input
-			const parsedItems = parseDateInput(inputVal);
-			return parsedItems;
+			return parseDateInput(inputVal);
 		}
-
-		// If input is empty, return an empty array or default value
 		return [];
-	});
-
-	// Update inputValue based on selected item
-	$effect(() => {
-		const selectedItem = $selected;
-		if (selectedItem && selectedItem.label) {
-			const parsedDate = chrono.parseDate(selectedItem.label);
-			$inputValue = parsedDate ? formatDate(parsedDate, true) : '';
-		} else {
-			$inputValue = '';
-		}
 	});
 </script>
 
-<!-- Calendar and Combobox rendered with Melt UI -->
 <div use:melt={$calendar} class="w-full">
 	<!-- Combobox Template -->
 	<div class="flex flex-col gap-1 w-full">
-		<label use:melt={$label} for="item-input"> </label>
+		<label use:melt={$label} for="date-input"> </label>
 
 		<div class="relative">
 			<input
-				id="item-input"
+				id="date-input"
 				use:melt={$input}
 				class="flex h-10 items-center justify-between rounded-lg bg-white text-black w-full pl-4"
 				placeholder="when"
+				bind:value={nlpInput}
+				oninput={() => setDateFromInput(nlpInput)}
 			/>
 			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
 		</div>
@@ -156,7 +128,7 @@
 				{#each filteredItems as item, index (index)}
 					<li
 						use:melt={$option(toOption(item))}
-						onclick={() => parseAndSetDate(item.description)}
+						onclick={() => setDateFromInput(item.description || '')}
 						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
 					>
 						<div class="pl-4">
@@ -171,6 +143,7 @@
 		</ul>
 	{/if}
 
+	<!-- Calendar Component -->
 	<header>
 		<button use:melt={$prevButton}>
 			<ChevronLeft />

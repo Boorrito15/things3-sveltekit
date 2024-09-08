@@ -1,6 +1,9 @@
 <!-- src/routes/design-system/playground/+page.svelte -->
 <script lang="ts">
+	import { Calendar } from '$lib/global-components';
+	import Datepicker from '$lib/blocks/to-do/Datepicker.svelte';
 	// To do
+
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
@@ -62,12 +65,14 @@
 
 	<button onclick={addNewTask}>+ New Task</button>
 </div>
-<!--
-<script>
-	import { Calendar } from '$lib/global-components';
-</script>
 
-<Calendar /> -->
+<!-- <script>
+	import { Calendar } from '$lib/global-components';
+</script> -->
+<div class="flex">
+	<Datepicker />
+	<Calendar />
+</div>
 
 <!-- <script>
 	import { Popover, Tooltip } from '$lib/global-components';

@@ -1,9 +1,11 @@
 <script lang="ts">
+	// Import statements
 	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
 	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
 
+	// Type definitions
 	interface Tag {
 		id: number;
 		name: string;
@@ -32,21 +34,20 @@
 		checklist?: ChecklistItem[];
 	}
 
+	// Props
 	let { task, onSelect, onDelete } = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
 	}>();
 
+	// State variables
 	let taskRef = $state<HTMLElement | null>(null);
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to the input element
 	let isPopoverOpen = $state(false); // Local popover state
 	let editedTaskName = $state(task.name);
 
-	function handlePopoverOpenChange(isOpen: boolean) {
-		isPopoverOpen = isOpen; // Directly update the state to match the popover's state
-	}
-
+	// Icons
 	const icons = {
 		calendar: {
 			svg: Calendar,
@@ -55,24 +56,30 @@
 		},
 		tag: {
 			svg: TagOutline,
-			message: 'Tags'
+			message: 'Tags',
+			content: Datepicker
 		},
 		checklist: {
 			svg: Checklist,
-			message: 'Add checklist'
+			message: 'Add checklist',
+			content: Datepicker
 		},
 		flag: {
 			svg: FlagOutline,
-			message: 'Deadline'
+			message: 'Deadline',
+			content: Datepicker
 		}
 	};
 
-	// Handle task selection
+	// Functions
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen;
+	}
+
 	function selectTask() {
 		onSelect(task.id); // Notify the parent component to select this task
 	}
 
-	// Handle task editing
 	function editTask() {
 		if (!task.expanded) {
 			task.expanded = true;
@@ -84,12 +91,10 @@
 		}
 	}
 
-	// Handle task completion
 	function completeTask() {
 		task.completed = true;
 	}
 
-	// Handle task deletion
 	function deleteTask() {
 		onDelete(task.id);
 	}
@@ -110,19 +115,14 @@
 					el.contains(event.target as Node)
 				);
 
-				// If clicked inside popover, do nothing
 				if (clickedInsidePopover) return;
 
-				// If clicked outside task, handle based on popover state
 				if (taskRef && !taskRef.contains(event.target as Node)) {
 					if (isPopoverOpen) {
-						// Close popover if open
 						console.log('closing popover');
 						isPopoverOpen = false;
 					} else {
-						// Collapse task if popover is closed
 						console.log('closing task');
-
 						task.selected = false;
 						task.expanded = false;
 					}
@@ -136,10 +136,6 @@
 			};
 		}
 	});
-
-	// function handlePopoverOpenChange(isOpen: boolean) {
-	// 	console.log(isOpen);
-	// }
 </script>
 
 <div
