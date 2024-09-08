@@ -12,24 +12,25 @@
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			console.log(next);
+			// console.log(next);
 			return next;
 		}
 	});
 
 	// Add natural language input
 	let nlpInput = $state('');
-	let parsedDate = $state(Date);
+	let parsedDate = $state<Date | null>(null);
 
 	function parseNLP() {
 		parsedDate = chrono.parseDate(nlpInput);
-		if (parsedDate) {
+		if (parsedDate instanceof Date) {
 			let year = parsedDate.getFullYear();
 			let month = parsedDate.getMonth() + 1;
 			let date = parsedDate.getDate();
 			let calendarDate = new CalendarDate(year, month, date);
 			// console.log(parsedDate);
 			value.set(calendarDate);
+			console.log(value);
 		}
 	}
 
