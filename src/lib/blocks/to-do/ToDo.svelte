@@ -4,6 +4,10 @@
 	import { tick } from 'svelte';
 	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
+	import dayjs from 'dayjs';
+	import relativeTime from 'dayjs/plugin/relativeTime';
+
+	dayjs.extend(relativeTime);
 
 	/**
 	 * * INTERFACES
@@ -102,6 +106,19 @@
 		isPopoverOpen = isOpen;
 	}
 
+	function formatDate(date: Date, forInput: boolean = false): string {
+		const today = dayjs().startOf('day');
+		const targetDate = dayjs(date).startOf('day');
+		const daysDiff = targetDate.diff(today, 'day');
+		if (date) {
+			if (daysDiff === 0) return 'Today';
+			if (daysDiff === 1) return 'Tomorrow';
+			if (daysDiff >= 2 && daysDiff <= 5) return `${targetDate.format('dddd')}`;
+			if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
+			return targetDate.format('D MMM YYYY');
+		}
+	}
+
 	/**
 	 * * EFFECTS
 	 */
@@ -186,7 +203,13 @@
 >
 	<div class="task-content">
 		<div class="task-header">
-			<Checkbox on:click={completeTask} />
+			<div class="mr-4">
+				<Checkbox on:click={completeTask} />
+			</div>
+
+			{#if task.when && !task.expanded}
+				<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5">{formatDate(task.when)}</small>
+			{/if}
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
 				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
@@ -227,6 +250,9 @@
 					</Popover>
 				{/each}
 			</div>
+			{#if task.when}
+				<p class="ml-7">🗓️ {formatDate(task.when)}</p>
+			{/if}
 		{/if}
 	</div>
 </div>
@@ -272,7 +298,6 @@
 	}
 
 	.task-text {
-		margin-left: 1rem;
 		flex-grow: 1;
 	}
 
@@ -333,5 +358,6 @@
 	input {
 		background: none;
 		outline: none;
+		outline-offset: none;
 	}
 </style>
