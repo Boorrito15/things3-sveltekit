@@ -244,7 +244,9 @@
 
 				<div class="flex justify-end space-x-3">
 					{#each Object.entries(icons) as [key, icon]}
-						<div class="border p-0.5 rounded-sm opacity-40">
+						<div
+							class="border-transparent border p-0.5 rounded-sm transition-all duration-150 ease-in-out hover:border hover:border-black opacity-40"
+						>
 							<Popover
 								Icon={icon.svg}
 								message={icon.message}
