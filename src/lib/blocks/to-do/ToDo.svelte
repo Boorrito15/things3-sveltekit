@@ -5,7 +5,11 @@
 	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
 
-	// Type definitions
+	/**
+	 * * INTERFACES
+	 */
+
+	// Tag interface: Defines the structure for tags.
 	interface Tag {
 		id: number;
 		name: string;
@@ -13,28 +17,33 @@
 		description?: string;
 	}
 
+	// ChecklistItem interface: Defines a checklist item's properties.
 	interface ChecklistItem {
 		id: number;
 		name: string;
 		completed: boolean;
 	}
 
+	// Task interface: Defines the structure for a task, including optional dates, priority, etc.
 	interface Task {
 		id: number;
 		name: string;
 		notes?: string;
-
 		selected?: boolean;
 		expanded?: boolean;
 		completed?: false;
-
-		dueDate?: Date;
+		when?: Date; // When the task is due
+		dueDate?: Date; // Task deadline
 		tags?: Tag[];
 		priority?: 'low' | 'medium' | 'high';
 		checklist?: ChecklistItem[];
 	}
 
-	// Props
+	/**
+	 * * PROPS AND STATE VARIABLES
+	 */
+
+	// Props: task, onSelect, and onDelete are passed from parent.
 	let { task, onSelect, onDelete } = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
@@ -42,44 +51,31 @@
 	}>();
 
 	// State variables
-	let taskRef = $state<HTMLElement | null>(null);
-	let inputRef = $state<HTMLInputElement | null>(null); // Reference to the input element
-	let isPopoverOpen = $state(false); // Local popover state
-	let editedTaskName = $state(task.name);
+	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
+	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
+	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
+	let editedTaskName = $state(task.name); // Holds the current task name for editing.
 
-	// Icons
-	const icons = {
-		calendar: {
-			svg: Calendar,
-			message: 'When',
-			content: Datepicker
-		},
-		tag: {
-			svg: TagOutline,
-			message: 'Tags',
-			content: Datepicker
-		},
-		checklist: {
-			svg: Checklist,
-			message: 'Add checklist',
-			content: Datepicker
-		},
-		flag: {
-			svg: FlagOutline,
-			message: 'Deadline',
-			content: Datepicker
-		}
-	};
+	/**********************************
+	 * FUNCTIONS
+	 **********************************/
 
-	// Functions
-	function handlePopoverOpenChange(isOpen: boolean) {
-		isPopoverOpen = isOpen;
+	/**
+	 * * FUNCTIONS
+	 */
+
+	// Update the 'when' date for the task
+	function updateWhen(date: Date | null) {
+		task.when = date;
+		console.log('Updated Task When:', task.when);
 	}
 
+	// Toggle task selection
 	function selectTask() {
-		onSelect(task.id); // Notify the parent component to select this task
+		onSelect(task.id); // Notify parent that the task was selected.
 	}
 
+	// Expand the task to enable editing
 	function editTask() {
 		if (!task.expanded) {
 			task.expanded = true;
@@ -91,22 +87,33 @@
 		}
 	}
 
+	// Mark the task as completed
 	function completeTask() {
 		task.completed = true;
 	}
 
+	// Delete the task
 	function deleteTask() {
 		onDelete(task.id);
 	}
 
-	// Automatically focus the input when the task is expanded
+	// Handle popover state changes (open/close)
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen;
+	}
+
+	/**
+	 * * EFFECTS
+	 */
+
+	// Auto-focus on input when task is expanded
 	$effect(() => {
 		if (task.expanded && inputRef) {
 			inputRef.focus();
 		}
 	});
 
-	// Handle outside click logic
+	// Handle clicks outside the task or popover, to collapse/close them
 	$effect(() => {
 		if (task.expanded || task.selected) {
 			const handleClickOutside = (event: MouseEvent) => {
@@ -136,6 +143,34 @@
 			};
 		}
 	});
+
+	/**
+	 * * ICON CONFIGURATION
+	 */
+
+	// Icon setup: Defines icons used for different task features.
+	const icons = {
+		calendar: {
+			svg: Calendar,
+			message: 'When',
+			content: Datepicker
+		},
+		tag: {
+			svg: TagOutline,
+			message: 'Tags',
+			content: null
+		},
+		checklist: {
+			svg: Checklist,
+			message: 'Add checklist',
+			content: null
+		},
+		flag: {
+			svg: FlagOutline,
+			message: 'Deadline',
+			content: Calendar
+		}
+	};
 </script>
 
 <div
@@ -184,7 +219,9 @@
 						{#snippet contentBlock()}
 							{@const ContentComponent = icon.content}
 							<div style="width: 300px">
-								<ContentComponent />
+								{#if ContentComponent == Datepicker}
+									<Datepicker onDateSelected={updateWhen} />
+								{/if}
 							</div>
 						{/snippet}
 					</Popover>

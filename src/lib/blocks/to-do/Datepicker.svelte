@@ -1,5 +1,7 @@
 <script lang="ts">
-	// Import statements
+	/**
+	 * * IMPORTS
+	 */
 	import { melt, createCalendar, createCombobox, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
@@ -11,14 +13,26 @@
 	// Extend dayjs with plugins
 	dayjs.extend(relativeTime);
 
-	// Type definitions
+	/**
+	 * * INTERFACES & TYPES
+	 * This section defines the types and interfaces used in the component.
+	 */
 	type DateItem = {
 		title: string;
 		description?: string;
 		disabled?: boolean;
 	};
 
-	// Utility functions
+	/**
+	 * * UTILITY FUNCTIONS
+	 * Helper functions to format dates and parse date inputs.
+	 */
+
+	/**
+	 * Format a Date object into a human-readable string.
+	 * @param date - The date to format.
+	 * @param forInput - Boolean indicating if the formatted string is for an input field.
+	 */
 	function formatDate(date: Date, forInput: boolean = false): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
@@ -26,11 +40,16 @@
 
 		if (daysDiff === 0) return 'Today';
 		if (daysDiff === 1) return 'Tomorrow';
-		if (daysDiff >= 2 && daysDiff <= 5) return `Next ${targetDate.format('dddd')}`;
+		if (daysDiff >= 2 && daysDiff <= 5) return `${targetDate.format('dddd')}`;
 		if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
 		return targetDate.format('D MMM YYYY');
 	}
 
+	/**
+	 * Parse a user's natural language input into potential date matches.
+	 * @param input - User input string to parse.
+	 * @returns An array of DateItem objects that match the parsed input.
+	 */
 	function parseDateInput(input: string): DateItem[] {
 		const results = chrono.parse(input);
 		if (results.length === 0) return [];
@@ -45,39 +64,70 @@
 		});
 	}
 
+	/**
+	 * Convert a DateItem into a ComboboxOptionProps object.
+	 * @param item - The DateItem to convert.
+	 * @returns A formatted ComboboxOptionProps object.
+	 */
 	const toOption = (item: DateItem): ComboboxOptionProps<DateItem> => ({
 		value: item,
 		label: item.title,
 		disabled: item.disabled
 	});
 
-	// Combobox setup
+	/**
+	 * * COMBOBOX SETUP
+	 * This section handles the logic for the combobox that displays potential date options.
+	 */
 	const {
 		elements: { menu, input, option, label },
 		states: { open, inputValue, selected },
 		helpers: { isSelected }
 	} = createCombobox<DateItem>({ forceVisible: true, portal: null });
 
-	// Calendar setup
+	/**
+	 * * CALENDAR SETUP
+	 * This section manages the calendar's behavior and its interaction with the state.
+	 */
 	const {
 		elements: { calendar, heading, grid, cell, prevButton, nextButton },
 		states: { months, headingValue, weekdays, value },
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
+		// This function is called when a date is selected in the calendar
 		onValueChange: ({ next }) => {
 			if (next) {
-				const date = new Date(next.year, next.month - 1, next.day);
+				date = new Date(next.year, next.month - 1, next.day);
 				$inputValue = formatDate(date, true);
+				if (onDateSelected) {
+					console.log();
+					onDateSelected(date);
+				}
 			}
 			return next;
 		}
 	});
 
-	// State variables
+	/**
+	 * * PROPS & STATE VARIABLES
+	 * These variables store the current state of the date input, parsed dates, and selected date.
+	 */
+
+	let { onDateSelected } = $props<{ onDateSelected: (date: Date | null) => void }>();
+
 	let nlpInput = $state('');
 	let parsedDate = $state<Date | null>(null);
+	let date = $state<Date | null>(null);
 
-	// Functions
+	/**
+	 * * FUNCTIONS
+	 * Additional helper functions to handle date input and updates.
+	 */
+
+	/**
+	 * Set the date based on user input (natural language parsing).
+	 * @param input - The user's input string.
+	 */
 	function setDateFromInput(input: string) {
 		parsedDate = chrono.parseDate(input);
 		if (parsedDate instanceof Date) {
@@ -89,13 +139,26 @@
 		}
 	}
 
-	// Filtered items for combobox
+	/**
+	 * * DERIVED DATA
+	 * This derived store filters date items based on user input.
+	 */
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
 		if (inputVal) {
 			return parseDateInput(inputVal);
 		}
 		return [];
+	});
+
+	/**
+	 * * EFFECTS
+	 * This effect logs the selected date when it changes.
+	 */
+	$effect(() => {
+		if (date) {
+			console.log(date);
+		}
 	});
 </script>
 
