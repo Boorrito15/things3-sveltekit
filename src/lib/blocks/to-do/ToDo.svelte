@@ -2,39 +2,52 @@
 	// Import statements
 	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
-	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
+	import { Calendar, Tag, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
+	import dayjs from 'dayjs';
+	import relativeTime from 'dayjs/plugin/relativeTime';
 
-	// Type definitions
-	interface Tag {
+	dayjs.extend(relativeTime);
+
+	/**
+	 * * INTERFACES
+	 */
+
+	// Tag interface: Defines the structure for tags.
+	interface Tags {
 		id: number;
 		name: string;
 		color?: string;
 		description?: string;
 	}
 
+	// ChecklistItem interface: Defines a checklist item's properties.
 	interface ChecklistItem {
 		id: number;
 		name: string;
 		completed: boolean;
 	}
 
+	// Task interface: Defines the structure for a task, including optional dates, priority, etc.
 	interface Task {
 		id: number;
 		name: string;
 		notes?: string;
-
 		selected?: boolean;
 		expanded?: boolean;
 		completed?: false;
-
-		dueDate?: Date;
+		when?: Date; // When the task is due
+		dueDate?: Date; // Task deadline
 		tags?: Tag[];
 		priority?: 'low' | 'medium' | 'high';
 		checklist?: ChecklistItem[];
 	}
 
-	// Props
+	/**
+	 * * PROPS AND STATE VARIABLES
+	 */
+
+	// Props: task, onSelect, and onDelete are passed from parent.
 	let { task, onSelect, onDelete } = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
@@ -42,44 +55,31 @@
 	}>();
 
 	// State variables
-	let taskRef = $state<HTMLElement | null>(null);
-	let inputRef = $state<HTMLInputElement | null>(null); // Reference to the input element
-	let isPopoverOpen = $state(false); // Local popover state
-	let editedTaskName = $state(task.name);
+	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
+	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
+	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
+	let editedTaskName = $state(task.name); // Holds the current task name for editing.
 
-	// Icons
-	const icons = {
-		calendar: {
-			svg: Calendar,
-			message: 'When',
-			content: Datepicker
-		},
-		tag: {
-			svg: TagOutline,
-			message: 'Tags',
-			content: Datepicker
-		},
-		checklist: {
-			svg: Checklist,
-			message: 'Add checklist',
-			content: Datepicker
-		},
-		flag: {
-			svg: FlagOutline,
-			message: 'Deadline',
-			content: Datepicker
-		}
-	};
+	/**********************************
+	 * FUNCTIONS
+	 **********************************/
 
-	// Functions
-	function handlePopoverOpenChange(isOpen: boolean) {
-		isPopoverOpen = isOpen;
+	/**
+	 * * FUNCTIONS
+	 */
+
+	// Update the 'when' date for the task
+	function updateWhen(date: Date | null) {
+		task.when = date;
+		console.log('Updated Task When:', task.when);
 	}
 
+	// Toggle task selection
 	function selectTask() {
-		onSelect(task.id); // Notify the parent component to select this task
+		onSelect(task.id); // Notify parent that the task was selected.
 	}
 
+	// Expand the task to enable editing
 	function editTask() {
 		if (!task.expanded) {
 			task.expanded = true;
@@ -91,22 +91,46 @@
 		}
 	}
 
+	// Mark the task as completed
 	function completeTask() {
 		task.completed = true;
 	}
 
+	// Delete the task
 	function deleteTask() {
 		onDelete(task.id);
 	}
 
-	// Automatically focus the input when the task is expanded
+	// Handle popover state changes (open/close)
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen;
+	}
+
+	function formatDate(date: Date, forInput: boolean = false): string {
+		const today = dayjs().startOf('day');
+		const targetDate = dayjs(date).startOf('day');
+		const daysDiff = targetDate.diff(today, 'day');
+		if (date) {
+			if (daysDiff === 0) return 'Today';
+			if (daysDiff === 1) return 'Tomorrow';
+			if (daysDiff >= 2 && daysDiff <= 5) return `${targetDate.format('dddd')}`;
+			if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
+			return targetDate.format('D MMM YYYY');
+		}
+	}
+
+	/**
+	 * * EFFECTS
+	 */
+
+	// Auto-focus on input when task is expanded
 	$effect(() => {
 		if (task.expanded && inputRef) {
 			inputRef.focus();
 		}
 	});
 
-	// Handle outside click logic
+	// Handle clicks outside the task or popover, to collapse/close them
 	$effect(() => {
 		if (task.expanded || task.selected) {
 			const handleClickOutside = (event: MouseEvent) => {
@@ -136,6 +160,34 @@
 			};
 		}
 	});
+
+	/**
+	 * * ICON CONFIGURATION
+	 */
+
+	// Icon setup: Defines icons used for different task features.
+	const icons = {
+		calendar: {
+			svg: Calendar,
+			message: 'When',
+			content: Datepicker
+		},
+		tag: {
+			svg: Tag,
+			message: 'Tags',
+			content: null
+		},
+		checklist: {
+			svg: Checklist,
+			message: 'Add checklist',
+			content: null
+		},
+		flag: {
+			svg: Flag,
+			message: 'Deadline',
+			content: Calendar
+		}
+	};
 </script>
 
 <div
@@ -151,7 +203,15 @@
 >
 	<div class="task-content">
 		<div class="task-header">
-			<Checkbox on:click={completeTask} />
+			<div class="mr-4">
+				<Checkbox on:click={completeTask} />
+			</div>
+
+			{#if task.when && !task.expanded}
+				<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
+					>{formatDate(task.when)}</small
+				>
+			{/if}
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
 				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
@@ -177,18 +237,31 @@
 			{/if}
 		</div>
 		{#if task.expanded}
-			<div class="task-footer space-x-3">
-				{#each Object.entries(icons) as [key, icon]}
-					<!-- Popover component with open state synced -->
-					<Popover Icon={icon.svg} message={icon.message} onOpenChange={handlePopoverOpenChange}>
-						{#snippet contentBlock()}
-							{@const ContentComponent = icon.content}
-							<div style="width: 300px">
-								<ContentComponent />
-							</div>
-						{/snippet}
-					</Popover>
-				{/each}
+			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
+				{#if task.when}
+					<p class="ml-7">🗓️ {formatDate(task.when)}</p>
+				{/if}
+
+				<div class="flex justify-end space-x-3">
+					{#each Object.entries(icons) as [key, icon]}
+						<div class="border p-0.5 rounded-sm opacity-40">
+							<Popover
+								Icon={icon.svg}
+								message={icon.message}
+								onOpenChange={handlePopoverOpenChange}
+							>
+								{#snippet contentBlock()}
+									{@const ContentComponent = icon.content}
+									<div style="width: 300px">
+										{#if ContentComponent == Datepicker}
+											<Datepicker onDateSelected={updateWhen} />
+										{/if}
+									</div>
+								{/snippet}
+							</Popover>
+						</div>
+					{/each}
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -235,7 +308,6 @@
 	}
 
 	.task-text {
-		margin-left: 1rem;
 		flex-grow: 1;
 	}
 
@@ -288,13 +360,14 @@
 		field-sizing: content;
 	}
 
-	.task-footer {
+	/* .task-footer {
 		display: flex;
 		justify-content: end;
-	}
+	} */
 
 	input {
 		background: none;
 		outline: none;
+		outline-offset: none;
 	}
 </style>

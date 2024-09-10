@@ -1,4 +1,3 @@
-<!-- src/routes/design-system/playground/+page.svelte -->
 <script lang="ts">
 	import { Calendar } from '$lib/global-components';
 	import Datepicker from '$lib/blocks/to-do/Datepicker.svelte';
@@ -66,23 +65,6 @@
 	<button onclick={addNewTask}>+ New Task</button>
 </div>
 
-<!-- <script>
-	import { Calendar } from '$lib/global-components';
-</script> -->
-<div class="flex">
+<!-- <div class="flex">
 	<Datepicker />
-	<Calendar />
-</div>
-
-<!-- <script>
-	import { Popover, Tooltip } from '$lib/global-components';
-	import { ChevronDown } from '$lib/global-icons';
-</script>
-
-<Popover Icon={ChevronDown} message={'When'}>
-	{#snippet contentBlock()}
-		<p>This is the popover content!</p>
-	{/snippet}
-</Popover> -->
-<!--
-<Tooltip message={'This is the tooltip'} TriggerElement={ChevronDown} /> -->
+</div> -->
