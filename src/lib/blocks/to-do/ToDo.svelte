@@ -2,7 +2,7 @@
 	// Import statements
 	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
-	import { Calendar, TagOutline, Checklist, FlagOutline } from '$lib/global-icons';
+	import { Calendar, Tag, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -14,7 +14,7 @@
 	 */
 
 	// Tag interface: Defines the structure for tags.
-	interface Tag {
+	interface Tags {
 		id: number;
 		name: string;
 		color?: string;
@@ -173,7 +173,7 @@
 			content: Datepicker
 		},
 		tag: {
-			svg: TagOutline,
+			svg: Tag,
 			message: 'Tags',
 			content: null
 		},
@@ -183,7 +183,7 @@
 			content: null
 		},
 		flag: {
-			svg: FlagOutline,
+			svg: Flag,
 			message: 'Deadline',
 			content: Calendar
 		}
