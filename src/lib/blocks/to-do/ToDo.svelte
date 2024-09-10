@@ -208,7 +208,9 @@
 			</div>
 
 			{#if task.when && !task.expanded}
-				<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5">{formatDate(task.when)}</small>
+				<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
+					>{formatDate(task.when)}</small
+				>
 			{/if}
 			{#if task.expanded}
 				<!-- Bind the input value to editableName -->
@@ -235,24 +237,32 @@
 			{/if}
 		</div>
 		{#if task.expanded}
-			<div class="task-footer space-x-3">
-				{#each Object.entries(icons) as [key, icon]}
-					<!-- Popover component with open state synced -->
-					<Popover Icon={icon.svg} message={icon.message} onOpenChange={handlePopoverOpenChange}>
-						{#snippet contentBlock()}
-							{@const ContentComponent = icon.content}
-							<div style="width: 300px">
-								{#if ContentComponent == Datepicker}
-									<Datepicker onDateSelected={updateWhen} />
-								{/if}
-							</div>
-						{/snippet}
-					</Popover>
-				{/each}
+			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
+				{#if task.when}
+					<p class="ml-7">🗓️ {formatDate(task.when)}</p>
+				{/if}
+
+				<div class="flex justify-end space-x-3">
+					{#each Object.entries(icons) as [key, icon]}
+						<div class="border p-0.5 rounded-sm opacity-40">
+							<Popover
+								Icon={icon.svg}
+								message={icon.message}
+								onOpenChange={handlePopoverOpenChange}
+							>
+								{#snippet contentBlock()}
+									{@const ContentComponent = icon.content}
+									<div style="width: 300px">
+										{#if ContentComponent == Datepicker}
+											<Datepicker onDateSelected={updateWhen} />
+										{/if}
+									</div>
+								{/snippet}
+							</Popover>
+						</div>
+					{/each}
+				</div>
 			</div>
-			{#if task.when}
-				<p class="ml-7">🗓️ {formatDate(task.when)}</p>
-			{/if}
 		{/if}
 	</div>
 </div>
@@ -350,10 +360,10 @@
 		field-sizing: content;
 	}
 
-	.task-footer {
+	/* .task-footer {
 		display: flex;
 		justify-content: end;
-	}
+	} */
 
 	input {
 		background: none;

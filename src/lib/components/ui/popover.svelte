@@ -100,7 +100,7 @@
 	}
 
 	.tooltip-trigger {
-		@apply w-fit;
+		@apply w-fit flex;
 	}
 
 	.tooltip-content {
