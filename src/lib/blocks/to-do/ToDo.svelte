@@ -107,7 +107,7 @@
 		isPopoverOpen = isOpen;
 	}
 
-	function formatDate(date: Date, forInput: boolean = false): string {
+	function formatDate(date: Date): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
 		const daysDiff = targetDate.diff(today, 'day');
@@ -207,39 +207,40 @@
 	}}
 >
 	<div class="task-content">
-		<div class="task-header">
-			<div class="mr-4">
-				<Checkbox on:click={completeTask} />
-			</div>
-
-			{#if task.when && !task.expanded}
-				<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
-					>{formatDate(task.when)}</small
+		<div>
+			<div class="task-header">
+				<div class="mr-4">
+					<Checkbox on:click={completeTask} />
+				</div>
+				{#if task.when && !task.expanded}
+					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
+						>{formatDate(task.when)}</small
+					>
+				{/if}
+				{#if task.expanded}
+					<!-- Bind the input value to editableName -->
+					<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
+				{:else}
+					<!-- Display the current value of editableName -->
+					<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
+				{/if}
+				<button class="h-full flex items-center" onclick={deleteTask}
+					><span class="material-symbols-outlined"> backspace </span></button
 				>
-			{/if}
-			{#if task.expanded}
-				<!-- Bind the input value to editableName -->
-				<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
-			{:else}
-				<!-- Display the current value of editableName -->
-				<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
-			{/if}
-			<button class="h-full flex items-center" onclick={deleteTask}
-				><span class="material-symbols-outlined"> backspace </span></button
-			>
-		</div>
-		<div class="notes-container">
-			{#if task.expanded}
-				<textarea
-					name="task-notes"
-					class="task-notes-input"
-					placeholder="Notes"
-					bind:value={task.notes}
-					rows="1"
-				></textarea>
-			{:else}
-				<p class="task-notes-collapsed">{task.notes || ''}</p>
-			{/if}
+			</div>
+			<div class="notes-container">
+				{#if task.expanded}
+					<textarea
+						name="task-notes"
+						class="task-notes-input"
+						placeholder="Notes"
+						bind:value={task.notes}
+						rows="1"
+					></textarea>
+				{:else}
+					<p class="task-notes-collapsed">{task.notes || ''}</p>
+				{/if}
+			</div>
 		</div>
 		{#if task.expanded}
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
@@ -320,25 +321,33 @@
 		width: 99.5%;
 		margin: 0;
 		transition: all 0.3s ease;
+		display: flex;
+		flex-direction: column; /* Make the task-container a flex container */
 	}
 
+	/* When the task is selected */
 	.task-container.selected {
 		background-color: #cae2ff;
 	}
 
+	/* When the task is expanded */
 	.task-container.expanded {
 		background-color: white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 		margin: 2rem 0;
 		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
-		height: fit-content;
-		width: 100%;
+		height: auto; /* Ensure the height is dynamic */
+		min-height: 9rem; /* Add a minimum height to the expanded task */
 	}
 
 	/* Task Content */
 	.task-content {
 		display: flex;
 		flex-direction: column;
+		flex-grow: 1; /* Ensure the task-content takes the full height */
+		justify-content: space-between; /* Space out the content vertically */
+		position: relative;
+		height: 100%;
 	}
 
 	/* Task Header */
@@ -373,7 +382,6 @@
 
 	/* Task Notes */
 	.task-notes-input {
-		width: 100%;
 		margin-left: 1.75rem; /* Match margin with .task-text */
 		border: none;
 		box-sizing: border-box;
@@ -401,11 +409,6 @@
 		min-height: 2rem;
 		field-sizing: content;
 	}
-
-	/* .task-footer {
-		display: flex;
-		justify-content: end;
-	} */
 
 	input {
 		background: none;
