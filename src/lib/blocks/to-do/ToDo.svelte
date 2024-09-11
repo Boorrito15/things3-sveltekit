@@ -247,9 +247,21 @@
 					<div
 						class="flex ml-6 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
 					>
-						<p class="leading-none">
+						<Popover onOpenChange={handlePopoverOpenChange}>
+							{#snippet triggerElement()}
+								{@const TriggerElement = formatDate(task.when)}
+								<p class="leading-3">🗓️ {TriggerElement}</p>
+							{/snippet}
+							{#snippet contentBlock()}
+								{@const ContentComponent = Datepicker}
+								<div style="width: 300px">
+									<Datepicker onDateSelected={updateWhen} />
+								</div>
+							{/snippet}
+						</Popover>
+						<!-- <p class="leading-none">
 							🗓️ {formatDate(task.when)}
-						</p>
+						</p> -->
 						<div onclick={deleteWhen} class="hover:bg-gray-200 p-0.5 rounded-sm">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -274,11 +286,11 @@
 							<div
 								class="border-transparent border p-0.5 rounded-sm transition-all duration-150 ease-in-out hover:border hover:border-black opacity-40"
 							>
-								<Popover
-									Icon={icon.svg}
-									message={icon.message}
-									onOpenChange={handlePopoverOpenChange}
-								>
+								<Popover message={icon.message} onOpenChange={handlePopoverOpenChange}>
+									{#snippet triggerElement()}
+										{@const TriggerElement = icon.svg}
+										<TriggerElement class="size-4" />
+									{/snippet}
 									{#snippet contentBlock()}
 										{@const ContentComponent = icon.content}
 										<div style="width: 300px">
