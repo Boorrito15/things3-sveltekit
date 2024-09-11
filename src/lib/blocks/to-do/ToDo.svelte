@@ -118,6 +118,7 @@
 			if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
 			return targetDate.format('D MMM YYYY');
 		}
+		return '';
 	}
 
 	function deleteWhen() {
