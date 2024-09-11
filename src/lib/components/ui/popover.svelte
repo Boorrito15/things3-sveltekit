@@ -7,13 +7,13 @@
 	let open = $state(false);
 
 	interface PopoverProps {
-		Icon: any;
+		triggerElement: Snippet;
 		contentBlock?: Snippet;
 		message?: string;
 		onOpenChange?: (isOpen: boolean) => void;
 	}
 
-	let { Icon, contentBlock, message, onOpenChange }: PopoverProps = $props();
+	let { triggerElement, contentBlock, message, onOpenChange }: PopoverProps = $props();
 
 	// Create the popover and tooltip
 	const {
@@ -60,7 +60,9 @@
 <div class="tooltip-trigger w-fit" use:melt={$tooltipTrigger}>
 	<!-- Popover trigger (Icon button) -->
 	<button type="button" use:melt={$trigger}>
-		<Icon class="size-4" />
+		{#if triggerElement}
+			{@render triggerElement()}
+		{/if}
 	</button>
 </div>
 

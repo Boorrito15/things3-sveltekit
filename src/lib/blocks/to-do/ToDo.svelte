@@ -1,4 +1,9 @@
 <script lang="ts">
+	const customXIcon = {
+		width: 24,
+		height: 24,
+		body: "<g fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='0.5'><path d='m15 9l-6 6m0-6l6 6'></path></g>"
+	};
 	// Import statements
 	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
@@ -60,10 +65,6 @@
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
 	let editedTaskName = $state(task.name); // Holds the current task name for editing.
 
-	/**********************************
-	 * FUNCTIONS
-	 **********************************/
-
 	/**
 	 * * FUNCTIONS
 	 */
@@ -117,6 +118,10 @@
 			if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
 			return targetDate.format('D MMM YYYY');
 		}
+	}
+
+	function deleteWhen() {
+		task.when = null;
 	}
 
 	/**
@@ -239,29 +244,64 @@
 		{#if task.expanded}
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
-					<p class="ml-7">🗓️ {formatDate(task.when)}</p>
+					<div
+						class="flex ml-6 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
+					>
+						<Popover onOpenChange={handlePopoverOpenChange}>
+							{#snippet triggerElement()}
+								{@const TriggerElement = formatDate(task.when)}
+								<p class="leading-3">🗓️ {TriggerElement}</p>
+							{/snippet}
+							{#snippet contentBlock()}
+								{@const ContentComponent = Datepicker}
+								<div style="width: 300px">
+									<Datepicker onDateSelected={updateWhen} />
+								</div>
+							{/snippet}
+						</Popover>
+						<!-- <p class="leading-none">
+							🗓️ {formatDate(task.when)}
+						</p> -->
+						<div onclick={deleteWhen} class="hover:bg-gray-200 p-0.5 rounded-sm">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="0.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								class="lucide lucide-x"
+								><path d="M18 6 6 18" /><path d="m6 6 12 12" />
+							</svg>
+						</div>
+					</div>
 				{/if}
 
 				<div class="flex justify-end space-x-3">
 					{#each Object.entries(icons) as [key, icon]}
-						<div
-							class="border-transparent border p-0.5 rounded-sm transition-all duration-150 ease-in-out hover:border hover:border-black opacity-40"
-						>
-							<Popover
-								Icon={icon.svg}
-								message={icon.message}
-								onOpenChange={handlePopoverOpenChange}
+						{#if !(key === 'calendar' && task.when)}
+							<div
+								class="border-transparent border p-0.5 rounded-sm transition-all duration-150 ease-in-out hover:border hover:border-black opacity-40"
 							>
-								{#snippet contentBlock()}
-									{@const ContentComponent = icon.content}
-									<div style="width: 300px">
-										{#if ContentComponent == Datepicker}
-											<Datepicker onDateSelected={updateWhen} />
-										{/if}
-									</div>
-								{/snippet}
-							</Popover>
-						</div>
+								<Popover message={icon.message} onOpenChange={handlePopoverOpenChange}>
+									{#snippet triggerElement()}
+										{@const TriggerElement = icon.svg}
+										<TriggerElement class="size-4" />
+									{/snippet}
+									{#snippet contentBlock()}
+										{@const ContentComponent = icon.content}
+										<div style="width: 300px">
+											{#if ContentComponent == Datepicker}
+												<Datepicker onDateSelected={updateWhen} />
+											{/if}
+										</div>
+									{/snippet}
+								</Popover>
+							</div>
+						{/if}
 					{/each}
 				</div>
 			</div>
