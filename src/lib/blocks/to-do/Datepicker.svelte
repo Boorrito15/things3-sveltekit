@@ -104,7 +104,7 @@
 	/**
 	 * * PROPS & STATE VARIABLES
 	 */
-	let { onDateSelected } = $props<{ onDateSelected: (date: Date | null) => void }>();
+	let { onDateSelected } = $props<{ onDateSelected?: (date: Date | null) => void }>();
 	let nlpInput = $state('');
 	let parsedDate = $state<Date | null>(null);
 	let date = $state<Date | null>(null);
@@ -147,9 +147,8 @@
 				id="date-input"
 				use:melt={$input}
 				class="flex h-10 items-center justify-between rounded-lg bg-white text-black w-full pl-4"
-				placeholder="when"
-				bind:value={nlpInput}
-				oninput={() => setDateFromInput(nlpInput)}
+				placeholder="Pick a date"
+				bind:value={$inputValue}
 			/>
 			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
 		</div>
