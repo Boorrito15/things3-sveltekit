@@ -10,12 +10,10 @@
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
-	// Extend dayjs with plugins
 	dayjs.extend(relativeTime);
 
 	/**
 	 * * INTERFACES & TYPES
-	 * This section defines the types and interfaces used in the component.
 	 */
 	type DateItem = {
 		title: string;
@@ -25,13 +23,6 @@
 
 	/**
 	 * * UTILITY FUNCTIONS
-	 * Helper functions to format dates and parse date inputs.
-	 */
-
-	/**
-	 * Format a Date object into a human-readable string.
-	 * @param date - The date to format.
-	 * @param forInput - Boolean indicating if the formatted string is for an input field.
 	 */
 	function formatDate(date: Date, forInput: boolean = false): string {
 		const today = dayjs().startOf('day');
@@ -45,11 +36,6 @@
 		return targetDate.format('D MMM YYYY');
 	}
 
-	/**
-	 * Parse a user's natural language input into potential date matches.
-	 * @param input - User input string to parse.
-	 * @returns An array of DateItem objects that match the parsed input.
-	 */
 	function parseDateInput(input: string): DateItem[] {
 		const results = chrono.parse(input);
 		if (results.length === 0) return [];
@@ -64,11 +50,6 @@
 		});
 	}
 
-	/**
-	 * Convert a DateItem into a ComboboxOptionProps object.
-	 * @param item - The DateItem to convert.
-	 * @returns A formatted ComboboxOptionProps object.
-	 */
 	const toOption = (item: DateItem): ComboboxOptionProps<DateItem> => ({
 		value: item,
 		label: item.title,
@@ -77,7 +58,6 @@
 
 	/**
 	 * * COMBOBOX SETUP
-	 * This section handles the logic for the combobox that displays potential date options.
 	 */
 	const {
 		elements: { menu, input, option, label },
@@ -87,61 +67,58 @@
 
 	/**
 	 * * CALENDAR SETUP
-	 * This section manages the calendar's behavior and its interaction with the state.
 	 */
 	const {
 		elements: { calendar, heading, grid, cell, prevButton, nextButton },
 		states: { months, headingValue, weekdays, value },
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
-		// This function is called when a date is selected in the calendar
 		onValueChange: ({ next }) => {
 			if (next) {
-				date = new Date(next.year, next.month - 1, next.day);
-				$inputValue = formatDate(date, true);
-				if (onDateSelected) {
-					console.log();
-					onDateSelected(date);
+				// Convert the selected date
+				const selectedDate = new Date(next.year, next.month - 1, next.day);
+
+				// Prevent infinite loop by ensuring the value is different
+				if (!date || date.getTime() !== selectedDate.getTime()) {
+					// Update inputValue only if necessary
+					if ($inputValue !== formatDate(selectedDate, true)) {
+						$inputValue = formatDate(selectedDate, true);
+					}
+
+					// Set the actual date and call the callback if necessary
+					date = selectedDate;
+					if (onDateSelected) {
+						onDateSelected(selectedDate);
+					}
+
+					// Set the selected date in the calendar state
+					const calendarDate = new CalendarDate(next.year, next.month, next.day);
+					value.set(calendarDate); // Ensure highlighting works correctly
 				}
 			}
+
 			return next;
 		}
 	});
 
 	/**
 	 * * PROPS & STATE VARIABLES
-	 * These variables store the current state of the date input, parsed dates, and selected date.
 	 */
-
 	let { onDateSelected } = $props<{ onDateSelected: (date: Date | null) => void }>();
-
 	let nlpInput = $state('');
 	let parsedDate = $state<Date | null>(null);
 	let date = $state<Date | null>(null);
 
 	/**
 	 * * FUNCTIONS
-	 * Additional helper functions to handle date input and updates.
-	 */
-
-	/**
-	 * Set the date based on user input (natural language parsing).
-	 * @param input - The user's input string.
 	 */
 	function setDateFromInput(input: string) {
 		parsedDate = chrono.parseDate(input);
-		if (parsedDate instanceof Date) {
-			const year = parsedDate.getFullYear();
-			const month = parsedDate.getMonth() + 1;
-			const day = parsedDate.getDate();
-			const calendarDate = new CalendarDate(year, month, day);
-			value.set(calendarDate);
-		}
+		// Only parsing input here; not setting the date yet
 	}
 
 	/**
 	 * * DERIVED DATA
-	 * This derived store filters date items based on user input.
 	 */
 	let filteredItems = $derived.by(() => {
 		const inputVal = $inputValue.toLowerCase();
@@ -153,7 +130,6 @@
 
 	/**
 	 * * EFFECTS
-	 * This effect logs the selected date when it changes.
 	 */
 	$effect(() => {
 		if (date) {
@@ -165,8 +141,7 @@
 <div use:melt={$calendar} class="w-full">
 	<!-- Combobox Template -->
 	<div class="flex flex-col gap-1 w-full">
-		<label use:melt={$label} for="date-input"> </label>
-
+		<label use:melt={$label} for="date-input"></label>
 		<div class="relative">
 			<input
 				id="date-input"
@@ -180,6 +155,7 @@
 		</div>
 	</div>
 
+	<!-- Display filtered date options for selection -->
 	{#if $open}
 		<ul
 			class="z-10 flex max-h-[300px] flex-col overflow-hidden rounded-lg"
@@ -187,11 +163,22 @@
 			transition:fly={{ duration: 150, y: -5 }}
 		>
 			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white text-black">
-				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 				{#each filteredItems as item, index (index)}
 					<li
 						use:melt={$option(toOption(item))}
-						onclick={() => setDateFromInput(item.description || '')}
+						onclick={() => {
+							setDateFromInput(item.description || '');
+							date = chrono.parseDate(item.description || '');
+							if (date) {
+								const calendarDate = new CalendarDate(
+									date.getFullYear(),
+									date.getMonth() + 1,
+									date.getDate()
+								);
+								value.set(calendarDate); // Update the calendar's selected value
+								if (onDateSelected) onDateSelected(date);
+							}
+						}}
 						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
 					>
 						<div class="pl-4">

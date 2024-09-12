@@ -66,6 +66,6 @@
 	<button onclick={addNewTask}>+ New Task</button>
 </div>
 
-<!-- <div class="flex">
+<div class="flex">
 	<Datepicker />
-</div> -->
+</div>
