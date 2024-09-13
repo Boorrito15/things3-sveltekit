@@ -1,13 +1,13 @@
+<!-- src/routes/inbox/+page.svelte -->
 <script lang="ts">
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
-	let tasks = $state([
-		{ id: 1, name: 'Task 1', selected: false, expanded: false },
-		{ id: 2, name: 'Task 2', selected: false, expanded: false }
-	]);
+	// Safely access props and ensure tasks is always an array
+	const { data } = $props();
+	let tasks = $state(data.tasks);
 
-	let selectedTaskId = $state<number | null>(null);
+	let selectedTaskId: number | null = null;
 
 	function handleSelectTask(taskId: number) {
 		tasks = tasks.map((task) => ({
@@ -26,7 +26,6 @@
 			if (task.selected) {
 				return { ...task, selected: false };
 			}
-
 			return task;
 		});
 
@@ -37,7 +36,7 @@
 			expanded: false
 		};
 
-		tasks = [...tasks, newTask]; // Add the new task to the tasks array;
+		tasks = [...tasks, newTask]; // Add the new task to the tasks array
 
 		// Wait for DOM to update before expanding the new task
 		await tick();
@@ -52,11 +51,15 @@
 	}
 </script>
 
-<h4>To do</h4>
+<h4 class="mb-12">📥 Inbox</h4>
 <div class="flex flex-col items-center">
-	{#each tasks as task}
-		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-	{/each}
+	{#if tasks.length > 0}
+		{#each tasks as task (task.id)}
+			<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+		{/each}
+	{:else}
+		<p>No tasks available.</p>
+	{/if}
 
 	<button onclick={addNewTask}>+ New Task</button>
 </div>

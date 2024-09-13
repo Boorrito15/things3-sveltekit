@@ -1,9 +1,4 @@
 <script lang="ts">
-	const customXIcon = {
-		width: 24,
-		height: 24,
-		body: "<g fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='0.5'><path d='m15 9l-6 6m0-6l6 6'></path></g>"
-	};
 	// Import statements
 	import { Checkbox, Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
@@ -95,6 +90,7 @@
 	// Mark the task as completed
 	function completeTask() {
 		task.completed = true;
+		console.log(task.name, 'completed');
 	}
 
 	// Delete the task
@@ -210,7 +206,7 @@
 	<div class="task-content">
 		<div>
 			<div class="task-header">
-				<div class="mr-4">
+				<div class="mr-2">
 					<Checkbox on:click={completeTask} />
 				</div>
 				{#if task.when && !task.expanded}
