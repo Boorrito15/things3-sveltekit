@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Import statements
-	import { Checkbox, Popover } from '$lib/global-components';
+	import { Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
 	import { Calendar, Tag, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
@@ -86,12 +86,6 @@
 			});
 		}
 	}
-
-	// Mark the task as completed
-	// function completeTask() {
-	// 	task.completed = true;
-	// 	console.log(task.name, 'completed');
-	// }
 
 	// Delete the task
 	function deleteTask() {
@@ -191,7 +185,10 @@
 		}
 	};
 
-	// console.log(task.completed);
+	const toggleComplete = () => {
+		task.completed = !task.completed;
+		console.log(task.completed);
+	};
 </script>
 
 <div
@@ -209,7 +206,12 @@
 		<div>
 			<div class="task-header">
 				<div class="mr-2">
-					<Checkbox checked={task.completed} />
+					<input
+						bind:checked={task.completed}
+						onclick={toggleComplete}
+						type="checkbox"
+						class="h-5 w-5 accent-blue-600 border-none rounded focus:ring-0"
+					/>
 				</div>
 				{#if task.when && !task.expanded}
 					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
@@ -218,7 +220,12 @@
 				{/if}
 				{#if task.expanded}
 					<!-- Bind the input value to editableName -->
-					<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
+					<input
+						type="text"
+						class="task-text focus:ring-0 focus:ring-offset-0"
+						bind:this={inputRef}
+						bind:value={editedTaskName}
+					/>
 				{:else}
 					<!-- Display the current value of editableName -->
 					<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
@@ -231,7 +238,7 @@
 				{#if task.expanded}
 					<textarea
 						name="task-notes"
-						class="task-notes-input"
+						class="task-notes-input focus:ring-0 focus:ring-offset-0"
 						placeholder="Notes"
 						bind:value={task.notes}
 						rows="1"
@@ -319,7 +326,7 @@
 		background-color: transparent;
 		width: 99.5%;
 		margin: 0;
-		transition: all 0.3s ease;
+		transition: all 0.5s ease;
 		display: flex;
 		flex-direction: column; /* Make the task-container a flex container */
 	}
@@ -359,6 +366,7 @@
 
 	.task-text {
 		flex-grow: 1;
+		outline: none;
 	}
 
 	.task-text:empty::before {
@@ -408,10 +416,50 @@
 		min-height: 2rem;
 		field-sizing: content;
 	}
-
-	input {
+	input[type='text'],
+	input[type='text']:focus {
 		background: none;
 		outline: none;
 		outline-offset: none;
+		border: none;
+	}
+
+	/* Base checkbox style */
+	input[type='checkbox'] {
+		width: 1rem;
+		height: 1rem;
+		appearance: none; /* Remove default checkbox styling */
+		border: 0.5px solid #ccc; /* Light gray border */
+		border-radius: 20%; /* Rounded corners */
+		background-color: white; /* White background when unchecked */
+		cursor: pointer;
+		display: flex; /* Flexbox for centering */
+		align-items: center; /* Vertically center */
+		justify-content: center; /* Horizontally center */
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+		position: relative; /* Enable absolute positioning for checkmark */
+	}
+
+	/* Style when checkbox is checked */
+	input[type='checkbox']:checked {
+		background-color: #0062c1; /* Blue background when checked */
+		border-color: #0062c1; /* Blue border when checked */
+	}
+
+	/* Centered checkmark with adjusted positioning */
+	input[type='checkbox']:checked::before {
+		content: '';
+		display: block;
+		width: 40%; /* Relative size to the checkbox */
+		height: 80%; /* Relative size to the checkbox */
+		border: solid white;
+		border-width: 0 0.15rem 0.15rem 0; /* Proportional borders */
+		transform: rotate(45deg); /* Create checkmark */
+		position: absolute; /* Absolute positioning */
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -60%) rotate(45deg); /* Properly center and rotate */
 	}
 </style>
