@@ -4,5 +4,6 @@ import Combobox from '$lib/components/ui/combobox.svelte';
 import Calendar from '$lib/components/ui/calendar.svelte';
 import Tabs from '$lib/components/ui/tabs.svelte';
 import Tooltip from '$lib/components/ui/tooltip.svelte';
+import Collapsible from '$lib/components/ui/collapsible.svelte';
 
-export { Combobox, Calendar, Tabs, Tooltip, Popover };
+export { Combobox, Calendar, Tabs, Tooltip, Popover, Collapsible };
