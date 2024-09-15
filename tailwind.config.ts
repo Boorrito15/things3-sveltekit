@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
 import typography from '@tailwindcss/typography';
+import forms from '@tailwindcss/forms';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -71,6 +72,9 @@ export default {
 	},
 
 	plugins: [
+		forms({
+			strategy: 'class' // Only apply form styles when using form-* classes
+		}),
 		typography,
 		plugin(function ({ addVariant, matchUtilities, theme }) {
 			addVariant('hocus', ['&:hover', '&:focus']);

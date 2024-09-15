@@ -5,6 +5,8 @@
 	// import 'iconify-icon';
 </script>
 
-<div class="bg-[#f2f5f7] min-h-screen">
-	{@render children()}
+<div class="min-h-screen pt-12">
+	<div class="max-w-4xl mx-auto">
+		{@render children()}
+	</div>
 </div>

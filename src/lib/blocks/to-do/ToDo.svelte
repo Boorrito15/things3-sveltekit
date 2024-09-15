@@ -1,11 +1,6 @@
 <script lang="ts">
-	const customXIcon = {
-		width: 24,
-		height: 24,
-		body: "<g fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='0.5'><path d='m15 9l-6 6m0-6l6 6'></path></g>"
-	};
 	// Import statements
-	import { Checkbox, Popover } from '$lib/global-components';
+	import { Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
 	import { Calendar, Tag, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
@@ -40,7 +35,7 @@
 		notes?: string;
 		selected?: boolean;
 		expanded?: boolean;
-		completed?: false;
+		completed?: boolean;
 		when?: Date; // When the task is due
 		dueDate?: Date; // Task deadline
 		tags?: Tag[];
@@ -64,6 +59,7 @@
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
 	let editedTaskName = $state(task.name); // Holds the current task name for editing.
+	let isCompleted = $state(task.completed);
 
 	/**
 	 * * FUNCTIONS
@@ -90,11 +86,6 @@
 				}
 			});
 		}
-	}
-
-	// Mark the task as completed
-	function completeTask() {
-		task.completed = true;
 	}
 
 	// Delete the task
@@ -194,6 +185,16 @@
 			content: Calendar
 		}
 	};
+
+	const toggleComplete = () => {
+		isCompleted = !isCompleted;
+		console.log(isCompleted);
+
+		setTimeout(() => {
+			task.completed = !task.completed;
+			console.log(task.completed);
+		}, 1000);
+	};
 </script>
 
 <div
@@ -210,8 +211,13 @@
 	<div class="task-content">
 		<div>
 			<div class="task-header">
-				<div class="mr-4">
-					<Checkbox on:click={completeTask} />
+				<div class="mr-2">
+					<input
+						checked={task.completed}
+						onclick={toggleComplete}
+						type="checkbox"
+						class="h-5 w-5 accent-blue-600 border-none rounded focus:ring-0"
+					/>
 				</div>
 				{#if task.when && !task.expanded}
 					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
@@ -220,10 +226,17 @@
 				{/if}
 				{#if task.expanded}
 					<!-- Bind the input value to editableName -->
-					<input class="task-text" bind:this={inputRef} bind:value={editedTaskName} />
+					<input
+						type="text"
+						class="task-text focus:ring-0 focus:ring-offset-0"
+						bind:this={inputRef}
+						bind:value={editedTaskName}
+					/>
 				{:else}
 					<!-- Display the current value of editableName -->
-					<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
+					<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
+						{editedTaskName}
+					</p>
 				{/if}
 				<button class="h-full flex items-center" onclick={deleteTask}
 					><span class="material-symbols-outlined"> backspace </span></button
@@ -233,7 +246,7 @@
 				{#if task.expanded}
 					<textarea
 						name="task-notes"
-						class="task-notes-input"
+						class="task-notes-input focus:ring-0 focus:ring-offset-0"
 						placeholder="Notes"
 						bind:value={task.notes}
 						rows="1"
@@ -247,7 +260,7 @@
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
 					<div
-						class="flex ml-6 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
+						class="flex ml-4 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
 					>
 						<Popover onOpenChange={handlePopoverOpenChange}>
 							{#snippet triggerElement()}
@@ -321,7 +334,7 @@
 		background-color: transparent;
 		width: 99.5%;
 		margin: 0;
-		transition: all 0.3s ease;
+		transition: all 0.5s ease;
 		display: flex;
 		flex-direction: column; /* Make the task-container a flex container */
 	}
@@ -335,6 +348,7 @@
 	.task-container.expanded {
 		background-color: white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		border: 0.5px solid #d7d8db; /* Light gray border */
 		margin: 2rem 0;
 		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
 		height: auto; /* Ensure the height is dynamic */
@@ -361,6 +375,7 @@
 
 	.task-text {
 		flex-grow: 1;
+		outline: none;
 	}
 
 	.task-text:empty::before {
@@ -383,7 +398,7 @@
 
 	/* Task Notes */
 	.task-notes-input {
-		margin-left: 1.75rem; /* Match margin with .task-text */
+		margin-left: 1.25rem; /* Match margin with .task-text */
 		border: none;
 		box-sizing: border-box;
 		outline: none;
@@ -410,10 +425,56 @@
 		min-height: 2rem;
 		field-sizing: content;
 	}
-
-	input {
+	input[type='text'],
+	input[type='text']:focus {
 		background: none;
 		outline: none;
 		outline-offset: none;
+		border: none;
+	}
+
+	/* Base checkbox style */
+	input[type='checkbox'] {
+		width: 0.75rem;
+		height: 0.75rem;
+		appearance: none; /* Remove default checkbox styling */
+		border: 0.5px solid #c1c3c6; /* Light gray border */
+		border-radius: 20%; /* Rounded corners */
+		background-color: none; /* White background when unchecked */
+		cursor: pointer;
+		display: flex; /* Flexbox for centering */
+		align-items: center; /* Vertically center */
+		justify-content: center; /* Horizontally center */
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease,
+			transform 0.2s ease; /* Add transition for the scaling effect */
+		position: relative; /* Enable absolute positioning for checkmark */
+	}
+
+	/* Style when checkbox is checked */
+	input[type='checkbox']:checked {
+		background-color: #0062c1; /* Blue background when checked */
+		border-color: #0062c1; /* Blue border when checked */
+	}
+
+	/* Scaling effect on mousedown */
+	input[type='checkbox']:active {
+		transform: scale(1.2); /* Make the checkbox 1.2 times its size when clicked */
+	}
+
+	/* Centered checkmark with adjusted positioning */
+	input[type='checkbox']:checked::before {
+		content: '';
+		display: block;
+		width: 35%; /* Relative size to the checkbox */
+		height: 70%; /* Relative size to the checkbox */
+		border: solid white;
+		border-width: 0 0.15rem 0.15rem 0; /* Proportional borders */
+		transform: rotate(45deg); /* Create checkmark */
+		position: absolute; /* Absolute positioning */
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -60%) rotate(45deg); /* Properly center and rotate */
 	}
 </style>
