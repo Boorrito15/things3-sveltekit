@@ -186,8 +186,10 @@
 	};
 
 	const toggleComplete = () => {
-		task.completed = !task.completed;
-		console.log(task.completed);
+		setTimeout(() => {
+			task.completed = !task.completed;
+			console.log(task.completed);
+		}, 500);
 	};
 </script>
 
@@ -207,7 +209,7 @@
 			<div class="task-header">
 				<div class="mr-2">
 					<input
-						bind:checked={task.completed}
+						checked={task.completed}
 						onclick={toggleComplete}
 						type="checkbox"
 						class="h-5 w-5 accent-blue-600 border-none rounded focus:ring-0"
@@ -252,7 +254,7 @@
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
 					<div
-						class="flex ml-6 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
+						class="flex ml-4 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
 					>
 						<Popover onOpenChange={handlePopoverOpenChange}>
 							{#snippet triggerElement()}
@@ -340,6 +342,7 @@
 	.task-container.expanded {
 		background-color: white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		border: 0.5px solid #d7d8db; /* Light gray border */
 		margin: 2rem 0;
 		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
 		height: auto; /* Ensure the height is dynamic */
@@ -389,7 +392,7 @@
 
 	/* Task Notes */
 	.task-notes-input {
-		margin-left: 1.75rem; /* Match margin with .task-text */
+		margin-left: 1.25rem; /* Match margin with .task-text */
 		border: none;
 		box-sizing: border-box;
 		outline: none;
@@ -426,19 +429,20 @@
 
 	/* Base checkbox style */
 	input[type='checkbox'] {
-		width: 1rem;
-		height: 1rem;
+		width: 0.75rem;
+		height: 0.75rem;
 		appearance: none; /* Remove default checkbox styling */
-		border: 0.5px solid #ccc; /* Light gray border */
+		border: 0.5px solid #c1c3c6; /* Light gray border */
 		border-radius: 20%; /* Rounded corners */
-		background-color: white; /* White background when unchecked */
+		background-color: none; /* White background when unchecked */
 		cursor: pointer;
 		display: flex; /* Flexbox for centering */
 		align-items: center; /* Vertically center */
 		justify-content: center; /* Horizontally center */
 		transition:
 			background-color 0.2s ease,
-			border-color 0.2s ease;
+			border-color 0.2s ease,
+			transform 0.2s ease; /* Add transition for the scaling effect */
 		position: relative; /* Enable absolute positioning for checkmark */
 	}
 
@@ -448,12 +452,17 @@
 		border-color: #0062c1; /* Blue border when checked */
 	}
 
+	/* Scaling effect on mousedown */
+	input[type='checkbox']:active {
+		transform: scale(1.2); /* Make the checkbox 1.2 times its size when clicked */
+	}
+
 	/* Centered checkmark with adjusted positioning */
 	input[type='checkbox']:checked::before {
 		content: '';
 		display: block;
-		width: 40%; /* Relative size to the checkbox */
-		height: 80%; /* Relative size to the checkbox */
+		width: 35%; /* Relative size to the checkbox */
+		height: 70%; /* Relative size to the checkbox */
 		border: solid white;
 		border-width: 0 0.15rem 0.15rem 0; /* Proportional borders */
 		transform: rotate(45deg); /* Create checkmark */

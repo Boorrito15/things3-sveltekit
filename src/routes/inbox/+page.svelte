@@ -6,6 +6,11 @@
 	// Safely access props and ensure tasks is always an array
 	const { data } = $props();
 	let tasks = $state(data.tasks);
+
+	let availableTasks = $derived(tasks.filter((task) => task.completed === false));
+
+	let completedTasks = $derived(tasks.filter((task) => task.completed === true));
+
 	if (data === undefined) {
 		console.error('Data is undefined in the script.');
 	} else {
@@ -57,14 +62,22 @@
 </script>
 
 <h4 class="mb-12">📥 Inbox</h4>
+
 <div class="flex flex-col items-center">
-	{#if tasks.length > 0}
-		{#each tasks as task (task.id)}
+	{#if availableTasks.length > 0}
+		{#each availableTasks as task (task.id)}
 			<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
 		{/each}
 	{:else}
 		<p>No tasks available.</p>
 	{/if}
 
-	<button onclick={addNewTask}>+ New Task</button>
+	<button class="text-sm" onclick={addNewTask}>+ New Task</button>
+</div>
+
+<div class="mt-12">
+	<small class="ml-3">Hidden</small>
+	{#each completedTasks as task (task.id)}
+		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+	{/each}
 </div>
