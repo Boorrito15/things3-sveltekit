@@ -6,7 +6,11 @@
 	// Safely access props and ensure tasks is always an array
 	const { data } = $props();
 	let tasks = $state(data.tasks);
-
+	if (data === undefined) {
+		console.error('Data is undefined in the script.');
+	} else {
+		console.log('Data in script:', tasks);
+	}
 	let selectedTaskId: number | null = null;
 
 	function handleSelectTask(taskId: number) {
@@ -33,10 +37,11 @@
 			id: tasks.length + 1, // Assign a unique ID
 			name: ``,
 			selected: false,
-			expanded: false
+			expanded: false,
+			completed: false
 		};
 
-		tasks = [...tasks, newTask]; // Add the new task to the tasks array
+		tasks.push(newTask); // Add the new task to the tasks array
 
 		// Wait for DOM to update before expanding the new task
 		await tick();

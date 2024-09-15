@@ -2,10 +2,19 @@
 	import { createCheckbox, melt } from '@melt-ui/svelte';
 	import { Check } from '$lib/global-icons';
 
+	let { checked } = $props<{ checked: boolean }>();
+	// let checked = $state(Boolean);
+
 	const {
 		elements: { root, input },
 		helpers: { isChecked }
-	} = createCheckbox({});
+	} = createCheckbox({
+		defaultChecked: checked,
+		onCheckedChange: ({ next }) => {
+			console.log(next);
+			return next;
+		}
+	});
 </script>
 
 <form>

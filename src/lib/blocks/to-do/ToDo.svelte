@@ -35,7 +35,7 @@
 		notes?: string;
 		selected?: boolean;
 		expanded?: boolean;
-		completed?: false;
+		completed?: boolean;
 		when?: Date; // When the task is due
 		dueDate?: Date; // Task deadline
 		tags?: Tag[];
@@ -88,10 +88,10 @@
 	}
 
 	// Mark the task as completed
-	function completeTask() {
-		task.completed = true;
-		console.log(task.name, 'completed');
-	}
+	// function completeTask() {
+	// 	task.completed = true;
+	// 	console.log(task.name, 'completed');
+	// }
 
 	// Delete the task
 	function deleteTask() {
@@ -190,6 +190,8 @@
 			content: Calendar
 		}
 	};
+
+	// console.log(task.completed);
 </script>
 
 <div
@@ -207,7 +209,7 @@
 		<div>
 			<div class="task-header">
 				<div class="mr-2">
-					<Checkbox on:click={completeTask} />
+					<Checkbox checked={task.completed} />
 				</div>
 				{#if task.when && !task.expanded}
 					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
