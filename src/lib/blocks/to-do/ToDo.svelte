@@ -59,6 +59,7 @@
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
 	let editedTaskName = $state(task.name); // Holds the current task name for editing.
+	let isCompleted = $state(task.completed);
 
 	/**
 	 * * FUNCTIONS
@@ -186,10 +187,13 @@
 	};
 
 	const toggleComplete = () => {
+		isCompleted = !isCompleted;
+		console.log(isCompleted);
+
 		setTimeout(() => {
 			task.completed = !task.completed;
 			console.log(task.completed);
-		}, 500);
+		}, 1000);
 	};
 </script>
 
@@ -230,7 +234,9 @@
 					/>
 				{:else}
 					<!-- Display the current value of editableName -->
-					<p class="task-text" data-placeholder="New To-Do...">{editedTaskName}</p>
+					<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
+						{editedTaskName}
+					</p>
 				{/if}
 				<button class="h-full flex items-center" onclick={deleteTask}
 					><span class="material-symbols-outlined"> backspace </span></button
