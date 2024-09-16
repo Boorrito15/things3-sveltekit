@@ -1,62 +1,21 @@
 <script lang="ts">
-	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
-	import { tick } from 'svelte';
+	import { Collapsible } from '$lib/global-components';
 
-	let tasks = $state([
-		{ id: 1, name: 'Task 1', selected: false, expanded: false },
-		{ id: 2, name: 'Task 2', selected: false, expanded: false }
-	]);
+	let word = 'hidden';
 
-	let selectedTaskId = $state<number | null>(null);
-
-	function handleSelectTask(taskId: number) {
-		tasks = tasks.map((task) => ({
-			...task,
-			selected: task.id === taskId
-		}));
-		selectedTaskId = taskId;
-	}
-
-	async function handleDeleteTask(taskId: number) {
-		tasks = tasks.filter((task) => task.id !== taskId);
-	}
-
-	async function addNewTask() {
-		tasks = tasks.map((task) => {
-			if (task.selected) {
-				return { ...task, selected: false };
-			}
-
-			return task;
-		});
-
-		const newTask = {
-			id: tasks.length + 1, // Assign a unique ID
-			name: ``,
-			selected: false,
-			expanded: false
-		};
-
-		tasks = [...tasks, newTask]; // Add the new task to the tasks array;
-
-		// Wait for DOM to update before expanding the new task
-		await tick();
-
-		// Directly set the new task to expanded
-		newTask.expanded = true;
-
-		setTimeout(() => {
-			// Directly set the new task to expanded
-			tasks = tasks.map((task) => (task.id === newTask.id ? { ...task, expanded: true } : task));
-		}, 0); // Small delay to allow the initial rendering to complete
-	}
+	let things = ['item 1', 'item 2', 'item 3'];
 </script>
 
-<h4>To do</h4>
-<div class="flex flex-col items-center">
-	{#each tasks as task}
-		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-	{/each}
+<Collapsible>
+	{#snippet heading()}
+		{@const heading = word}
+		<p class="leading-3 text-sm font-semibold text-gray-300">{heading}</p>
+	{/snippet}
 
-	<button onclick={addNewTask}>+ New Task</button>
-</div>
+	{#snippet items()}
+		{#each things as thing}
+			{@const items = thing}
+			<p class="leading-3">{items}</p>
+		{/each}
+	{/snippet}
+</Collapsible>
