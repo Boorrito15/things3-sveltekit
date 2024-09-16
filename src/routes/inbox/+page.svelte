@@ -1,5 +1,6 @@
 <!-- src/routes/inbox/+page.svelte -->
 <script lang="ts">
+	import { Collapsible } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
@@ -11,11 +12,6 @@
 
 	let completedTasks = $derived(tasks.filter((task) => task.completed === true));
 
-	if (data === undefined) {
-		console.error('Data is undefined in the script.');
-	} else {
-		console.log('Data in script:', tasks);
-	}
 	let selectedTaskId: number | null = null;
 
 	function handleSelectTask(taskId: number) {
@@ -73,11 +69,31 @@
 	{/if}
 
 	<button class="text-sm" onclick={addNewTask}>+ New Task</button>
+	<br /><br />
+	{#if completedTasks.length > 0}
+		<Collapsible>
+			{#snippet heading()}
+				{@const heading = 'Hidden'}
+				<p
+					class="leading-3 text-sm font-semibold text-gray-500 border border-transparent hover:border-gray-300 p-1"
+				>
+					{heading}
+				</p>
+			{/snippet}
+
+			{#snippet items()}
+				{#each completedTasks as task (task.id)}
+					{@const items = task}
+					<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+				{/each}
+			{/snippet}
+		</Collapsible>
+	{/if}
 </div>
 
-<div class="mt-12">
+<!-- <div class="mt-12">
 	<small class="ml-3">Hidden</small>
 	{#each completedTasks as task (task.id)}
 		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
 	{/each}
-</div>
+</div> -->

@@ -190,10 +190,13 @@
 		isCompleted = !isCompleted;
 		console.log(isCompleted);
 
-		setTimeout(() => {
+		if (!task.completed) {
+			setTimeout(() => {
+				task.completed = !task.completed;
+			}, 700);
+		} else {
 			task.completed = !task.completed;
-			console.log(task.completed);
-		}, 1000);
+		}
 	};
 </script>
 
