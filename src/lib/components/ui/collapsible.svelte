@@ -12,18 +12,18 @@
 	});
 
 	type CollapsibleProps = {
-		text: Snippet;
+		heading: Snippet;
 		items: Snippet;
 	};
 
-	let { text, items }: CollapsibleProps = $props();
+	let { heading, items }: CollapsibleProps = $props();
 </script>
 
 <div use:melt={$root} class="relative mx-auto mb-28 w-full">
 	<div class="flex items-center justify-between">
 		<button use:melt={$trigger} class="text-sm font-semibold text-magnum-900">
-			{#if text}
-				{@render text()}
+			{#if heading}
+				{@render heading()}
 			{:else}
 				@thomasglopes starred 3 repositories
 			{/if}
