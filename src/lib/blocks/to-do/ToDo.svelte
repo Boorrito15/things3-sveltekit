@@ -54,6 +54,12 @@
 		onDelete: (taskId: number) => void;
 	}>();
 
+	task = {
+		...task,
+		selected: task.selected ?? false, // Defaults to false if not provided
+		expanded: task.expanded ?? false // Defaults to false if not provided
+	};
+
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
