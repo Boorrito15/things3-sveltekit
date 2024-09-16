@@ -68,7 +68,6 @@
 	// Update the 'when' date for the task
 	function updateWhen(date: Date | null) {
 		task.when = date;
-		console.log('Updated Task When:', task.when);
 	}
 
 	// Toggle task selection
@@ -140,10 +139,8 @@
 
 				if (taskRef && !taskRef.contains(event.target as Node)) {
 					if (isPopoverOpen) {
-						console.log('closing popover');
 						isPopoverOpen = false;
 					} else {
-						console.log('closing task');
 						task.selected = false;
 						task.expanded = false;
 					}
@@ -188,7 +185,6 @@
 
 	const toggleComplete = () => {
 		isCompleted = !isCompleted;
-		console.log(isCompleted);
 
 		if (!task.completed) {
 			setTimeout(() => {

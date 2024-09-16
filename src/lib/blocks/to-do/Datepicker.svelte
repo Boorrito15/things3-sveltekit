@@ -131,11 +131,6 @@
 	/**
 	 * * EFFECTS
 	 */
-	$effect(() => {
-		if (date) {
-			console.log(date);
-		}
-	});
 </script>
 
 <div use:melt={$calendar} class="w-full">

@@ -12,7 +12,6 @@
 		helpers: { isDateDisabled, isDateUnavailable }
 	} = createCalendar({
 		onValueChange: ({ curr, next }) => {
-			// console.log(next);
 			return next;
 		}
 	});
@@ -28,9 +27,7 @@
 			let month = parsedDate.getMonth() + 1;
 			let date = parsedDate.getDate();
 			let calendarDate = new CalendarDate(year, month, date);
-			// console.log(parsedDate);
 			value.set(calendarDate);
-			console.log(value);
 		}
 	}
 
