@@ -9,15 +9,17 @@
 	const { data } = $props();
 	let tasks = $state(data.tasks);
 
+	let today = dayjs().startOf('day').toISOString();
+
 	let availableTasks = $derived(
 		tasks.filter(
-			(task) => task.when === dayjs().startOf('day').toISOString() && task.completed === false
+			(task) => (task.when === today || task.expanded === true) && task.completed === false
 		)
 	);
 
 	let completedTasks = $derived(
 		tasks.filter(
-			(task) => task.when === dayjs().startOf('day').toISOString() && task.completed === true
+			(task) => (task.when === today || task.expanded === true) && task.completed === true
 		)
 	);
 
