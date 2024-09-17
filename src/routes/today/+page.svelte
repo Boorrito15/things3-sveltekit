@@ -3,20 +3,12 @@
 	import { Collapsible } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
+	import dayjs from 'dayjs';
 
 	// Safely access props and ensure tasks is always an array
 	const { data } = $props();
 	let tasks = $state(
-		data.todos.filter((task) => {
-			let today = new Date();
-			today.setHours(0, 0, 0, 0); // Set today's time to midnight
-
-			let taskDate = new Date(task.when);
-			taskDate.setHours(0, 0, 0, 0); // Set task's date to midnight
-
-			// Return only tasks where 'when' is today
-			return taskDate.getTime() === today.getTime();
-		})
+		data.tasks.filter((task) => task.when === dayjs().startOf('day').toISOString())
 	);
 
 	let availableTasks = $derived(tasks.filter((task) => task.completed === false));
@@ -48,11 +40,10 @@
 		const newTask = {
 			id: tasks.length + 1, // Assign a unique ID
 			name: ``,
-			notes: '',
 			selected: false,
 			expanded: false,
 			completed: false,
-			when: new Date()
+			when: dayjs().startOf('day').toISOString()
 		};
 
 		tasks.push(newTask); // Add the new task to the tasks array
@@ -103,10 +94,3 @@
 		</Collapsible>
 	{/if}
 </div>
-
-<!-- <div class="mt-12">
-	<small class="ml-3">Hidden</small>
-	{#each completedTasks as task (task.id)}
-		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-	{/each}
-</div> -->

@@ -1,40 +1,27 @@
+// src/routes/inbox/+page.server.ts
+import dayjs from 'dayjs';
+
 export async function load() {
-	const todos = [
+	// Mock tasks that will be used for the inbox
+	const inboxTasks = [
 		{
 			id: 1,
 			name: 'Task 1',
-			notes: 'Some notes for task 1',
-			when: new Date('2024-09-18'),
-			completed: false,
-			// project: 'Work',
-			// tags: ['Important', 'Urgent'],
 			selected: false,
-			expanded: false
+			expanded: false,
+			completed: true,
+			when: dayjs().startOf('day').toISOString()
 		},
 		{
 			id: 2,
 			name: 'Task 2',
-			notes: 'Some notes for task 2',
-			when: new Date('2024-09-20'),
-			completed: false,
-			// project: 'Personal',
-			// tags: ['Optional'],
 			selected: false,
-			expanded: false
-		},
-		{
-			id: 3,
-			name: 'Task 3',
-			notes: 'Some notes for task 3',
-			when: new Date(Date.now()),
+			expanded: false,
 			completed: false,
-			// project: 'Personal',
-			// tags: ['Optional'],
-			selected: false,
-			expanded: false
+			when: dayjs().startOf('day').toISOString()
 		}
 	];
-	return {
-		todos
-	};
+
+	// Return the tasks to be used in the +page.svelte file
+	return { tasks: inboxTasks };
 }

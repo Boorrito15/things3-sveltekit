@@ -3,6 +3,7 @@
 	import { Collapsible } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
+	import dayjs from 'dayjs';
 
 	// Safely access props and ensure tasks is always an array
 	const { data } = $props();
@@ -39,7 +40,8 @@
 			name: ``,
 			selected: false,
 			expanded: false,
-			completed: false
+			completed: false,
+			when: ''
 		};
 
 		tasks.push(newTask); // Add the new task to the tasks array
