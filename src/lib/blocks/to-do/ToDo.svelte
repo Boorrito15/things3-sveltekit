@@ -36,7 +36,7 @@
 		selected?: boolean;
 		expanded?: boolean;
 		completed?: boolean;
-		when?: Date; // When the task is due
+		when?: string; // When the task is due
 		dueDate?: Date; // Task deadline
 		tags?: Tag[];
 		priority?: 'low' | 'medium' | 'high';
@@ -53,6 +53,12 @@
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
 	}>();
+
+	task = {
+		...task,
+		selected: task.selected ?? false, // Defaults to false if not provided
+		expanded: task.expanded ?? false // Defaults to false if not provided
+	};
 
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.

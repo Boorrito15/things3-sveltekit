@@ -9,9 +9,19 @@
 	const { data } = $props();
 	let tasks = $state(data.tasks);
 
-	let availableTasks = $derived(tasks.filter((task) => task.completed === false));
+	let today = dayjs().startOf('day').toISOString();
 
-	let completedTasks = $derived(tasks.filter((task) => task.completed === true));
+	let availableTasks = $derived(
+		tasks.filter(
+			(task) => (task.when === today || task.expanded === true) && task.completed === false
+		)
+	);
+
+	let completedTasks = $derived(
+		tasks.filter(
+			(task) => (task.when === today || task.expanded === true) && task.completed === true
+		)
+	);
 
 	let selectedTaskId: number | null = null;
 
@@ -41,10 +51,10 @@
 			selected: false,
 			expanded: false,
 			completed: false,
-			when: ''
+			when: dayjs().startOf('day').toISOString()
 		};
 
-		tasks.push(newTask); // Add the new task to the tasks array
+		tasks = [...tasks, newTask]; // Add the new task to the tasks array
 
 		// Wait for DOM to update before expanding the new task
 		await tick();
@@ -59,7 +69,7 @@
 	}
 </script>
 
-<h4 class="mb-12">📥 Inbox</h4>
+<h4 class="mb-12">⭐️ Today</h4>
 
 <div class="flex flex-col items-center">
 	{#if availableTasks.length > 0}
@@ -92,10 +102,3 @@
 		</Collapsible>
 	{/if}
 </div>
-
-<!-- <div class="mt-12">
-	<small class="ml-3">Hidden</small>
-	{#each completedTasks as task (task.id)}
-		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-	{/each}
-</div> -->
