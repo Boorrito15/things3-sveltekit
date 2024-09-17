@@ -7,13 +7,19 @@
 
 	// Safely access props and ensure tasks is always an array
 	const { data } = $props();
-	let tasks = $state(
-		data.tasks.filter((task) => task.when === dayjs().startOf('day').toISOString())
+	let tasks = $state(data.tasks);
+
+	let availableTasks = $derived(
+		tasks.filter(
+			(task) => task.when === dayjs().startOf('day').toISOString() && task.completed === false
+		)
 	);
 
-	let availableTasks = $derived(tasks.filter((task) => task.completed === false));
-
-	let completedTasks = $derived(tasks.filter((task) => task.completed === true));
+	let completedTasks = $derived(
+		tasks.filter(
+			(task) => task.when === dayjs().startOf('day').toISOString() && task.completed === true
+		)
+	);
 
 	let selectedTaskId: number | null = null;
 
@@ -46,7 +52,7 @@
 			when: dayjs().startOf('day').toISOString()
 		};
 
-		tasks.push(newTask); // Add the new task to the tasks array
+		tasks = [...tasks, newTask]; // Add the new task to the tasks array
 
 		// Wait for DOM to update before expanding the new task
 		await tick();
