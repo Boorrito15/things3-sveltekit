@@ -1,61 +1,27 @@
-<!-- src/routes/inbox/+page.svelte -->
+<!-- src/routes/today/+page.svelte -->
 <script lang="ts">
 	import { Collapsible } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
-	import { tick } from 'svelte';
-	import dayjs from 'dayjs';
+	import type { Task } from '$lib/types';
+	import { filterTasks, addNewTask, handleTaskAction } from '$lib/utils/taskUtils';
 
-	// Safely access props and ensure tasks is always an array
-	const { data } = $props();
+	const { data } = $props<{ data: { tasks: Task[] } }>();
+
+	// No 'today' variable needed for inbox
+
 	let tasks = $state(data.tasks);
 
-	let availableTasks = $derived(tasks.filter((task) => task.completed === false));
+	let availableTasks = $derived(filterTasks(tasks, '').availableTasks);
+	let completedTasks = $derived(filterTasks(tasks, '').completedTasks);
 
-	let completedTasks = $derived(tasks.filter((task) => task.completed === true));
-
-	let selectedTaskId: number | null = null;
-
-	function handleSelectTask(taskId: number) {
-		tasks = tasks.map((task) => ({
-			...task,
-			selected: task.id === taskId
-		}));
-		selectedTaskId = taskId;
+	function handleTaskActionWrapper(
+		action: 'select' | 'delete' | 'update' | 'complete',
+		taskData: Task | number
+	) {
+		tasks = handleTaskAction(tasks, action, taskData);
 	}
-
-	async function handleDeleteTask(taskId: number) {
-		tasks = tasks.filter((task) => task.id !== taskId);
-	}
-
-	async function addNewTask() {
-		tasks = tasks.map((task) => {
-			if (task.selected) {
-				return { ...task, selected: false };
-			}
-			return task;
-		});
-
-		const newTask = {
-			id: tasks.length + 1, // Assign a unique ID
-			name: ``,
-			selected: false,
-			expanded: false,
-			completed: false,
-			when: ''
-		};
-
-		tasks.push(newTask); // Add the new task to the tasks array
-
-		// Wait for DOM to update before expanding the new task
-		await tick();
-
-		// Directly set the new task to expanded
-		newTask.expanded = true;
-
-		setTimeout(() => {
-			// Directly set the new task to expanded
-			tasks = tasks.map((task) => (task.id === newTask.id ? { ...task, expanded: true } : task));
-		}, 0); // Small delay to allow the initial rendering to complete
+	function addNewTaskWrapper() {
+		tasks = addNewTask(tasks, '');
 	}
 </script>
 
@@ -64,38 +30,42 @@
 <div class="flex flex-col items-center">
 	{#if availableTasks.length > 0}
 		{#each availableTasks as task (task.id)}
-			<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+			<ToDo
+				{task}
+				onSelect={(id) => handleTaskActionWrapper('select', id)}
+				onDelete={(id) => handleTaskActionWrapper('delete', id)}
+				onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
+				onComplete={(updatedTask) => handleTaskActionWrapper('complete', updatedTask)}
+			/>
 		{/each}
 	{:else}
 		<p>No tasks available.</p>
 	{/if}
+	<button class="text-sm" onclick={addNewTaskWrapper}>+ New Task</button>
 
-	<button class="text-sm" onclick={addNewTask}>+ New Task</button>
-	<br /><br />
 	{#if completedTasks.length > 0}
 		<Collapsible>
 			{#snippet heading()}
-				{@const heading = 'Hidden'}
 				<p
 					class="leading-3 text-sm font-semibold text-gray-500 border border-transparent hover:border-gray-300 p-1"
 				>
-					{heading}
+					Hidden
 				</p>
 			{/snippet}
 
 			{#snippet items()}
 				{#each completedTasks as task (task.id)}
-					{@const items = task}
-					<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
+					<ToDo
+						{task}
+						onSelect={(id) => handleTaskActionWrapper('select', id)}
+						onDelete={(id) => handleTaskActionWrapper('delete', id)}
+						onUpdate={(updatedTask: number | Task) =>
+							handleTaskActionWrapper('update', updatedTask)}
+						onComplete={(updatedTask: number | Task) =>
+							handleTaskActionWrapper('complete', updatedTask)}
+					/>
 				{/each}
 			{/snippet}
 		</Collapsible>
 	{/if}
 </div>
-
-<!-- <div class="mt-12">
-	<small class="ml-3">Hidden</small>
-	{#each completedTasks as task (task.id)}
-		<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-	{/each}
-</div> -->
