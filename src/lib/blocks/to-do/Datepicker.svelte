@@ -15,7 +15,7 @@
 	/**
 	 * * INTERFACES & TYPES
 	 */
-	type DateItem = {
+	type DateSuggestion = {
 		title: string;
 		description?: string;
 		disabled?: boolean;
@@ -24,33 +24,33 @@
 	/**
 	 * * UTILITY FUNCTIONS
 	 */
-	function formatDate(date: Date): string {
+	function formatDateForDisplay(date: Date): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
-		const daysDiff = targetDate.diff(today, 'day');
+		const daysDifference = targetDate.diff(today, 'day');
 
-		if (daysDiff === 0) return 'Today';
-		if (daysDiff === 1) return 'Tomorrow';
-		if (daysDiff >= 2 && daysDiff <= 5) return `${targetDate.format('dddd')}`;
+		if (daysDifference === 0) return 'Today';
+		if (daysDifference === 1) return 'Tomorrow';
+		if (daysDifference >= 2 && daysDifference <= 5) return `${targetDate.format('dddd')}`;
 		if (targetDate.year() === today.year()) return targetDate.format('ddd, D MMM');
 		return targetDate.format('D MMM YYYY');
 	}
 
-	function parseDateInput(input: string): DateItem[] {
-		const results = chrono.parse(input);
-		if (results.length === 0) return [];
+	function parseNaturalDateInput(input: string): DateSuggestion[] {
+		const parsedResults = chrono.parse(input);
+		if (parsedResults.length === 0) return [];
 
-		return results.map((result) => {
+		return parsedResults.map((result) => {
 			const title = result.text;
 			const date = result.start.date();
 			return {
 				title: title.charAt(0).toUpperCase() + title.slice(1),
-				description: formatDate(date)
+				description: formatDateForDisplay(date)
 			};
 		});
 	}
 
-	const toOption = (item: DateItem): ComboboxOptionProps<DateItem> => ({
+	const convertToOption = (item: DateSuggestion): ComboboxOptionProps<DateSuggestion> => ({
 		value: item,
 		label: item.title,
 		disabled: item.disabled
@@ -63,12 +63,12 @@
 		elements: { menu, input, option, label },
 		states: { open, inputValue, selected },
 		helpers: { isSelected }
-	} = createCombobox<DateItem>({
+	} = createCombobox<DateSuggestion>({
 		forceVisible: true,
 		portal: null,
 		onSelectedChange: ({ next }) => {
 			if (next) {
-				setDateFromInput(next.value.description || next.value.title || '');
+				updateDateFromInput(next.value.description || next.value.title || '');
 			}
 			return next;
 		}
@@ -88,21 +88,21 @@
 				const selectedDate = new Date(next.year, next.month - 1, next.day);
 
 				// Prevent infinite loop by ensuring the value is different
-				if (!date || date.getTime() !== selectedDate.getTime()) {
+				if (!currentDate || currentDate.getTime() !== selectedDate.getTime()) {
 					// Update inputValue only if necessary
-					if ($inputValue !== formatDate(selectedDate)) {
-						$inputValue = formatDate(selectedDate);
+					if ($inputValue !== formatDateForDisplay(selectedDate)) {
+						$inputValue = formatDateForDisplay(selectedDate);
 					}
 
-					// Set the actual date and call the callback if necessary
-					date = selectedDate;
+					// Set the actual date and trigger the callback if necessary
+					currentDate = selectedDate;
 					if (onDateSelected) {
 						onDateSelected(selectedDate);
 					}
 
 					// Set the selected date in the calendar state
 					const calendarDate = new CalendarDate(next.year, next.month, next.day);
-					value.set(calendarDate); // Ensure highlighting works correctly
+					value.set(calendarDate); // Ensure proper date highlighting
 				}
 			}
 
@@ -115,15 +115,15 @@
 	 */
 	let { onDateSelected } = $props<{ onDateSelected?: (date: Date | null) => void }>();
 	let parsedDate = $state<Date | null>(null);
-	let date = $state<Date | null>(null);
+	let currentDate = $state<Date | null>(null);
 
 	/**
 	 * * FUNCTIONS
 	 */
-	function setDateFromInput(input: string) {
+	function updateDateFromInput(input: string) {
 		parsedDate = chrono.parseDate(input);
 		if (parsedDate) {
-			date = parsedDate;
+			currentDate = parsedDate;
 			if (onDateSelected) {
 				onDateSelected(parsedDate);
 			}
@@ -133,10 +133,10 @@
 	/**
 	 * * DERIVED DATA
 	 */
-	let filteredItems = $derived.by(() => {
-		const inputVal = $inputValue.toLowerCase();
-		if (inputVal) {
-			return parseDateInput(inputVal);
+	let dateSuggestions = $derived.by(() => {
+		const searchInput = $inputValue.toLowerCase();
+		if (searchInput) {
+			return parseNaturalDateInput(searchInput);
 		}
 		return [];
 	});
@@ -169,15 +169,15 @@
 			transition:fly={{ duration: 150, y: -5 }}
 		>
 			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white text-black">
-				{#each filteredItems as item, index (index)}
+				{#each dateSuggestions as suggestion, index (index)}
 					<li
-						use:melt={$option(toOption(item))}
+						use:melt={$option(convertToOption(suggestion))}
 						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
 					>
 						<div class="pl-4">
-							<span class="font-medium">{item.title}</span>
-							{#if item.description}
-								<span class="block text-sm opacity-75">{item.description}</span>
+							<span class="font-medium">{suggestion.title}</span>
+							{#if suggestion.description}
+								<span class="block text-sm opacity-75">{suggestion.description}</span>
 							{/if}
 						</div>
 					</li>
