@@ -14,12 +14,12 @@
 	 */
 
 	// Tag interface: Defines the structure for tags.
-	interface Tags {
-		id: number;
-		name: string;
-		color?: string;
-		description?: string;
-	}
+	// interface Tags {
+	// 	id: number;
+	// 	name: string;
+	// 	color?: string;
+	// 	description?: string;
+	// }
 
 	// ChecklistItem interface: Defines a checklist item's properties.
 	interface ChecklistItem {
@@ -52,10 +52,13 @@
 		task: Task;
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
+		onUpdate: (updatedTask: number | Task) => void;
+		onComplete: (updatedTask: number | Task) => void;
 	}>();
 
 	task = {
 		...task,
+		completed: task.completed ?? false,
 		selected: task.selected ?? false, // Defaults to false if not provided
 		expanded: task.expanded ?? false // Defaults to false if not provided
 	};
@@ -275,14 +278,20 @@
 							{#snippet contentBlock()}
 								{@const ContentComponent = Datepicker}
 								<div style="width: 300px">
-									<Datepicker onDateSelected={updateWhen} />
+									<ContentComponent onDateSelected={updateWhen} />
 								</div>
 							{/snippet}
 						</Popover>
 						<!-- <p class="leading-none">
 							🗓️ {formatDate(task.when)}
 						</p> -->
-						<div onclick={deleteWhen} class="hover:bg-gray-200 p-0.5 rounded-sm">
+						<button
+							onclick={deleteWhen}
+							onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
+							class="hover:bg-gray-200 p-0.5 rounded-sm"
+							type="button"
+							aria-label="Delete"
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="16"
@@ -294,9 +303,11 @@
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								class="lucide lucide-x"
-								><path d="M18 6 6 18" /><path d="m6 6 12 12" />
+							>
+								<path d="M18 6 6 18" />
+								<path d="m6 6 12 12" />
 							</svg>
-						</div>
+						</button>
 					</div>
 				{/if}
 

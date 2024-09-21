@@ -24,7 +24,7 @@
 	/**
 	 * * UTILITY FUNCTIONS
 	 */
-	function formatDate(date: Date, forInput: boolean = false): string {
+	function formatDate(date: Date): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
 		const daysDiff = targetDate.diff(today, 'day');
@@ -63,7 +63,16 @@
 		elements: { menu, input, option, label },
 		states: { open, inputValue, selected },
 		helpers: { isSelected }
-	} = createCombobox<DateItem>({ forceVisible: true, portal: null });
+	} = createCombobox<DateItem>({
+		forceVisible: true,
+		portal: null,
+		onSelectedChange: ({ next }) => {
+			if (next) {
+				setDateFromInput(next.value.description || next.value.title || '');
+			}
+			return next;
+		}
+	});
 
 	/**
 	 * * CALENDAR SETUP
@@ -81,8 +90,8 @@
 				// Prevent infinite loop by ensuring the value is different
 				if (!date || date.getTime() !== selectedDate.getTime()) {
 					// Update inputValue only if necessary
-					if ($inputValue !== formatDate(selectedDate, true)) {
-						$inputValue = formatDate(selectedDate, true);
+					if ($inputValue !== formatDate(selectedDate)) {
+						$inputValue = formatDate(selectedDate);
 					}
 
 					// Set the actual date and call the callback if necessary
@@ -105,7 +114,6 @@
 	 * * PROPS & STATE VARIABLES
 	 */
 	let { onDateSelected } = $props<{ onDateSelected?: (date: Date | null) => void }>();
-	let nlpInput = $state('');
 	let parsedDate = $state<Date | null>(null);
 	let date = $state<Date | null>(null);
 
@@ -114,7 +122,12 @@
 	 */
 	function setDateFromInput(input: string) {
 		parsedDate = chrono.parseDate(input);
-		// Only parsing input here; not setting the date yet
+		if (parsedDate) {
+			date = parsedDate;
+			if (onDateSelected) {
+				onDateSelected(parsedDate);
+			}
+		}
 	}
 
 	/**
@@ -143,7 +156,6 @@
 				use:melt={$input}
 				class="flex h-10 items-center justify-between rounded-lg bg-white text-black w-full pl-4"
 				placeholder="Pick a date"
-				bind:value={$inputValue}
 			/>
 			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
 		</div>
@@ -160,19 +172,6 @@
 				{#each filteredItems as item, index (index)}
 					<li
 						use:melt={$option(toOption(item))}
-						onclick={() => {
-							setDateFromInput(item.description || '');
-							date = chrono.parseDate(item.description || '');
-							if (date) {
-								const calendarDate = new CalendarDate(
-									date.getFullYear(),
-									date.getMonth() + 1,
-									date.getDate()
-								);
-								value.set(calendarDate); // Update the calendar's selected value
-								if (onDateSelected) onDateSelected(date);
-							}
-						}}
 						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
 					>
 						<div class="pl-4">
