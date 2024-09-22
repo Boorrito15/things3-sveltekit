@@ -49,7 +49,7 @@
 				<p
 					class="leading-3 text-sm font-semibold text-gray-500 border border-transparent hover:border-gray-300 p-1"
 				>
-					Hidden
+					Completed
 				</p>
 			{/snippet}
 

@@ -133,8 +133,15 @@
 	}
 
 	const toggleComplete = () => {
-		isCompleted = !isCompleted;
-		onComplete(task.id, isCompleted);
+		if (!isCompleted) {
+			isCompleted = true;
+			setTimeout(() => {
+				onComplete(task.id, true);
+			}, 700);
+		} else {
+			isCompleted = false;
+			onComplete(task.id, false);
+		}
 	};
 
 	/**
