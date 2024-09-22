@@ -1,16 +1,15 @@
 <script module lang="ts">
-	export const load = async () => {
-		if (process.env.NODE_ENV === 'production') {
-			// Redirect to home or show a 404 page
-			return {
-				status: 302,
-				redirect: '/'
-			};
-		}
-	};
+	// export const load = async () => {
+	// 	if (process.env.NODE_ENV === 'production') {
+	// 		// Redirect to home or show a 404 page
+	// 		return {
+	// 			status: 302,
+	// 			redirect: '/'
+	// 		};
+	// 	}
+	// };
 
 	// To do
-	import { Checkbox } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
 	import { tick } from 'svelte';
 
@@ -105,19 +104,6 @@
 		<h1>Base components</h1>
 		<br />
 		<h4>Checkbox</h4>
-		<Checkbox />
 	</section>
 	<!-- App components -->
-	<section class="space-y-6">
-		<h1>App components</h1>
-		<br />
-		<h4>To do</h4>
-		<div class="flex flex-col items-center">
-			{#each tasks as task}
-				<ToDo {task} onSelect={handleSelectTask} onDelete={handleDeleteTask} />
-			{/each}
-
-			<button onclick={addNewTask}>+ New Task</button>
-		</div>
-	</section>
 </div>

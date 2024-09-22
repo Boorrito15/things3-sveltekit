@@ -44,6 +44,7 @@
 		"chrono-node": "^1.4.9",
 		"clsx": "^2.1.1",
 		"dayjs": "^1.11.13",
+		"lucide-svelte": "^0.445.0",
 		"svelte-preprocess": "^6.0.2",
 		"tailwind-merge": "^2.5.2",
 		"tailwind-variants": "^0.2.1"

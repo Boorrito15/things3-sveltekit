@@ -11,7 +11,6 @@
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
 	dayjs.extend(relativeTime);
-
 	/**
 	 * * INTERFACES & TYPES
 	 */
