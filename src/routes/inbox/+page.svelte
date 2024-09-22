@@ -1,4 +1,4 @@
-<!-- src/routes/today/+page.svelte -->
+<!-- src/routes/inbox/+page.svelte -->
 <script lang="ts">
 	import { Collapsible } from '$lib/global-components';
 	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
@@ -16,7 +16,7 @@
 
 	function handleTaskActionWrapper(
 		action: 'select' | 'delete' | 'update' | 'complete',
-		taskData: Task | number
+		taskData: Task | number | { id: number; completed: boolean }
 	) {
 		tasks = handleTaskAction(tasks, action, taskData);
 	}
@@ -35,7 +35,7 @@
 				onSelect={(id) => handleTaskActionWrapper('select', id)}
 				onDelete={(id) => handleTaskActionWrapper('delete', id)}
 				onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
-				onComplete={(updatedTask) => handleTaskActionWrapper('complete', updatedTask)}
+				onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 			/>
 		{/each}
 	{:else}
@@ -61,8 +61,7 @@
 						onDelete={(id) => handleTaskActionWrapper('delete', id)}
 						onUpdate={(updatedTask: number | Task) =>
 							handleTaskActionWrapper('update', updatedTask)}
-						onComplete={(updatedTask: number | Task) =>
-							handleTaskActionWrapper('complete', updatedTask)}
+						onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 					/>
 				{/each}
 			{/snippet}

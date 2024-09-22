@@ -49,7 +49,7 @@ export function createNewTask(tasks: Task[], when: string | null = null): Task {
 export function handleTaskAction(
 	tasks: Task[],
 	action: 'select' | 'delete' | 'update' | 'complete',
-	taskData: Task | number
+	taskData: Task | number | { id: number; completed: boolean }
 ): Task[] {
 	let updatedTasks: Task[];
 	switch (action) {
@@ -69,8 +69,8 @@ export function handleTaskAction(
 			break;
 		case 'complete':
 			updatedTasks = tasks.map((task) =>
-				task.id === (taskData as Task).id
-					? { ...task, completed: (taskData as Task).completed }
+				task.id === (taskData as { id: number; completed: boolean }).id
+					? { ...task, completed: (taskData as { id: number; completed: boolean }).completed }
 					: task
 			);
 			break;
