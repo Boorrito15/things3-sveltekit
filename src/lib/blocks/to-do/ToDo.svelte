@@ -48,27 +48,25 @@
 	 */
 
 	// Props: task, onSelect, and onDelete are passed from parent.
-	let { task, onSelect, onDelete } = $props<{
+	let { task, onSelect, onDelete, onUpdate, onComplete } = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
-		onUpdate: (updatedTask: number | Task) => void;
-		onComplete: (updatedTask: number | Task) => void;
+		onUpdate: (updatedTask: Task) => void;
+		onComplete: (taskId: number, completed: boolean) => void;
 	}>();
 
-	task = {
-		...task,
-		completed: task.completed ?? false,
-		selected: task.selected ?? false, // Defaults to false if not provided
-		expanded: task.expanded ?? false // Defaults to false if not provided
-	};
+	// Instead, use local state variables:
+	let isCompleted = $state(task.completed ?? false);
+	let isSelected = $state(task.selected ?? false);
+	let isExpanded = $state(task.expanded ?? false);
+	let editedTaskName = $state(task.name);
+	let editedNotes = $state(task.notes ?? '');
 
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
-	let editedTaskName = $state(task.name); // Holds the current task name for editing.
-	let isCompleted = $state(task.completed);
 
 	/**
 	 * * FUNCTIONS
@@ -76,7 +74,7 @@
 
 	// Update the 'when' date for the task
 	function updateWhen(date: Date | null) {
-		task.when = date;
+		onUpdate({ ...task, when: date });
 	}
 
 	// Toggle task selection
@@ -86,8 +84,9 @@
 
 	// Expand the task to enable editing
 	function editTask() {
-		if (!task.expanded) {
-			task.expanded = true;
+		if (!isExpanded) {
+			isExpanded = true;
+			onUpdate({ ...task, expanded: true });
 			tick().then(() => {
 				if (inputRef) {
 					inputRef.focus();
@@ -121,8 +120,22 @@
 	}
 
 	function deleteWhen() {
-		task.when = null;
+		onUpdate({ ...task, when: null });
 	}
+
+	function updateTask() {
+		onUpdate({
+			...task,
+			name: editedTaskName,
+			notes: editedNotes,
+			expanded: isExpanded
+		});
+	}
+
+	const toggleComplete = () => {
+		isCompleted = !isCompleted;
+		onComplete(task.id, isCompleted);
+	};
 
 	/**
 	 * * EFFECTS
@@ -130,14 +143,14 @@
 
 	// Auto-focus on input when task is expanded
 	$effect(() => {
-		if (task.expanded && inputRef) {
+		if (isExpanded && inputRef) {
 			inputRef.focus();
 		}
 	});
 
 	// Handle clicks outside the task or popover, to collapse/close them
 	$effect(() => {
-		if (task.expanded || task.selected) {
+		if (isExpanded || isSelected) {
 			const handleClickOutside = (event: MouseEvent) => {
 				const popoverElements = document.querySelectorAll('[data-melt-popover-content]');
 				const clickedInsidePopover = Array.from(popoverElements).some((el) =>
@@ -150,8 +163,9 @@
 					if (isPopoverOpen) {
 						isPopoverOpen = false;
 					} else {
-						task.selected = false;
-						task.expanded = false;
+						isSelected = false;
+						isExpanded = false;
+						onUpdate({ ...task, selected: false, expanded: false });
 					}
 				}
 			};
@@ -191,22 +205,10 @@
 			content: Calendar
 		}
 	};
-
-	const toggleComplete = () => {
-		isCompleted = !isCompleted;
-
-		if (!task.completed) {
-			setTimeout(() => {
-				task.completed = !task.completed;
-			}, 700);
-		} else {
-			task.completed = !task.completed;
-		}
-	};
 </script>
 
 <div
-	class="task-container {task.expanded ? 'expanded' : ''} {task.selected ? 'selected' : ''}"
+	class="task-container {isExpanded ? 'expanded' : ''} {isSelected ? 'selected' : ''}"
 	bind:this={taskRef}
 	role="button"
 	tabindex="0"
@@ -221,24 +223,25 @@
 			<div class="task-header">
 				<div class="mr-2">
 					<input
-						checked={task.completed}
+						checked={isCompleted}
 						onclick={toggleComplete}
 						type="checkbox"
 						class="h-5 w-5 accent-blue-600 border-none rounded focus:ring-0"
 					/>
 				</div>
-				{#if task.when && !task.expanded}
+				{#if task.when && !isExpanded}
 					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
 						>{formatDate(task.when)}</small
 					>
 				{/if}
-				{#if task.expanded}
+				{#if isExpanded}
 					<!-- Bind the input value to editableName -->
 					<input
 						type="text"
 						class="task-text focus:ring-0 focus:ring-offset-0"
 						bind:this={inputRef}
 						bind:value={editedTaskName}
+						onblur={updateTask}
 					/>
 				{:else}
 					<!-- Display the current value of editableName -->
@@ -251,20 +254,21 @@
 				>
 			</div>
 			<div class="notes-container">
-				{#if task.expanded}
+				{#if isExpanded}
 					<textarea
 						name="task-notes"
 						class="task-notes-input focus:ring-0 focus:ring-offset-0"
 						placeholder="Notes"
-						bind:value={task.notes}
+						bind:value={editedNotes}
+						onblur={updateTask}
 						rows="1"
 					></textarea>
 				{:else}
-					<p class="task-notes-collapsed">{task.notes || ''}</p>
+					<p class="task-notes-collapsed">{editedNotes}</p>
 				{/if}
 			</div>
 		</div>
-		{#if task.expanded}
+		{#if isExpanded}
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
 					<div
