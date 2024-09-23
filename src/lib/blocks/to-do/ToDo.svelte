@@ -363,12 +363,11 @@
 <style>
 	/* General Task Container */
 	.task-container {
-		padding: 0 0.5rem 0 0.5rem; /* Add initial padding on the left */
 		border-radius: 5px;
 		overflow: hidden;
 		cursor: pointer;
 		background-color: transparent;
-		width: 99.5%;
+		width: 100%;
 		margin: 0;
 		transition: all 0.5s ease;
 		display: flex;
@@ -389,6 +388,7 @@
 		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
 		height: auto; /* Ensure the height is dynamic */
 		min-height: 9rem; /* Add a minimum height to the expanded task */
+		width: 102%;
 	}
 
 	/* Task Content */
