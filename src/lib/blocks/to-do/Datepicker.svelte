@@ -5,12 +5,13 @@
 	import { melt, createCalendar, createCombobox, type ComboboxOptionProps } from '@melt-ui/svelte';
 	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
-	import { CalendarDate } from '@internationalized/date';
+	import { CalendarDate, CalendarDateTime } from '@internationalized/date';
 	import dayjs from 'dayjs';
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
 	dayjs.extend(relativeTime);
+
 	/**
 	 * * INTERFACES & TYPES
 	 */
@@ -42,9 +43,11 @@
 		return parsedResults.map((result) => {
 			const title = result.text;
 			const date = result.start.date();
+			const time =
+				result.start.get('hour') !== undefined ? dayjs(date).format('h:mm A') : '9:00 PM'; // Default time
 			return {
 				title: title.charAt(0).toUpperCase() + title.slice(1),
-				description: formatDateForDisplay(date)
+				description: `${formatDateForDisplay(date)} at ${time}`
 			};
 		});
 	}
@@ -83,25 +86,37 @@
 	} = createCalendar({
 		onValueChange: ({ next }) => {
 			if (next) {
-				// Convert the selected date
 				const selectedDate = new Date(next.year, next.month - 1, next.day);
+				const selectedTime = currentDate ? dayjs(currentDate).format('HH:mm:ss') : '21:00:00'; // Default to 9:00 PM
 
-				// Prevent infinite loop by ensuring the value is different
 				if (!currentDate || currentDate.getTime() !== selectedDate.getTime()) {
-					// Update inputValue only if necessary
-					if ($inputValue !== formatDateForDisplay(selectedDate)) {
-						$inputValue = formatDateForDisplay(selectedDate);
+					const formattedDateTime = `${formatDateForDisplay(selectedDate)} at ${dayjs(selectedTime, 'HH:mm:ss').format('h:mm A')}`;
+					if ($inputValue !== formattedDateTime) {
+						$inputValue = formattedDateTime;
 					}
 
-					// Set the actual date and trigger the callback if necessary
-					currentDate = selectedDate;
+					currentDate = new Date(
+						selectedDate.getFullYear(),
+						selectedDate.getMonth(),
+						selectedDate.getDate(),
+						parseInt(selectedTime.split(':')[0]),
+						parseInt(selectedTime.split(':')[1]),
+						parseInt(selectedTime.split(':')[2])
+					);
+
 					if (onDateSelected) {
-						onDateSelected(selectedDate);
+						onDateSelected(currentDate);
 					}
 
-					// Set the selected date in the calendar state
-					const calendarDate = new CalendarDate(next.year, next.month, next.day);
-					value.set(calendarDate); // Ensure proper date highlighting
+					const calendarDateTime = new CalendarDateTime(
+						next.year,
+						next.month,
+						next.day,
+						currentDate.getHours(),
+						currentDate.getMinutes(),
+						currentDate.getSeconds()
+					);
+					value.set(calendarDateTime);
 				}
 			}
 

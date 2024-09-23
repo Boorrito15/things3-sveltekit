@@ -16,19 +16,43 @@ export function formatDate(date: Date | string | null): string {
 	return targetDate.format('D MMM YYYY');
 }
 
+export function formatDateTime(date: Date | string | null): string {
+	if (!date) return '';
+
+	const formattedDate = formatDate(date);
+	const formattedTime = dayjs(date).format('h:mm A');
+	return `${formattedDate} at ${formattedTime}`;
+}
+
 export function filterTasks(
 	tasks: Task[],
-	today: string
+	today: string | null
 ): {
 	availableTasks: Task[];
 	completedTasks: Task[];
 } {
-	const availableTasks = tasks.filter(
-		(task) => (task.when === today || task.expanded) && !task.completed
-	);
-	const completedTasks = tasks.filter(
-		(task) => (task.when === today || task.expanded) && task.completed
-	);
+	const todayDate = today ? dayjs(today).startOf('day') : null;
+
+	const availableTasks = tasks.filter((task) => {
+		if (todayDate) {
+			// Today view
+			return task.when && dayjs(task.when).startOf('day').isSame(todayDate) && !task.completed;
+		} else {
+			// Inbox view
+			return !task.when && !task.completed;
+		}
+	});
+
+	const completedTasks = tasks.filter((task) => {
+		if (todayDate) {
+			// Today view
+			return task.when && dayjs(task.when).startOf('day').isSame(todayDate) && task.completed;
+		} else {
+			// Inbox view
+			return !task.when && task.completed;
+		}
+	});
+
 	return { availableTasks, completedTasks };
 }
 

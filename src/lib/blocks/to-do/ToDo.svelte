@@ -119,6 +119,15 @@
 		return '';
 	}
 
+	function formatDateTime(date: Date): string {
+		const formattedDate = formatDate(date);
+		const formattedTime = dayjs(date).format('h:mm A');
+		if (formattedTime === '12:00 AM') {
+			return formattedDate;
+		}
+		return `${formattedDate} at ${formattedTime}`;
+	}
+
 	function deleteWhen() {
 		onUpdate({ ...task, when: null });
 	}
@@ -238,7 +247,7 @@
 				</div>
 				{#if task.when && !isExpanded}
 					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
-						>{formatDate(task.when)}</small
+						>{formatDateTime(task.when)}</small
 					>
 				{/if}
 				{#if isExpanded}
@@ -283,7 +292,7 @@
 					>
 						<Popover onOpenChange={handlePopoverOpenChange}>
 							{#snippet triggerElement()}
-								{@const TriggerElement = formatDate(task.when)}
+								{@const TriggerElement = formatDateTime(task.when)}
 								<p class="leading-3">🗓️ {TriggerElement}</p>
 							{/snippet}
 							{#snippet contentBlock()}
