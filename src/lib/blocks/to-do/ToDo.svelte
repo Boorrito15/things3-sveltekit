@@ -80,6 +80,8 @@
 	// Toggle task selection
 	function selectTask() {
 		onSelect(task.id); // Notify parent that the task was selected.
+		isSelected = true;
+		console.log(task, 'selected');
 	}
 
 	// Expand the task to enable editing
@@ -364,66 +366,70 @@
 	/* General Task Container */
 	.task-container {
 		border-radius: 5px;
-		overflow: hidden;
 		cursor: pointer;
 		background-color: transparent;
 		width: 100%;
 		margin: 0;
-		transition: all 0.5s ease;
 		display: flex;
-		flex-direction: column; /* Make the task-container a flex container */
-	}
-
-	/* When the task is selected */
-	.task-container.selected {
-		background-color: #cae2ff;
+		flex-direction: column;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		padding: 0rem calc(0.5rem + 0.25%);
+		min-height: 28px; /* Use min-height instead of max-height */
 	}
 
 	/* When the task is expanded */
 	.task-container.expanded {
 		background-color: white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-		border: 0.5px solid #d7d8db; /* Light gray border */
-		margin: 2rem 0;
-		padding: 1rem calc(0.5rem + 0.25%); /* Keep the left padding the same */
-		height: auto; /* Ensure the height is dynamic */
-		min-height: 9rem; /* Add a minimum height to the expanded task */
+		border: 0.5px solid #d7d8db;
+		padding: 1rem calc(0.5rem + 1.25%);
+		max-height: 500px;
 		width: 102%;
+		margin-bottom: 2rem;
+		overflow: hidden; /* Only hide overflow when expanded */
 	}
 
-	/* Task Content */
 	.task-content {
 		display: flex;
 		flex-direction: column;
-		flex-grow: 1; /* Ensure the task-content takes the full height */
-		justify-content: space-between; /* Space out the content vertically */
-		position: relative;
-		height: 100%;
+		justify-content: flex-start;
+		transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		max-height: 40px; /* Initial height */
+	}
+
+	.task-container.expanded .task-content {
+		max-height: 460px; /* Expanded height */
 	}
 
 	/* Task Header */
 	.task-header {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		min-height: 28px;
+		overflow: hidden; /* Prevent content from overflowing */
+		text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+		white-space: nowrap; /* Keep content on a single line */
 	}
 
+	/* Ensure the task name is visible */
 	.task-text {
-		flex-grow: 1;
-		outline: none;
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
-	.task-text:empty::before {
-		content: attr(data-placeholder);
-		color: #999;
+	/* Style for the date/time small tag */
+	.task-header small {
+		flex-shrink: 0; /* Prevent the date from shrinking */
+		margin-right: 0.5rem; /* Add some space between date and task name */
 	}
 
 	/* Notes Container */
 	.notes-container {
 		display: grid;
 		grid-template-rows: 0fr;
-		transition: grid-template-rows 0.5s ease;
+		transition: grid-template-rows 0.3s ease;
 		width: 100%;
 		overflow: hidden;
 	}
