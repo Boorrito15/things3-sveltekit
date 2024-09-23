@@ -248,7 +248,7 @@
 					/>
 				</div>
 				{#if task.when && !isExpanded}
-					<small class="px-2 rounded-md bg-[#E6E8EC] mr-1 leading-5 font-light"
+					<small class="px-2 rounded-md bg-[#E6E8EC] leading-5 font-light"
 						>{formatDateTime(task.when)}</small
 					>
 				{/if}
