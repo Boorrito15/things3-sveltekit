@@ -239,7 +239,7 @@
 	<div class="task-content">
 		<div>
 			<div class="task-header">
-				<div class="mr-1">
+				<div class="mr-2">
 					<input
 						checked={isCompleted}
 						onclick={toggleComplete}
@@ -248,7 +248,7 @@
 					/>
 				</div>
 				{#if task.when && !isExpanded}
-					<small class="px-2 rounded-md bg-[#E6E8EC] leading-5 font-light"
+					<small class="px-1 rounded-sm bg-[#E6E8EC] leading-5 font-light"
 						>{formatDateTime(task.when)}</small
 					>
 				{/if}
@@ -374,11 +374,11 @@
 		padding: 0rem calc(0.5rem + 0.25%);
 		min-height: 28px;
 		transition:
-			transform 0.3s ease-out,
-			max-height 0.3s ease-out,
-			padding 0.3s ease-out,
-			width 0.3s ease-out,
-			margin-bottom 0.3s ease-out;
+			transform 0.2s ease-out,
+			max-height 0.2s ease-out,
+			padding 0.2s ease-out,
+			width 0.2s ease-out,
+			margin-bottom 0.2s ease-out;
 		transform: translateY(0);
 		background-color: transparent;
 		box-shadow: none;
@@ -391,17 +391,16 @@
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 		border: 0.5px solid #d7d8db;
 		padding: 1rem calc(0.5rem + 1.25%);
-		max-height: 500px;
 		width: 102%;
 		margin-bottom: 4rem;
 		overflow: hidden;
 		transform: translateY(20px);
 		transition:
-			transform 0.3s ease-out,
-			max-height 0.3s ease-out,
-			padding 0.3s ease-out,
-			width 0.3s ease-out,
-			margin-bottom 0.3s ease-out,
+			transform 0.2s ease-out,
+			max-height 0.2s ease-out,
+			padding 0.2s ease-out,
+			width 0.2s ease-out,
+			margin-bottom 0.2s ease-out,
 			background-color 0s,
 			box-shadow 0s,
 			border 0s;
@@ -412,7 +411,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
-		transition: max-height 0.3s ease-out;
+		transition: max-height 0.2s ease-out;
 		max-height: 40px;
 		overflow: hidden;
 	}
@@ -442,13 +441,13 @@
 	/* Style for the date/time small tag */
 	.task-header small {
 		flex-shrink: 0; /* Prevent the date from shrinking */
-		margin-right: 0.25rem; /* Add some space between date and task name */
+		margin-right: 0.5rem; /* Add some space between date and task name */
 	}
 
 	/* Notes Container */
 	.notes-container {
 		max-height: 0;
-		transition: max-height 0.3s ease-out;
+		transition: max-height 0.2s ease-out;
 		width: 100%;
 		overflow: hidden;
 	}
