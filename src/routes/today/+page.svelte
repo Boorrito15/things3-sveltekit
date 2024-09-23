@@ -16,7 +16,7 @@
 
 	function handleTaskActionWrapper(
 		action: 'select' | 'delete' | 'update' | 'complete',
-		taskData: Task | number
+		taskData: Task | number | { id: number; completed: boolean }
 	) {
 		tasks = handleTaskAction(tasks, action, taskData);
 	}
@@ -36,7 +36,7 @@
 				onSelect={(id) => handleTaskActionWrapper('select', id)}
 				onDelete={(id) => handleTaskActionWrapper('delete', id)}
 				onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
-				onComplete={(updatedTask) => handleTaskActionWrapper('complete', updatedTask)}
+				onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 			/>
 		{/each}
 	{:else}
@@ -62,7 +62,7 @@
 						onSelect={(id) => handleTaskActionWrapper('select', id)}
 						onDelete={(id) => handleTaskActionWrapper('delete', id)}
 						onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
-						onComplete={(updatedTask) => handleTaskActionWrapper('complete', updatedTask)}
+						onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 					/>
 				{/each}
 			{/snippet}

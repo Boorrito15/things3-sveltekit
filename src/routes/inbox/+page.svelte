@@ -11,8 +11,8 @@
 
 	let tasks = $state(data.tasks);
 
-	let availableTasks = $derived(filterTasks(tasks, '').availableTasks);
-	let completedTasks = $derived(filterTasks(tasks, '').completedTasks);
+	let availableTasks = $derived(filterTasks(tasks, null).availableTasks);
+	let completedTasks = $derived(filterTasks(tasks, null).completedTasks);
 
 	function handleTaskActionWrapper(
 		action: 'select' | 'delete' | 'update' | 'complete',
