@@ -48,7 +48,7 @@
 	<div style:position="absolute" style:top="calc(100% + 10px)" style:right="0" style:left="0">
 		{#if $open}
 			<div use:melt={$content} transition:slide>
-				<div class="flex flex-col">
+				<div class="flex flex-col items-center">
 					{#if items}
 						{@render items()}
 					{/if}

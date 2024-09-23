@@ -239,7 +239,7 @@
 	<div class="task-content">
 		<div>
 			<div class="task-header">
-				<div class="mr-2">
+				<div class="mr-1">
 					<input
 						checked={isCompleted}
 						onclick={toggleComplete}
@@ -442,7 +442,7 @@
 	/* Style for the date/time small tag */
 	.task-header small {
 		flex-shrink: 0; /* Prevent the date from shrinking */
-		margin-right: 0.5rem; /* Add some space between date and task name */
+		margin-right: 0.25rem; /* Add some space between date and task name */
 	}
 
 	/* Notes Container */
