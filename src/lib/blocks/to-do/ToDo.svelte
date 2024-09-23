@@ -226,7 +226,7 @@
 </script>
 
 <div
-	class="task-container {isExpanded ? 'expanded' : ''} {isSelected ? 'selected' : ''}"
+	class="task-container {isExpanded ? 'expanded' : ''} {isSelected ? 'bg-[#CBE2FF]' : ''}"
 	bind:this={taskRef}
 	role="button"
 	tabindex="0"
@@ -367,7 +367,6 @@
 	.task-container {
 		border-radius: 5px;
 		cursor: pointer;
-		background-color: transparent;
 		width: 100%;
 		margin: 0;
 		display: flex;
@@ -480,7 +479,7 @@
 		width: 0.75rem;
 		height: 0.75rem;
 		appearance: none; /* Remove default checkbox styling */
-		border: 0.5px solid #c1c3c6; /* Light gray border */
+		border: 1.2px solid #99aec6; /* Light gray border */
 		border-radius: 20%; /* Rounded corners */
 		background-color: none; /* White background when unchecked */
 		cursor: pointer;
