@@ -275,7 +275,7 @@
 				{#if isExpanded}
 					<textarea
 						name="task-notes"
-						class="task-notes-input focus:ring-0 focus:ring-offset-0"
+						class="task-notes-input focus:ring-0 focus:ring-offset-0 mb-6"
 						placeholder="Notes"
 						bind:value={editedNotes}
 						onblur={updateTask}
