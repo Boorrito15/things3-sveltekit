@@ -25,7 +25,7 @@
 	}
 </script>
 
-<h4 class="mb-12">📥 Inbox</h4>
+<h4 class="mb-8">📥 Inbox</h4>
 
 <div class="flex flex-col items-center">
 	{#if availableTasks.length > 0}
