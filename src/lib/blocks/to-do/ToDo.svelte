@@ -290,7 +290,7 @@
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
 					<div
-						class="flex ml-4 border-transparent border pl-1 rounded-md transition-all duration-150 ease-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
+						class="flex ml-4 border-transparent border pl-1 rounded-md transition-all duration-150 linear-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
 					>
 						<Popover onOpenChange={handlePopoverOpenChange}>
 							{#snippet triggerElement()}
@@ -337,7 +337,7 @@
 					{#each Object.entries(icons) as [key, icon]}
 						{#if !(key === 'calendar' && task.when)}
 							<div
-								class="border-transparent border p-0.5 rounded-sm transition-all duration-150 ease-in-out hover:border hover:border-black opacity-40"
+								class="border-transparent border p-0.5 rounded-sm transition-all duration-150 linear-in-out hover:border hover:border-black opacity-40"
 							>
 								<Popover message={icon.message} onOpenChange={handlePopoverOpenChange}>
 									{#snippet triggerElement()}
@@ -371,9 +371,18 @@
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		padding: 0rem calc(0.5rem + 0.25%);
-		min-height: 28px; /* Use min-height instead of max-height */
+		min-height: 28px;
+		transition:
+			transform 0.3s ease-out,
+			max-height 0.3s ease-out,
+			padding 0.3s ease-out,
+			width 0.3s ease-out,
+			margin-bottom 0.3s ease-out;
+		transform: translateY(0);
+		background-color: transparent;
+		box-shadow: none;
+		border: 0.5px solid transparent;
 	}
 
 	/* When the task is expanded */
@@ -384,20 +393,32 @@
 		padding: 1rem calc(0.5rem + 1.25%);
 		max-height: 500px;
 		width: 102%;
-		margin-bottom: 2rem;
-		overflow: hidden; /* Only hide overflow when expanded */
+		margin-bottom: 4rem;
+		overflow: hidden;
+		transform: translateY(20px);
+		transition:
+			transform 0.3s ease-out,
+			max-height 0.3s ease-out,
+			padding 0.3s ease-out,
+			width 0.3s ease-out,
+			margin-bottom 0.3s ease-out,
+			background-color 0s,
+			box-shadow 0s,
+			border 0s;
 	}
 
+	/* Task Content */
 	.task-content {
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
-		transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		max-height: 40px; /* Initial height */
+		transition: max-height 0.3s ease-out;
+		max-height: 40px;
+		overflow: hidden;
 	}
 
 	.task-container.expanded .task-content {
-		max-height: 460px; /* Expanded height */
+		max-height: 460px;
 	}
 
 	/* Task Header */
@@ -426,15 +447,14 @@
 
 	/* Notes Container */
 	.notes-container {
-		display: grid;
-		grid-template-rows: 0fr;
-		transition: grid-template-rows 0.3s ease;
+		max-height: 0;
+		transition: max-height 0.3s ease-out;
 		width: 100%;
 		overflow: hidden;
 	}
 
 	.task-container.expanded .notes-container {
-		grid-template-rows: 1fr;
+		max-height: 420px; /* Adjust this value based on your needs */
 	}
 
 	/* Task Notes */
@@ -446,7 +466,7 @@
 		background: none;
 		overflow: hidden;
 		resize: none;
-		transition: height 0.3s ease;
+		transition: height 0.6s linear;
 		height: auto;
 		min-height: 2rem;
 	}
@@ -487,9 +507,9 @@
 		align-items: center; /* Vertically center */
 		justify-content: center; /* Horizontally center */
 		transition:
-			background-color 0.2s ease,
-			border-color 0.2s ease,
-			transform 0.2s ease; /* Add transition for the scaling effect */
+			background-color 0.2s linear,
+			border-color 0.2s linear,
+			transform 0.2s linear; /* Add transition for the scaling effect */
 		position: relative; /* Enable absolute positioning for checkmark */
 	}
 

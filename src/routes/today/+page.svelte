@@ -26,7 +26,7 @@
 	}
 </script>
 
-<h4 class="mb-12">⭐️ Today</h4>
+<h4 class="mb-8">⭐️ Today</h4>
 
 <div class="flex flex-col items-center">
 	{#if availableTasks.length > 0}

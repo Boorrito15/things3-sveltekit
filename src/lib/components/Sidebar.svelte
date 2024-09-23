@@ -4,7 +4,7 @@
 	// import { InboxIcon, CalendarIcon } from '$lib/global-icons';
 </script>
 
-<nav class="w-64 bg-[#F5F6F8] h-screen pt-2 px-2">
+<nav class="w-80 bg-[#F5F6F8] h-screen pt-4 px-3 border-r border-neutral-200">
 	<ul class="m-0 font-medium">
 		<li class="m-0">
 			<a
@@ -17,7 +17,7 @@
 			</a>
 		</li>
 
-		<li class="mt-2">
+		<li class="mt-4">
 			<a
 				href="/today"
 				class="flex items-center px-1 rounded-md {$page.url.pathname === '/today'
