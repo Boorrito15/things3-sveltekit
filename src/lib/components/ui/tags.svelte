@@ -23,7 +23,7 @@
 		{#each $tags as t}
 			<div
 				use:melt={$tag(t)}
-				class="flex items-stretch overflow-hidden rounded-md bg-[#C3E1D3] text-[#1D7D58] text-sm [word-break:break-word] data-[disabled]:bg-magnum-300 data-[selected]:bg-[#5C9AFE] data-[selected]:text-white data-[disabled]:hover:cursor-default data-[disabled]:focus:!outline-none data-[disabled]:focus:!ring-0"
+				class="flex items-stretch overflow-hidden rounded-xl bg-[#C3E1D3] text-[#1D7D58] text-sm [word-break:break-word] data-[disabled]:bg-magnum-300 data-[selected]:bg-[#5C9AFE] data-[selected]:text-white data-[disabled]:hover:cursor-default data-[disabled]:focus:!outline-none data-[disabled]:focus:!ring-0"
 			>
 				<span class="flex items-center border-r border-white/10 px-1.5">{t.value}</span>
 				<button
