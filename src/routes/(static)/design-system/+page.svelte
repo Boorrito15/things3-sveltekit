@@ -10,7 +10,7 @@
 	// };
 
 	// To do
-	import ToDo from '$lib/blocks/to-do/ToDo.svelte';
+	import ToDo from '$lib/components/ToDo.svelte';
 	import { tick } from 'svelte';
 
 	let tasks = $state([
