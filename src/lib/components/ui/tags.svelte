@@ -3,7 +3,7 @@
 	import { X } from '$lib/global-icons';
 
 	const {
-		elements: { root, input, tag, deleteTrigger, edit },
+		elements: { root, input, tag, edit },
 		states: { tags }
 	} = createTagsInput({
 		// defaultTags: ['Svelte', 'Typescript'],
@@ -35,8 +35,8 @@
 			</div>
 			<div
 				use:melt={$edit(t)}
-				class="flex items-center overflow-hidden rounded-md px-1.5 [word-break:break-word] data-[invalid-edit]:focus:!ring-red-500 h-fit">
-            </div>
+				class="flex items-center overflow-hidden rounded-md px-1.5 [word-break:break-word] data-[invalid-edit]:focus:!ring-red-500 h-fit data-[invalid-edit]:focus:!outline-none focus:outline-none focus:ring-0"
+			></div>
 		{/each}
 
 		<input
@@ -49,7 +49,7 @@
 </div>
 
 <style>
-    input[type='text'],
+	input[type='text'],
 	input[type='text']:focus {
 		background: none;
 		outline: none;
