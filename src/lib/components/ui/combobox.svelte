@@ -72,7 +72,7 @@
 	$effect(() => {
 		const selectedValue = $selected;
 		if (selectedValue) {
-			const parsedDate = chrono.parseDate(selectedValue.label);
+			const parsedDate = chrono.parseDate(selectedValue.label ?? '');
 			// Display formatted date in the input if it was parsed
 			$inputValue = parsedDate ? formatDate(parsedDate, true) : (selectedValue.label ?? '');
 		} else {
