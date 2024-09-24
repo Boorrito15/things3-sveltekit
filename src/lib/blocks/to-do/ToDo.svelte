@@ -81,7 +81,6 @@
 	function selectTask() {
 		onSelect(task.id); // Notify parent that the task was selected.
 		isSelected = true;
-		console.log(task, 'selected');
 	}
 
 	// Expand the task to enable editing
@@ -380,7 +379,6 @@
 			width 0.2s ease-out,
 			margin-bottom 0.2s ease-out;
 		transform: translateY(0);
-		background-color: transparent;
 		box-shadow: none;
 		border: 0.5px solid transparent;
 	}
