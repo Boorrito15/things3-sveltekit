@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createCombobox, createTagsInput, melt, type ComboboxOption } from '@melt-ui/svelte';
-	import { ChevronDown, ChevronUp, X } from '$lib/global-icons';
+	import { ChevronDown, ChevronUp, X, TagIcon } from '$lib/global-icons';
 	import { fly } from 'svelte/transition';
 
 	type Tag = {
@@ -68,12 +68,11 @@
 </script>
 
 <div>
-	<div use:melt={$tagsRoot} class="flex min-w-24 flex-wrap gap-2.5 rounded-lg bg-[#F0F1F3] p-2">
+	<div use:melt={$tagsRoot} class="flex min-w-24 flex-wrap gap-2 rounded-lg px-2.5">
 		{#each $tags as t}
 			<div
 				use:melt={$tag(t)}
-				class="flex items-center rounded-xl bg-[#C3E1D3] text-[#1D7D58] text-sm
-                       data-[selected]:bg-[#5C9AFE] data-[selected]:text-white"
+				class="my-auto flex h-fit items-center rounded-xl bg-[#C3E1D3] text-sm text-[#1D7D58] data-[selected]:bg-[#5C9AFE] data-[selected]:text-white"
 			>
 				<span class="px-2">{t.value}</span>
 				<!-- <button
@@ -108,7 +107,7 @@
 {#if $open}
 	<ul
 		use:melt={$menu}
-		class="z-10 mt-1 max-h-[300px] w-full overflow-auto rounded-lg bg-white shadow-md m-0"
+		class="z-10 m-0 mt-1 max-h-[300px] w-full overflow-auto rounded-lg bg-white text-sm shadow-md"
 		transition:fly={{ duration: 150, y: -5 }}
 	>
 		{#each filteredTags as tag}
@@ -120,7 +119,10 @@
 				}}
 				class="cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
-				{tag}
+				<span class="inline-block align-middle">
+					<TagIcon class="mr-2 size-3" />
+				</span>
+				<span class="inline-block align-middle">{tag}</span>
 			</li>
 		{/each}
 
@@ -130,9 +132,12 @@
 				onclick={() => {
 					handleTagSelection($selected.value);
 				}}
-				class="cursor-pointer px-4 py-2 italic text-magnum-600 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
+				class="cursor-pointer px-4 py-2 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
-				New Tag "{$inputValue}"
+				<span class="inline-block align-middle">
+					<TagIcon class="mr-2 size-3" />
+				</span>
+				<span class="inline-block align-middle">New Tag "{$inputValue}"</span>
 			</li>
 		{/if}
 	</ul>

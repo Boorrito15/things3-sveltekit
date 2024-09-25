@@ -2,7 +2,7 @@
 	// Import statements
 	import { Popover } from '$lib/global-components';
 	import { tick } from 'svelte';
-	import { Calendar, Tag, Checklist, Flag } from '$lib/global-icons';
+	import { Calendar, TagIcon, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -207,7 +207,7 @@
 			content: Datepicker
 		},
 		tag: {
-			svg: Tag,
+			svg: TagIcon,
 			message: 'Tags',
 			content: null
 		},
