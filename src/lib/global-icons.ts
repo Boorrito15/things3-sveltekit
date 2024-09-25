@@ -1,5 +1,5 @@
 import Calendar from '~icons/lucide/calendar';
-import Tag from '~icons/lucide/tag';
+import TagIcon from '~icons/lucide/tag';
 import Checklist from '~icons/lucide/list';
 import Flag from '~icons/lucide/flag';
 import Check from '~icons/lucide/check';
@@ -19,7 +19,7 @@ export {
 	ChevronLeft,
 	ChevronRight,
 	ChevronUpDown,
-	Tag,
+	TagIcon,
 	Flag,
 	X
 };

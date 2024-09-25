@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tags } from '$lib/global-components';
+	import TagCombobox from '$lib/components/TagCombobox.svelte';
 </script>
 
-<Tags />
+<TagCombobox />
