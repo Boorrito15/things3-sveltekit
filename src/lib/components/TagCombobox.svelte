@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createCombobox, createTagsInput, melt, type ComboboxOption } from '@melt-ui/svelte';
-	import { Check, ChevronDown, ChevronUp, X } from '$lib/global-icons';
+	import { ChevronDown, ChevronUp, X } from '$lib/global-icons';
 	import { fly } from 'svelte/transition';
 
 	type Tag = {
@@ -8,16 +8,14 @@
 		value: string;
 	};
 
-	let existingTags = $state(['Svelte', 'TypeScript', 'JavaScript', 'HTML', 'CSS']);
+	let existingTags = $state(['Svelte', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'React']);
 
 	const {
 		elements: { root: tagsRoot, input: tagsInput, tag, deleteTrigger },
 		states: { tags }
 	} = createTagsInput({
 		unique: true,
-		add(tagValue) {
-			return { id: tagValue, value: tagValue };
-		},
+		add: (tagValue) => ({ id: tagValue, value: tagValue }),
 		addOnPaste: true
 	});
 
@@ -25,63 +23,51 @@
 		elements: { menu, input: comboboxInput, option, label },
 		states: { open, inputValue, selected },
 		helpers: { isSelected }
-	} = createCombobox<Tag>({
-		forceVisible: true
-	});
+	} = createCombobox<Tag>({ forceVisible: true });
 
 	$effect(() => {
-		if (!$open) {
-			$inputValue = '';
-		}
+		if (!$open) $inputValue = '';
 	});
 
 	const filteredTags = $derived(
-		$inputValue
-			? existingTags.filter((tag) => tag.toLowerCase().includes($inputValue.toLowerCase()))
-			: existingTags
+		existingTags.filter((tag) => {
+			const normalizedTag = tag.toLowerCase();
+			const normalizedInput = $inputValue.toLowerCase();
+			const isNotSelected = !$tags.some((t) => t.value.toLowerCase() === normalizedTag);
+			return $inputValue ? normalizedTag.includes(normalizedInput) && isNotSelected : isNotSelected;
+		})
 	);
 
-	function handleTagSelection(tagValue: string) {
-		if (!$tags.some((t) => t.value === tagValue)) {
-			$tags = [...$tags, { id: tagValue, value: tagValue }];
+	function handleTagSelection(value: string) {
+		// console.log('handleTagSelection called with:', value);
+		const normalizedValue = value.toLowerCase();
+		if (!$tags.some((t) => t.value.toLowerCase() === normalizedValue)) {
+			if (!existingTags.includes(value)) {
+				existingTags = [...existingTags, value];
+			}
+			$tags = [...$tags, { id: value, value: value }];
 		}
+		// console.log('Updated tags:', $tags);
 		$inputValue = '';
 		$open = false;
-	}
-
-	function createNewTag() {
-		if ($inputValue && !existingTags.includes($inputValue)) {
-			existingTags = [...existingTags, $inputValue];
-			handleTagSelection($inputValue);
-		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			if ($selected) {
-				handleTagSelection($selected.value.value);
-			} else if ($inputValue) {
-				createNewTag();
+				handleTagSelection($selected.value);
+				console.log($selected.value);
 			}
 		} else if (event.key === 'Backspace' && $inputValue === '' && $tags.length > 0) {
-			const lastTag = $tags[$tags.length - 1];
-			$tags = $tags.map((t) =>
-				t === lastTag ? { ...t, selected: true } : { ...t, selected: false }
+			$tags = $tags.map((t, index) =>
+				index === $tags.length - 1 ? { ...t, selected: true } : { ...t, selected: false }
 			);
 		}
 	}
-
-	function handleOptionClick(tag: string) {
-		handleTagSelection(tag);
-	}
 </script>
 
-<div class="flex flex-col gap-2">
-	<label use:melt={$label}>
-		<span class="text-sm font-medium text-magnum-900">Enter tags:</span>
-	</label>
-
+<div>
 	<div use:melt={$tagsRoot} class="flex min-w-24 flex-wrap gap-2.5 rounded-lg bg-[#F0F1F3] p-2">
 		{#each $tags as t}
 			<div
@@ -90,12 +76,12 @@
                        data-[selected]:bg-[#5C9AFE] data-[selected]:text-white"
 			>
 				<span class="px-2">{t.value}</span>
-				<button
+				<!-- <button
 					use:melt={$deleteTrigger(t)}
 					class="flex items-center px-1 hover:bg-[#7ab89b] data-[selected]:hover:bg-[#2c7dff]"
 				>
 					<X class="size-4" />
-				</button>
+				</button> -->
 			</div>
 		{/each}
 
@@ -106,15 +92,15 @@
 				type="text"
 				placeholder="Type to add tags..."
 				class="w-full min-w-[8rem] bg-transparent p-1 text-black outline-none"
-				on:keydown={handleKeydown}
+				onkeydown={handleKeydown}
 			/>
-			<div class="absolute right-2 top-1/2 -translate-y-1/2 text-magnum-900">
+			<!-- <div class="absolute right-2 top-1/2 -translate-y-1/2 text-magnum-900">
 				{#if $open}
 					<ChevronUp class="size-4" />
 				{:else}
 					<ChevronDown class="size-4" />
 				{/if}
-			</div>
+			</div> -->
 		</div>
 	</div>
 </div>
@@ -127,23 +113,26 @@
 	>
 		{#each filteredTags as tag}
 			<li
-				use:melt={$option({ value: { id: tag, value: tag }, label: tag })}
-				on:click={() => handleOptionClick(tag)}
+				use:melt={$option({ value: tag, label: tag })}
+				onclick={() => {
+					console.log('Clicked tag:', tag);
+					handleTagSelection(tag);
+				}}
 				class="cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
-				{#if $isSelected({ id: tag, value: tag })}
-					<Check class="mr-2 inline-block size-4" />
-				{/if}
 				{tag}
 			</li>
 		{/each}
-		{#if $inputValue && !filteredTags.includes($inputValue)}
+
+		{#if $inputValue && !filteredTags.includes($inputValue) && !$tags.some((t) => t.value.toLowerCase() === $inputValue.toLowerCase())}
 			<li
-				use:melt={$option({ value: { id: $inputValue, value: $inputValue }, label: $inputValue })}
-				on:click={createNewTag}
+				use:melt={$option({ value: $inputValue, label: $inputValue })}
+				onclick={() => {
+					handleTagSelection($selected.value);
+				}}
 				class="cursor-pointer px-4 py-2 italic text-magnum-600 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
-				Create "{$inputValue}"
+				New Tag "{$inputValue}"
 			</li>
 		{/if}
 	</ul>
