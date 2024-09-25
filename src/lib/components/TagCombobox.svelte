@@ -56,7 +56,9 @@
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			if ($selected) {
-				handleTagSelection($selected.value.value);
+				let selectedValue = $selected.value as unknown as string;
+				handleTagSelection(selectedValue);
+				console.log(typeof $selected.value);
 			}
 		} else if (event.key === 'Backspace' && $inputValue === '' && $tags.length > 0) {
 			$tags = $tags.map((t, index) =>
@@ -110,7 +112,14 @@
 		transition:fly={{ duration: 150, y: -5 }}
 	>
 		{#each filteredTags as tag}
-			<li tabindex="0">
+			<li
+				use:melt={$option({ value: tag, label: tag })}
+				onclick={() => {
+					console.log('Clicked tag:', tag);
+					handleTagSelection(tag);
+				}}
+				class="m-0 cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
+			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
 				</span>
@@ -120,7 +129,6 @@
 
 		{#if $inputValue && !filteredTags.includes($inputValue) && !$tags.some((t) => t.value.toLowerCase() === $inputValue.toLowerCase())}
 			<li
-				role="option"
 				use:melt={$option({ value: $inputValue, label: $inputValue })}
 				onclick={() => {
 					if ($selected && $selected.value) {
