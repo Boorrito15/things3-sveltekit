@@ -117,7 +117,7 @@
 					console.log('Clicked tag:', tag);
 					handleTagSelection(tag);
 				}}
-				class="cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
+				class="m-0 cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
@@ -132,7 +132,7 @@
 				onclick={() => {
 					handleTagSelection($selected.value);
 				}}
-				class="cursor-pointer px-4 py-2 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
+				class="m-0 cursor-pointer px-4 py-2 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-magnum-200"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
