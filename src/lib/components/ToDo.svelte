@@ -38,7 +38,7 @@
 		completed?: boolean;
 		when?: string; // When the task is due
 		dueDate?: Date; // Task deadline
-		tags?: Tag[];
+		// tags?: Tag[];
 		priority?: 'low' | 'medium' | 'high';
 		checklist?: ChecklistItem[];
 	}
@@ -243,11 +243,11 @@
 						checked={isCompleted}
 						onclick={toggleComplete}
 						type="checkbox"
-						class="h-5 w-5 accent-blue-600 border-none rounded focus:ring-0"
+						class="h-5 w-5 rounded border-none accent-blue-600 focus:ring-0"
 					/>
 				</div>
 				{#if task.when && !isExpanded}
-					<small class="px-1 rounded-sm bg-[#E6E8EC] leading-5 font-light"
+					<small class="rounded-sm bg-[#E6E8EC] px-1 font-light leading-5"
 						>{formatDateTime(task.when)}</small
 					>
 				{/if}
@@ -266,7 +266,7 @@
 						{editedTaskName}
 					</p>
 				{/if}
-				<button class="h-full flex items-center" onclick={deleteTask}
+				<button class="flex h-full items-center" onclick={deleteTask}
 					><span class="material-symbols-outlined"> backspace </span></button
 				>
 			</div>
@@ -274,7 +274,7 @@
 				{#if isExpanded}
 					<textarea
 						name="task-notes"
-						class="task-notes-input focus:ring-0 focus:ring-offset-0 mb-6"
+						class="task-notes-input mb-6 focus:ring-0 focus:ring-offset-0"
 						placeholder="Notes"
 						bind:value={editedNotes}
 						onblur={updateTask}
@@ -289,7 +289,7 @@
 			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
 				{#if task.when}
 					<div
-						class="flex ml-4 border-transparent border pl-1 rounded-md transition-all duration-150 linear-in-out hover:border hover:border-gray-200 leading-none items-center space-x-2"
+						class="linear-in-out ml-4 flex items-center space-x-2 rounded-md border border-transparent pl-1 leading-none transition-all duration-150 hover:border hover:border-gray-200"
 					>
 						<Popover onOpenChange={handlePopoverOpenChange}>
 							{#snippet triggerElement()}
@@ -309,7 +309,7 @@
 						<button
 							onclick={deleteWhen}
 							onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
-							class="hover:bg-gray-200 p-0.5 rounded-sm"
+							class="rounded-sm p-0.5 hover:bg-gray-200"
 							type="button"
 							aria-label="Delete"
 						>
@@ -336,7 +336,7 @@
 					{#each Object.entries(icons) as [key, icon]}
 						{#if !(key === 'calendar' && task.when)}
 							<div
-								class="border-transparent border p-0.5 rounded-sm transition-all duration-150 linear-in-out hover:border hover:border-black opacity-40"
+								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
 							>
 								<Popover message={icon.message} onOpenChange={handlePopoverOpenChange}>
 									{#snippet triggerElement()}
