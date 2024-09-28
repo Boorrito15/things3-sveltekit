@@ -83,11 +83,11 @@
 </script>
 
 <div>
-	<div use:melt={$tagsRoot} class="flex min-w-24 flex-wrap gap-2 rounded-lg px-2.5">
+	<div use:melt={$tagsRoot} class="flex flex-wrap gap-1 rounded-lg border border-gray-300 p-1">
 		{#each $tags as t}
 			<div
 				use:melt={$tag(t)}
-				class="my-auto flex h-fit items-center rounded-xl bg-[#C3E1D3] text-sm text-[#1D7D58] data-[selected]:bg-[#5C9AFE] data-[selected]:text-white"
+				class="my-auto flex items-center rounded-xl bg-[#C3E1D3] text-sm text-[#1D7D58] data-[selected]:bg-[#5C9AFE] data-[selected]:text-white"
 			>
 				<span class="px-2">{t.value}</span>
 				<!-- <button
@@ -99,22 +99,15 @@
 			</div>
 		{/each}
 
-		<div class="relative flex-grow">
+		<div class="w-fit flex-grow">
 			<input
 				use:melt={$comboboxInput}
 				use:melt={$tagsInput}
 				type="text"
 				placeholder={$tags.length === 0 ? 'Type to add tags...' : ''}
-				class="w-full min-w-[8rem] bg-transparent p-1 text-black outline-none"
+				class="w-full bg-transparent text-black outline-none"
 				onkeydown={handleKeydown}
 			/>
-			<!-- <div class="absolute right-2 top-1/2 -translate-y-1/2 text-magnum-900">
-				{#if $open}
-					<ChevronUp class="size-4" />
-				{:else}
-					<ChevronDown class="size-4" />
-				{/if}
-			</div> -->
 		</div>
 	</div>
 </div>
@@ -122,7 +115,7 @@
 {#if $open}
 	<ul
 		use:melt={$menu}
-		class="z-10 m-0 mt-1 max-h-[300px] w-full overflow-auto rounded-lg bg-white text-sm shadow-md"
+		class="z-10 m-0 mt-1 max-h-[300px] w-auto overflow-auto rounded-lg bg-white text-sm shadow-md"
 		transition:fly={{ duration: 150, y: -5 }}
 	>
 		{#each filteredTags as tag}
@@ -131,7 +124,7 @@
 				onclick={() => {
 					handleTagSelection(tag);
 				}}
-				class="m-0 cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
+				class="m-0 cursor-pointer px-3 py-1 hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
@@ -148,12 +141,14 @@
 						handleTagSelection($inputValue);
 					}
 				}}
-				class="m-0 cursor-pointer px-4 py-2 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
+				class="m-0 cursor-pointer px-3 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
 				</span>
-				<span class="inline-block align-middle">New Tag "{$inputValue}"</span>
+				<span class="inline-block max-w-full whitespace-normal break-words align-middle"
+					>New Tag "{$inputValue}"</span
+				>
 			</li>
 		{/if}
 	</ul>

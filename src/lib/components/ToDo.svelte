@@ -231,12 +231,6 @@
 			content: Calendar
 		}
 	};
-
-	if (task.tags.length > 0) {
-		console.log('task.tags:', task.tags);
-	} else {
-		console.log('task.tags:', 'no tags');
-	}
 </script>
 
 <div
@@ -301,63 +295,62 @@
 			</div>
 		</div>
 		{#if isExpanded}
-			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
-				<div>
-					{#if task.when}
-						<div
-							class="linear-in-out ml-4 flex items-center space-x-2 rounded-md border border-transparent pl-1 leading-none transition-all duration-150 hover:border hover:border-gray-200"
-						>
-							<Popover onOpenChange={handlePopoverOpenChange}>
-								{#snippet triggerElement()}
-									{@const TriggerElement = formatDateTime(task.when)}
-									<p class="leading-3">🗓️ {TriggerElement}</p>
-								{/snippet}
-								{#snippet contentBlock()}
-									{@const ContentComponent = Datepicker}
-									<div style="width: 300px">
-										<ContentComponent onDateSelected={updateWhen} />
-									</div>
-								{/snippet}
-							</Popover>
-							<!-- <p class="leading-none">
-                                🗓️ {formatDate(task.when)}
-                            </p> -->
-							<button
-								onclick={deleteWhen}
-								onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
-								class="rounded-sm p-0.5 hover:bg-gray-200"
-								type="button"
-								aria-label="Delete"
+			<div class="ml-5 flex items-end {task.when ? 'justify-between' : 'justify-end'} ">
+				<div class="flex flex-col space-y-2">
+					<div>
+						{#if task.tags.length > 0}
+							<TagCombobox
+								initialTags={task.tags}
+								onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
+							/>
+						{/if}
+					</div>
+					<div>
+						{#if task.when}
+							<div
+								class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
 							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="0.5"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									class="lucide lucide-x"
+								<Popover onOpenChange={handlePopoverOpenChange}>
+									{#snippet triggerElement()}
+										{@const TriggerElement = formatDateTime(task.when)}
+										<p class="leading-3">🗓️ {TriggerElement}</p>
+									{/snippet}
+									{#snippet contentBlock()}
+										{@const ContentComponent = Datepicker}
+										<div style="width: 300px">
+											<ContentComponent onDateSelected={updateWhen} />
+										</div>
+									{/snippet}
+								</Popover>
+								<!-- <p class="leading-none">
+                                                                        🗓️ {formatDate(task.when)}
+                                                                    </p> -->
+								<button
+									onclick={deleteWhen}
+									onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
+									class="rounded-sm p-0.5 hover:bg-gray-200"
+									type="button"
+									aria-label="Delete"
 								>
-									<path d="M18 6 6 18" />
-									<path d="m6 6 12 12" />
-								</svg>
-							</button>
-						</div>
-					{/if}
-					{#if task.tags.length > 0}
-						<TagCombobox
-							initialTags={task.tags}
-							onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
-						/>
-						<!-- {#each task.tags as tag, index}
-							<small class="mx-1 rounded-lg bg-[#E6E8EC] px-1 font-light leading-5"
-								>{tag.value}{#if index < task.tags.length - 1}{/if}</small
-							>
-						{/each} -->
-					{/if}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="0.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										class="lucide lucide-x"
+									>
+										<path d="M18 6 6 18" />
+										<path d="m6 6 12 12" />
+									</svg>
+								</button>
+							</div>
+						{/if}
+					</div>
 				</div>
 
 				<div class="flex justify-end space-x-3">
