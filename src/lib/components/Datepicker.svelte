@@ -162,13 +162,13 @@
 
 <div use:melt={$calendar} class="w-full">
 	<!-- Combobox Template -->
-	<div class="flex flex-col gap-1 w-full">
+	<div class="flex w-full flex-col gap-1">
 		<label use:melt={$label} for="date-input"></label>
 		<div class="relative">
 			<input
 				id="date-input"
 				use:melt={$input}
-				class="flex h-10 items-center justify-between rounded-lg bg-white text-black w-full pl-4"
+				class="flex h-10 w-full items-center justify-between rounded-lg bg-white pl-4 text-black"
 				placeholder="Pick a date"
 			/>
 			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
@@ -186,7 +186,7 @@
 				{#each dateSuggestions as suggestion, index (index)}
 					<li
 						use:melt={$option(convertToOption(suggestion))}
-						class="relative cursor-pointer scroll-my-2 rounded-md hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50 py-2"
+						class="relative cursor-pointer scroll-my-2 rounded-md py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
 					>
 						<div class="pl-4">
 							<span class="font-medium">{suggestion.title}</span>
@@ -272,10 +272,10 @@
 	}
 
 	th {
-		@apply text-sm font-semibold text-magnum-800 bg-transparent;
+		@apply bg-transparent text-sm font-semibold text-magnum-800;
 
 		& div {
-			@apply flex h-4 w-4 items-center justify-center bg-transparent mx-auto py-4;
+			@apply mx-auto flex h-4 w-4 items-center justify-center bg-transparent py-4;
 		}
 	}
 
@@ -284,24 +284,24 @@
 	}
 
 	[data-melt-calendar-cell] {
-		@apply flex bg-transparent mx-auto aspect-square w-full cursor-pointer select-none items-center justify-center rounded-lg hover:bg-magnum-100 data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-magnum-200 data-[selected]:bg-magnum-300 data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
+		@apply mx-auto flex aspect-square w-full cursor-pointer select-none items-center justify-center rounded-lg bg-transparent hover:bg-magnum-100 data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-magnum-200 data-[selected]:bg-magnum-300 data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
 	}
 
 	[data-melt-calendar-cell][data-outside-month='true'][data-outside-visible-months='true'] {
-		@apply opacity-0 bg-transparent;
+		@apply bg-transparent opacity-0;
 	}
 
 	table {
-		@apply bg-transparent border-collapse w-full;
+		@apply w-full border-collapse bg-transparent;
 	}
 
 	td,
 	th {
-		@apply bg-transparent border-0 p-0;
+		@apply border-0 bg-transparent p-0;
 	}
 
 	tr {
-		@apply bg-transparent border-none;
+		@apply border-none bg-transparent;
 	}
 
 	.check {

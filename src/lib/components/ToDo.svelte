@@ -4,6 +4,7 @@
 	import { tick } from 'svelte';
 	import { Calendar, TagIcon, Checklist, Flag } from '$lib/global-icons';
 	import Datepicker from './Datepicker.svelte';
+	import TagCombobox from './TagCombobox.svelte';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -14,12 +15,12 @@
 	 */
 
 	// Tag interface: Defines the structure for tags.
-	// interface Tags {
-	// 	id: number;
-	// 	name: string;
-	// 	color?: string;
-	// 	description?: string;
-	// }
+	interface Tags {
+		id: number;
+		name: string;
+		color?: string;
+		description?: string;
+	}
 
 	// ChecklistItem interface: Defines a checklist item's properties.
 	interface ChecklistItem {
@@ -38,7 +39,7 @@
 		completed?: boolean;
 		when?: string; // When the task is due
 		dueDate?: Date; // Task deadline
-		// tags?: Tag[];
+		tags?: Tags[];
 		priority?: 'low' | 'medium' | 'high';
 		checklist?: ChecklistItem[];
 	}
@@ -75,6 +76,14 @@
 	// Update the 'when' date for the task
 	function updateWhen(date: Date | null) {
 		onUpdate({ ...task, when: date });
+	}
+
+	function updateTag(tag: Tags | null) {
+		console.log('Updated tags:', tag);
+		onUpdate({
+			...task,
+			tags: [...task.tags, tag] // Ensure the property is 'tags' (lowercase 't')
+		});
 	}
 
 	// Toggle task selection
@@ -209,7 +218,7 @@
 		tag: {
 			svg: TagIcon,
 			message: 'Tags',
-			content: null
+			content: TagCombobox
 		},
 		checklist: {
 			svg: Checklist,
@@ -286,55 +295,69 @@
 			</div>
 		</div>
 		{#if isExpanded}
-			<div class="flex items-center {task.when ? 'justify-between' : 'justify-end'}">
-				{#if task.when}
-					<div
-						class="linear-in-out ml-4 flex items-center space-x-2 rounded-md border border-transparent pl-1 leading-none transition-all duration-150 hover:border hover:border-gray-200"
-					>
-						<Popover onOpenChange={handlePopoverOpenChange}>
-							{#snippet triggerElement()}
-								{@const TriggerElement = formatDateTime(task.when)}
-								<p class="leading-3">🗓️ {TriggerElement}</p>
-							{/snippet}
-							{#snippet contentBlock()}
-								{@const ContentComponent = Datepicker}
-								<div style="width: 300px">
-									<ContentComponent onDateSelected={updateWhen} />
-								</div>
-							{/snippet}
-						</Popover>
-						<!-- <p class="leading-none">
-							🗓️ {formatDate(task.when)}
-						</p> -->
-						<button
-							onclick={deleteWhen}
-							onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
-							class="rounded-sm p-0.5 hover:bg-gray-200"
-							type="button"
-							aria-label="Delete"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="0.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								class="lucide lucide-x"
-							>
-								<path d="M18 6 6 18" />
-								<path d="m6 6 12 12" />
-							</svg>
-						</button>
+			<div class="ml-5 flex items-end {task.when ? 'justify-between' : 'justify-end'} ">
+				<div class="flex flex-col space-y-2">
+					<div>
+						{#if task.tags.length > 0}
+							<TagCombobox
+								initialTags={task.tags}
+								onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
+							/>
+						{/if}
 					</div>
-				{/if}
+					<div>
+						{#if task.when}
+							<div
+								class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
+							>
+								<Popover onOpenChange={handlePopoverOpenChange}>
+									{#snippet triggerElement()}
+										{@const TriggerElement = formatDateTime(task.when)}
+										<p class="leading-3">🗓️ {TriggerElement}</p>
+									{/snippet}
+									{#snippet contentBlock()}
+										{@const ContentComponent = Datepicker}
+										<div style="width: 300px">
+											<ContentComponent onDateSelected={updateWhen} />
+										</div>
+									{/snippet}
+								</Popover>
+								<!-- <p class="leading-none">
+                                                                        🗓️ {formatDate(task.when)}
+                                                                    </p> -->
+								<button
+									onclick={deleteWhen}
+									onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
+									class="rounded-sm p-0.5 hover:bg-gray-200"
+									type="button"
+									aria-label="Delete"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="0.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										class="lucide lucide-x"
+									>
+										<path d="M18 6 6 18" />
+										<path d="m6 6 12 12" />
+									</svg>
+								</button>
+							</div>
+						{/if}
+					</div>
+				</div>
 
 				<div class="flex justify-end space-x-3">
 					{#each Object.entries(icons) as [key, icon]}
-						{#if !(key === 'calendar' && task.when)}
+						{@const shouldShowIcon =
+							(key !== 'calendar' || !task.when) && (key !== 'tag' || task.tags.length == 0)}
+						{#if shouldShowIcon}
 							<div
 								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
 							>
@@ -348,6 +371,9 @@
 										<div style="width: 300px">
 											{#if ContentComponent == Datepicker}
 												<Datepicker onDateSelected={updateWhen} />
+											{/if}
+											{#if ContentComponent == TagCombobox}
+												<TagCombobox onTagSelected={(tag) => updateTag(tag as unknown as Tags)} />
 											{/if}
 										</div>
 									{/snippet}
