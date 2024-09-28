@@ -256,7 +256,7 @@
 					/>
 				</div>
 				{#if task.when && !isExpanded}
-					<small class="rounded-sm bg-[#E6E8EC] px-1 font-light leading-5"
+					<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
 						>{formatDateTime(task.when)}</small
 					>
 				{/if}
@@ -273,6 +273,11 @@
 					<!-- Display the current value of editableName -->
 					<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
 						{editedTaskName}
+						{#each task.tags as tag}
+							<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
+								>{tag.value}</span
+							>
+						{/each}
 					</p>
 				{/if}
 				<button class="flex h-full items-center" onclick={deleteTask}
