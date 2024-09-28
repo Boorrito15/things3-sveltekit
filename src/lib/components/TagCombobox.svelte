@@ -85,7 +85,7 @@
 <div>
 	<div
 		use:melt={$tagsRoot}
-		class="flex flex-wrap gap-1 rounded-lg {$tags.length === 0 ? 'border border-gray-300 p-1' : ''}"
+		class="flex flex-wrap gap-1 rounded-lg {$tags.length === 0 ? 'p-1' : ''}"
 	>
 		{#each $tags as t}
 			<div
@@ -120,7 +120,7 @@
 {#if $open}
 	<ul
 		use:melt={$menu}
-		class="z-10 m-0 mt-1 max-h-[300px] w-auto overflow-auto rounded-lg bg-white text-sm shadow-md"
+		class="z-10 m-0 mt-1 max-h-[300px] w-auto overflow-auto rounded-lg bg-black text-sm text-white shadow-md"
 		transition:fly={{ duration: 150, y: -5 }}
 	>
 		{#each filteredTags as tag}
