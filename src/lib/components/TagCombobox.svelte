@@ -8,7 +8,12 @@
 		value: string;
 	};
 
-	let existingTags = $state(['Svelte', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'React']);
+	let existingOptions = $state(['Svelte', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'React']);
+
+	let { initialTags = [], onTagSelected } = $props<{
+		initialTags?: Tag[];
+		onTagSelected?: (tag: Tag | null) => void;
+	}>();
 
 	const {
 		elements: { root: tagsRoot, input: tagsInput, tag, deleteTrigger },
@@ -16,7 +21,12 @@
 	} = createTagsInput({
 		unique: true,
 		add: (tagValue) => ({ id: tagValue, value: tagValue }),
-		addOnPaste: true
+		addOnPaste: true,
+		defaultTags: initialTags.map((tag: Tag) => tag.value), // Initialize with task.tags (from initialTags prop)
+		onTagsChange: ({ next }) => {
+			console.log('tags changed', next);
+			return next;
+		}
 	});
 
 	const {
@@ -30,7 +40,7 @@
 	});
 
 	const filteredTags = $derived(
-		existingTags.filter((tag) => {
+		existingOptions.filter((tag) => {
 			const normalizedTag = tag.toLowerCase();
 			const normalizedInput = $inputValue.toLowerCase();
 			const isNotSelected = !$tags.some((t) => t.value.toLowerCase() === normalizedTag);
@@ -42,12 +52,17 @@
 		// console.log('handleTagSelection called with:', value);
 		const normalizedValue = value.toLowerCase();
 		if (!$tags.some((t) => t.value.toLowerCase() === normalizedValue)) {
-			if (!existingTags.includes(value)) {
-				existingTags = [...existingTags, value];
+			if (!existingOptions.includes(value)) {
+				existingOptions = [...existingOptions, value];
 			}
 			$tags = [...$tags, { id: value, value: value }];
 		}
-		// console.log('Updated tags:', $tags);
+		console.log('Updated tags:', $tags);
+		console.log(value, 'tag selected');
+
+		if (onTagSelected) {
+			onTagSelected({ id: value, value: value }); // Notify parent with the selected tag object
+		}
 		$inputValue = '';
 		$open = false;
 	}
@@ -58,7 +73,6 @@
 			if ($selected) {
 				let selectedValue = $selected.value as unknown as string;
 				handleTagSelection(selectedValue);
-				console.log(typeof $selected.value);
 			}
 		} else if (event.key === 'Backspace' && $inputValue === '' && $tags.length > 0) {
 			$tags = $tags.map((t, index) =>
@@ -90,7 +104,7 @@
 				use:melt={$comboboxInput}
 				use:melt={$tagsInput}
 				type="text"
-				placeholder="Type to add tags..."
+				placeholder={$tags.length === 0 ? 'Type to add tags...' : ''}
 				class="w-full min-w-[8rem] bg-transparent p-1 text-black outline-none"
 				onkeydown={handleKeydown}
 			/>
@@ -115,7 +129,6 @@
 			<li
 				use:melt={$option({ value: tag, label: tag })}
 				onclick={() => {
-					console.log('Clicked tag:', tag);
 					handleTagSelection(tag);
 				}}
 				class="m-0 cursor-pointer px-4 py-2 hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"

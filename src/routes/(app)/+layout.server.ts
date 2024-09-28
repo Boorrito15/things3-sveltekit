@@ -10,7 +10,8 @@ export async function load() {
 			selected: false,
 			expanded: false,
 			completed: true,
-			when: dayjs().startOf('day').toISOString()
+			when: dayjs().startOf('day').toISOString(),
+			tags: []
 		},
 		{
 			id: 2,
@@ -18,7 +19,8 @@ export async function load() {
 			selected: false,
 			expanded: false,
 			completed: false,
-			when: dayjs().startOf('day').toISOString()
+			when: dayjs().startOf('day').toISOString(),
+			tags: []
 		}
 	];
 
