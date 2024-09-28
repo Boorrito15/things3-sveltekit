@@ -168,7 +168,7 @@
 			<input
 				id="date-input"
 				use:melt={$input}
-				class="flex h-10 w-full items-center justify-between rounded-lg bg-white pl-4 text-black"
+				class="flex h-5 w-full items-center justify-between rounded-lg bg-transparent pl-4 text-white"
 				placeholder="Pick a date"
 			/>
 			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
@@ -182,11 +182,11 @@
 			use:melt={$menu}
 			transition:fly={{ duration: 150, y: -5 }}
 		>
-			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white text-black">
+			<div class="flex max-h-full flex-col gap-0 overflow-y-auto bg-black text-white">
 				{#each dateSuggestions as suggestion, index (index)}
 					<li
 						use:melt={$option(convertToOption(suggestion))}
-						class="relative cursor-pointer scroll-my-2 rounded-md py-2 hover:bg-magnum-100 data-[highlighted]:bg-magnum-200 data-[highlighted]:text-magnum-900 data-[disabled]:opacity-50"
+						class="relative cursor-pointer scroll-my-2 rounded-md py-1 text-sm hover:bg-[#5A9BFE] data-[highlighted]:bg-[#5A9BFE] data-[highlighted]:text-white data-[disabled]:opacity-50"
 					>
 						<div class="pl-4">
 							<span class="font-medium">{suggestion.title}</span>
@@ -248,7 +248,7 @@
 
 <style lang="postcss">
 	[data-melt-calendar] {
-		@apply min-w-fit rounded-lg bg-white p-3 text-magnum-800 shadow-sm;
+		@apply min-w-fit rounded-lg bg-black p-1 text-white shadow-sm;
 	}
 
 	header {
@@ -260,19 +260,19 @@
 	}
 
 	[data-melt-calendar-prevbutton] {
-		@apply rounded-lg p-1 transition-all hover:bg-magnum-100;
+		@apply rounded-lg p-1 transition-all hover:bg-[#5A9BFE];
 	}
 
 	[data-melt-calendar-nextbutton] {
-		@apply rounded-lg p-1 transition-all hover:bg-magnum-100;
+		@apply rounded-lg p-1 transition-all hover:bg-[#5A9BFE];
 	}
 
 	[data-melt-calendar-heading] {
-		@apply font-semibold text-magnum-800;
+		@apply text-sm font-semibold text-white;
 	}
 
 	th {
-		@apply bg-transparent text-sm font-semibold text-magnum-800;
+		@apply bg-transparent text-sm font-semibold text-white;
 
 		& div {
 			@apply mx-auto flex h-4 w-4 items-center justify-center bg-transparent py-4;
@@ -284,7 +284,7 @@
 	}
 
 	[data-melt-calendar-cell] {
-		@apply mx-auto flex aspect-square w-full cursor-pointer select-none items-center justify-center rounded-lg bg-transparent hover:bg-magnum-100 data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-magnum-200 data-[selected]:bg-magnum-300 data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
+		@apply mx-auto flex h-6 w-full cursor-pointer select-none items-center justify-center rounded-lg bg-transparent p-0.5 text-sm hover:bg-[#5A9BFE] data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-magnum-200 data-[selected]:bg-magnum-300 data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
 	}
 
 	[data-melt-calendar-cell][data-outside-month='true'][data-outside-visible-months='true'] {

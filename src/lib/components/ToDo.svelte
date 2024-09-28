@@ -322,7 +322,7 @@
 									{/snippet}
 									{#snippet contentBlock()}
 										{@const ContentComponent = Datepicker}
-										<div style="width: 300px">
+										<div style="width: 250px">
 											<ContentComponent onDateSelected={updateWhen} />
 										</div>
 									{/snippet}
