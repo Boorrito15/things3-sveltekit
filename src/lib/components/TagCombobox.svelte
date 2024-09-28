@@ -83,7 +83,10 @@
 </script>
 
 <div>
-	<div use:melt={$tagsRoot} class="flex flex-wrap gap-1 rounded-lg border border-gray-300 p-1">
+	<div
+		use:melt={$tagsRoot}
+		class="flex flex-wrap gap-1 rounded-lg {$tags.length === 0 ? 'border border-gray-300 p-1' : ''}"
+	>
 		{#each $tags as t}
 			<div
 				use:melt={$tag(t)}
@@ -105,7 +108,9 @@
 				use:melt={$tagsInput}
 				type="text"
 				placeholder={$tags.length === 0 ? 'Type to add tags...' : ''}
-				class="w-full bg-transparent text-black outline-none"
+				class="{$tags.length === 0
+					? ''
+					: ''}w-full bg-transparent leading-none text-black outline-none"
 				onkeydown={handleKeydown}
 			/>
 		</div>
@@ -146,9 +151,8 @@
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-2 size-3" />
 				</span>
-				<span class="inline-block max-w-full whitespace-normal break-words align-middle"
-					>New Tag "{$inputValue}"</span
-				>
+				<span class="inline-blockalign-middle">New Tag </span>
+				<span class=" max-w-full whitespace-normal break-words">"{$inputValue}"</span>
 			</li>
 		{/if}
 	</ul>
@@ -161,5 +165,6 @@
 		outline: none;
 		outline-offset: none;
 		border: none;
+		height: fit-content;
 	}
 </style>
