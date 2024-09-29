@@ -110,7 +110,7 @@
 				placeholder={$tags.length === 0 ? 'Type to add tags...' : ''}
 				class="{$tags.length === 0
 					? ''
-					: ''}px-2 w-full bg-transparent leading-none text-black outline-none"
+					: ''}px-1 h-max w-max bg-transparent text-black outline-none"
 				onkeydown={handleKeydown}
 			/>
 		</div>

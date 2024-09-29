@@ -301,7 +301,7 @@
 		</div>
 		{#if isExpanded}
 			<div class="ml-5 flex items-end justify-between">
-				<div class="flex flex-col space-y-2">
+				<div class="flex flex-col">
 					<div>
 						{#if task.tags && task.tags.length > 0}
 							<TagCombobox
@@ -364,7 +364,11 @@
 							<div
 								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
 							>
-								<Popover message={icon.message} onOpenChange={handlePopoverOpenChange}>
+								<Popover
+									message={icon.message}
+									onOpenChange={handlePopoverOpenChange}
+									placement={key === 'calendar' ? 'left-start' : 'left'}
+								>
 									{#snippet triggerElement()}
 										{@const TriggerElement = icon.svg}
 										<TriggerElement class="size-4" />
