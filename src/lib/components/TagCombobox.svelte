@@ -120,7 +120,7 @@
 {#if $open}
 	<ul
 		use:melt={$menu}
-		class="z-10 m-0 mt-1 max-h-[300px] w-auto overflow-auto rounded-lg bg-black text-sm text-white shadow-md"
+		class="z-10 m-0 mt-1 max-h-[300px] w-auto overflow-auto rounded-lg bg-black p-2 text-sm text-white shadow-md"
 		transition:fly={{ duration: 150, y: -5 }}
 	>
 		{#each filteredTags as tag}
@@ -129,10 +129,10 @@
 				onclick={() => {
 					handleTagSelection(tag);
 				}}
-				class="m-0 cursor-pointer px-3 py-1 hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
+				class="m-0 cursor-pointer rounded-md px-3 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
-					<TagIcon class="mr-2 size-3" />
+					<TagIcon class="mr-1 size-3" />
 				</span>
 				<span class="inline-block align-middle">{tag}</span>
 			</li>
@@ -146,10 +146,10 @@
 						handleTagSelection($inputValue);
 					}
 				}}
-				class="m-0 cursor-pointer px-3 text-[#5496FD] hover:bg-magnum-100 data-[highlighted]:bg-[#5C9AFF50]"
+				class="m-0 cursor-pointer rounded-md px-3 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
-					<TagIcon class="mr-2 size-3" />
+					<TagIcon class="mr-1 size-3" />
 				</span>
 				<span class="inline-blockalign-middle">New Tag </span>
 				<span class=" max-w-full whitespace-normal break-words">"{$inputValue}"</span>

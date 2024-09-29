@@ -9,6 +9,7 @@ import ChevronLeft from '~icons/lucide/chevron-left';
 import ChevronRight from '~icons/lucide/chevron-right';
 import ChevronUpDown from '~icons/lucide/chevrons-up-down';
 import X from '~icons/lucide/x';
+import Search from '~icons/lucide/search';
 
 export {
 	Checklist,
@@ -21,5 +22,6 @@ export {
 	ChevronUpDown,
 	TagIcon,
 	Flag,
-	X
+	X,
+	Search
 };

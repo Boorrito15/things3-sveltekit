@@ -3,9 +3,9 @@
 	 * * IMPORTS
 	 */
 	import { melt, createCalendar, createCombobox, type ComboboxOptionProps } from '@melt-ui/svelte';
-	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
+	import { ChevronLeft, ChevronRight, Search } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
-	import { CalendarDate, CalendarDateTime } from '@internationalized/date';
+	import { CalendarDateTime } from '@internationalized/date';
 	import dayjs from 'dayjs';
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -162,20 +162,20 @@
 
 <div use:melt={$calendar} class="flex w-full flex-col items-center">
 	<!-- Combobox Template -->
-	<div class="mb-1 flex w-full flex-col">
+	<div class="mb-2 flex w-full flex-col">
 		<label use:melt={$label} for="date-input"></label>
 		<div class="relative flex items-center">
 			<!-- Parent div made a flex container to allow input to grow properly -->
-			<input
-				id="date-input"
-				use:melt={$input}
-				class="mx-1 flex-grow items-center rounded-md bg-gray-500 bg-transparent px-2 py-0 text-white"
-				placeholder="When"
-			/>
-			<!-- Ensure the icon/element inside is positioned correctly -->
-			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900">
-				<!-- Content like icon or text here -->
+			<div class="relative flex-grow">
+				<Search class="absolute left-1.5 top-1/2 size-4 -translate-y-1/2 transform text-gray-400" />
+				<input
+					id="date-input"
+					use:melt={$input}
+					class="w-full items-center rounded-md bg-gray-500 bg-transparent py-0 pl-8 pr-2 text-white"
+					placeholder="When"
+				/>
 			</div>
+			<!-- Ensure the icon/element inside is positioned correctly -->
 		</div>
 	</div>
 
@@ -253,7 +253,7 @@
 
 <style lang="postcss">
 	[data-melt-calendar] {
-		@apply min-w-fit rounded-lg bg-black px-1 py-2 text-white shadow-sm;
+		@apply min-w-fit rounded-lg bg-black p-2 text-white shadow-sm;
 	}
 
 	header {
