@@ -3,9 +3,9 @@
 	 * * IMPORTS
 	 */
 	import { melt, createCalendar, createCombobox, type ComboboxOptionProps } from '@melt-ui/svelte';
-	import { ChevronLeft, ChevronRight } from '$lib/global-icons';
+	import { ChevronLeft, ChevronRight, Search } from '$lib/global-icons';
 	import * as chrono from 'chrono-node';
-	import { CalendarDate, CalendarDateTime } from '@internationalized/date';
+	import { CalendarDateTime } from '@internationalized/date';
 	import dayjs from 'dayjs';
 	import { fly } from 'svelte/transition';
 	import relativeTime from 'dayjs/plugin/relativeTime';
@@ -160,25 +160,29 @@
 	 */
 </script>
 
-<div use:melt={$calendar} class="w-full">
+<div use:melt={$calendar} class="flex w-full flex-col items-center">
 	<!-- Combobox Template -->
-	<div class="flex w-full flex-col gap-1">
+	<div class="mb-2 flex w-full flex-col">
 		<label use:melt={$label} for="date-input"></label>
-		<div class="relative">
-			<input
-				id="date-input"
-				use:melt={$input}
-				class="flex h-5 w-full items-center justify-between rounded-lg bg-transparent pl-4 text-white"
-				placeholder="Pick a date"
-			/>
-			<div class="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-magnum-900"></div>
+		<div class="relative flex items-center">
+			<!-- Parent div made a flex container to allow input to grow properly -->
+			<div class="relative flex-grow">
+				<Search class="absolute left-1.5 top-1/2 size-4 -translate-y-1/2 transform text-gray-400" />
+				<input
+					id="date-input"
+					use:melt={$input}
+					class="w-full items-center rounded-md bg-gray-500 bg-transparent py-0 pl-8 pr-2 text-white"
+					placeholder="When"
+				/>
+			</div>
+			<!-- Ensure the icon/element inside is positioned correctly -->
 		</div>
 	</div>
 
 	<!-- Display filtered date options for selection -->
 	{#if $open}
 		<ul
-			class="z-10 flex max-h-[300px] flex-col overflow-hidden rounded-lg"
+			class="flex flex-col overflow-hidden"
 			use:melt={$menu}
 			transition:fly={{ duration: 150, y: -5 }}
 		>
@@ -186,9 +190,9 @@
 				{#each dateSuggestions as suggestion, index (index)}
 					<li
 						use:melt={$option(convertToOption(suggestion))}
-						class="relative cursor-pointer scroll-my-2 rounded-md py-1 text-sm hover:bg-[#5A9BFE] data-[highlighted]:bg-[#5A9BFE] data-[highlighted]:text-white data-[disabled]:opacity-50"
+						class="relative cursor-pointer scroll-my-2 rounded-md py-1 pl-2 text-sm hover:bg-[#5A9BFE] data-[highlighted]:bg-[#5A9BFE] data-[highlighted]:text-white data-[disabled]:opacity-50"
 					>
-						<div class="pl-4">
+						<div>
 							<span class="font-medium">{suggestion.title}</span>
 							{#if suggestion.description}
 								<span class="block text-sm opacity-75">{suggestion.description}</span>
@@ -201,54 +205,55 @@
 	{/if}
 
 	<!-- Calendar Component -->
-	<header>
-		<button use:melt={$prevButton}>
-			<ChevronLeft />
-		</button>
-		<div use:melt={$heading}>
-			{$headingValue}
-		</div>
-		<button use:melt={$nextButton}>
-			<ChevronRight />
-		</button>
-	</header>
-
-	<div>
-		{#each $months as month}
-			<table use:melt={$grid}>
-				<thead aria-hidden="true">
-					<tr>
-						{#each $weekdays as day}
-							<th>
-								<div>{day}</div>
-							</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each month.weeks as weekDates}
+	<div class="w-full {dateSuggestions.length > 0 ? 'hidden' : ''}">
+		<header>
+			<button use:melt={$prevButton}>
+				<ChevronLeft />
+			</button>
+			<div use:melt={$heading}>
+				{$headingValue}
+			</div>
+			<button use:melt={$nextButton}>
+				<ChevronRight />
+			</button>
+		</header>
+		<div>
+			{#each $months as month}
+				<table use:melt={$grid}>
+					<thead aria-hidden="true">
 						<tr>
-							{#each weekDates as date}
-								<td
-									role="gridcell"
-									aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
-								>
-									<div use:melt={$cell(date, month.value)}>
-										{date.day}
-									</div>
-								</td>
+							{#each $weekdays as day}
+								<th>
+									<div>{day}</div>
+								</th>
 							{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/each}
+					</thead>
+					<tbody>
+						{#each month.weeks as weekDates}
+							<tr>
+								{#each weekDates as date}
+									<td
+										role="gridcell"
+										aria-disabled={$isDateDisabled(date) || $isDateUnavailable(date)}
+									>
+										<div use:melt={$cell(date, month.value)}>
+											{date.day}
+										</div>
+									</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/each}
+		</div>
 	</div>
 </div>
 
 <style lang="postcss">
 	[data-melt-calendar] {
-		@apply min-w-fit rounded-lg bg-black p-1 text-white shadow-sm;
+		@apply min-w-fit rounded-lg bg-black p-2 text-white shadow-sm;
 	}
 
 	header {
@@ -305,11 +310,11 @@
 	}
 
 	.check {
-		@apply absolute left-2 top-1/2 text-magnum-500;
-		translate: 0 calc(-50% + 1px);
+		/* @apply absolute left-2 top-1/2 text-magnum-500; */
+		/* translate: 0 calc(-50% + 1px); */
 	}
 
 	ul {
-		@apply m-0;
+		@apply !relative !left-0 !top-0 m-0;
 	}
 </style>

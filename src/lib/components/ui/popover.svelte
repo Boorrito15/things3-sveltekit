@@ -11,9 +11,16 @@
 		contentBlock?: Snippet;
 		message?: string;
 		onOpenChange?: (isOpen: boolean) => void;
+		placement?: any; // Add this line
 	}
 
-	let { triggerElement, contentBlock, message, onOpenChange }: PopoverProps = $props();
+	let {
+		triggerElement,
+		contentBlock,
+		message,
+		onOpenChange,
+		placement = 'left'
+	}: PopoverProps = $props();
 
 	// Create the popover and tooltip
 	const {
@@ -22,9 +29,9 @@
 	} = createPopover({
 		forceVisible: true,
 		positioning: {
-			placement: 'bottom-end' // Adjust placement if needed
+			placement // Use the placement prop here
 		},
-		closeOnOutsideClick: true // Ensure clicking outside closes the popover
+		closeOnOutsideClick: true
 	});
 
 	// Tooltip configuration
@@ -71,7 +78,7 @@
 	<div
 		use:melt={$tooltipContent}
 		transition:fade={{ duration: 100 }}
-		class="z-10 rounded-lg bg-white shadow w-fit"
+		class="z-10 w-fit rounded-lg bg-white shadow"
 	>
 		<div use:melt={$tooltipArrow}></div>
 		<p class="px-2 text-[hsl(213,100%,60%)]">{message}</p>
@@ -82,7 +89,7 @@
 {#if open}
 	<div use:melt={$content} transition:fade={{ duration: 100 }} class="content">
 		<!-- Arrow for popover -->
-		<div use:melt={$arrow}></div>
+		<!-- <div use:melt={$arrow}></div> -->
 		<!-- Popover content block passed via snippet -->
 		{#if contentBlock}
 			{@render contentBlock()}
@@ -102,11 +109,11 @@
 	}
 
 	.tooltip-trigger {
-		@apply w-fit flex;
+		@apply flex w-fit;
 	}
 
 	.tooltip-content {
-		@apply z-10 rounded-lg bg-white shadow w-fit;
+		@apply z-10 w-fit rounded-lg bg-white shadow;
 	}
 
 	.tooltip-arrow {
