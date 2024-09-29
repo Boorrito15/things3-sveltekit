@@ -300,10 +300,10 @@
 			</div>
 		</div>
 		{#if isExpanded}
-			<div class="ml-5 flex items-end {task.when ? 'justify-between' : 'justify-end'} ">
+			<div class="ml-5 flex items-end justify-between">
 				<div class="flex flex-col space-y-2">
 					<div>
-						{#if task.tags.length > 0}
+						{#if task.tags && task.tags.length > 0}
 							<TagCombobox
 								initialTags={task.tags}
 								onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
@@ -327,9 +327,6 @@
 										</div>
 									{/snippet}
 								</Popover>
-								<!-- <p class="leading-none">
-                                                                        🗓️ {formatDate(task.when)}
-                                                                    </p> -->
 								<button
 									onclick={deleteWhen}
 									onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
@@ -361,7 +358,8 @@
 				<div class="flex justify-end space-x-3">
 					{#each Object.entries(icons) as [key, icon]}
 						{@const shouldShowIcon =
-							(key !== 'calendar' || !task.when) && (key !== 'tag' || task.tags.length == 0)}
+							(key !== 'calendar' || !task.when) &&
+							(key !== 'tag' || !task.tags || task.tags.length == 0)}
 						{#if shouldShowIcon}
 							<div
 								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"

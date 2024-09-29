@@ -21,6 +21,15 @@ export async function load() {
 			completed: false,
 			when: dayjs().startOf('day').toISOString(),
 			tags: []
+		},
+		{
+			id: 3,
+			name: 'Task 3',
+			selected: false,
+			expanded: false,
+			completed: false,
+			when: null,
+			tags: []
 		}
 	];
 
