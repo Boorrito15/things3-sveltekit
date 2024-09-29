@@ -373,10 +373,12 @@
 									{/snippet}
 									{#snippet contentBlock()}
 										{@const ContentComponent = icon.content}
-										<div style="width: 300px">
+										<div class="w-fit">
 											{#if ContentComponent == Datepicker}
 												<Datepicker onDateSelected={updateWhen} />
 											{/if}
+										</div>
+										<div>
 											{#if ContentComponent == TagCombobox}
 												<TagCombobox onTagSelected={(tag) => updateTag(tag as unknown as Tags)} />
 											{/if}

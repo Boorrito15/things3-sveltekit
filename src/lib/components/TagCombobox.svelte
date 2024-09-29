@@ -110,7 +110,7 @@
 				placeholder={$tags.length === 0 ? 'Type to add tags...' : ''}
 				class="{$tags.length === 0
 					? ''
-					: ''}w-full bg-transparent leading-none text-black outline-none"
+					: ''}px-2 w-full bg-transparent leading-none text-black outline-none"
 				onkeydown={handleKeydown}
 			/>
 		</div>
@@ -129,7 +129,7 @@
 				onclick={() => {
 					handleTagSelection(tag);
 				}}
-				class="m-0 cursor-pointer rounded-md px-3 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
+				class="m-0 cursor-pointer rounded-md px-1 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-1 size-3" />
@@ -146,7 +146,7 @@
 						handleTagSelection($inputValue);
 					}
 				}}
-				class="m-0 cursor-pointer rounded-md px-3 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
+				class="m-0 cursor-pointer rounded-md px-1 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-1 size-3" />
