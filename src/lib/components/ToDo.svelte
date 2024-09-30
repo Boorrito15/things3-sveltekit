@@ -138,17 +138,23 @@
 
 		checklist = [...checklist.slice(0, index + 1), newChecklistItem, ...checklist.slice(index + 1)];
 
+		setTimeout(() => {
+			const element = document.getElementById(`checklist-item-${index + 1}`);
+			if (element) {
+				// Lock the scroll position
+				const scrollPosition = window.scrollY;
+
+				// Focus the element without causing any scroll
+				element.focus({ preventScroll: true });
+
+				// Restore the scroll position to prevent any layout shift
+				window.scrollTo({ top: scrollPosition });
+			}
+		}, 0); // Using 0 to defer after DOM has been updated
+
 		onUpdate({
 			...task,
 			checklist: checklist
-		});
-
-		// Focus on the new item after the component updates
-		tick().then(() => {
-			const newItemInput = document.getElementById(`checklist-item-${index + 1}`);
-			if (newItemInput) {
-				(newItemInput as HTMLInputElement).focus();
-			}
 		});
 	}
 
@@ -307,6 +313,7 @@
 								if (e.key === 'Enter') {
 									e.preventDefault();
 									addChecklistItem(index);
+									// focusChecklistItem(index);
 								}
 								if (e.key === 'Backspace' && item.name === '') {
 									console.log('delete');
@@ -547,13 +554,9 @@
 		padding-left: 0.125rem;
 	}
 
-	/* input[type='text'],
 	input[type='text']:focus {
-		background: none;
 		outline: none;
-		outline-offset: none;
-		border: none;
-	} */
+	}
 
 	/* Base checkbox style */
 	input[type='checkbox'] {
