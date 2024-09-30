@@ -159,6 +159,7 @@
 	}
 
 	function removeChecklistItem(index: number) {
+		// Remove the checklist item regardless of when it was added
 		checklist = [...checklist.slice(0, index), ...checklist.slice(index + 1)];
 		onUpdate({
 			...task,
@@ -327,19 +328,25 @@
 							? 'border-b'
 							: ''}"
 					>
-						<input type="checkbox" class="mr-2" checked={item.completed} />
+						<input type="checkbox" class="mr-2" bind:checked={item.completed} />
 						<input
 							type="text"
 							id="checklist-item-{index}"
 							style="flex-grow: 1;"
-							value={item.name}
+							bind:value={item.name}
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
 									addChecklistItem(index);
 								}
-								if (e.key === 'Backspace' && item.name === '') {
-									removeChecklistItem(index);
+								if (e.key === 'Backspace') {
+									console.log(
+										`Backspace pressed for item at index ${index} with name: ${item.name}`
+									);
+									if (item.name === '') {
+										console.log(`Removing item at index ${index}`);
+										removeChecklistItem(index);
+									}
 								}
 							}}
 						/>
