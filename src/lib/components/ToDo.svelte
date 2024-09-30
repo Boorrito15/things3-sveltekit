@@ -135,7 +135,21 @@
 			name: '',
 			completed: false
 		};
+
 		checklist = [...checklist, newChecklistItem];
+
+		onUpdate({
+			...task,
+			checklist: [...checklist, newChecklistItem]
+		});
+	}
+
+	function updateChecklistItem(index: number, item: ChecklistItem) {
+		checklist = [...checklist.slice(0, index), item, ...checklist.slice(index + 1)];
+		onUpdate({
+			...task,
+			checklist: [...checklist, item]
+		});
 	}
 
 	/**
@@ -268,14 +282,16 @@
 					onblur={updateTask}
 					rows="1"
 				></textarea>
-				{#snippet checklistItem(item: { completed: boolean; name: string })}
-					<label class="flex w-full items-center border-y !border-gray-200">
+				{#snippet checklistItem(item: { completed: boolean; name: string }, isLast: boolean)}
+					<label
+						class="flex w-full items-center border-t !border-gray-200 {isLast ? 'border-b' : ''}"
+					>
 						<input type="checkbox" class="mr-2" checked={item.completed} />
 						<input type="text" style="flex-grow: 1;" value={item.name} />
 					</label>
 				{/snippet}
-				{#each checklist as item}
-					{@render checklistItem(item)}
+				{#each checklist as item, index}
+					{@render checklistItem(item, index === checklist.length - 1)}
 				{/each}
 				<button onclick={addChecklistItem}>Add</button>
 			{:else}
