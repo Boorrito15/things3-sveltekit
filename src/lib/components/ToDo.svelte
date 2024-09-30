@@ -130,17 +130,25 @@
 		}
 	};
 
-	function addChecklistItem() {
+	function addChecklistItem(index: number) {
 		const newChecklistItem: ChecklistItem = {
 			name: '',
 			completed: false
 		};
 
-		checklist = [...checklist, newChecklistItem];
+		checklist = [...checklist.slice(0, index + 1), newChecklistItem, ...checklist.slice(index + 1)];
 
 		onUpdate({
 			...task,
-			checklist: [...checklist, newChecklistItem]
+			checklist: checklist
+		});
+
+		// Focus on the new item after the component updates
+		tick().then(() => {
+			const newItemInput = document.getElementById(`checklist-item-${index + 1}`);
+			if (newItemInput) {
+				(newItemInput as HTMLInputElement).focus();
+			}
 		});
 	}
 
@@ -276,24 +284,40 @@
 			{#if isExpanded}
 				<textarea
 					name="task-notes"
-					class="task-notes-input mb-2 focus:ring-0 focus:ring-offset-0"
+					class="task-notes-input mb-4 focus:ring-0 focus:ring-offset-0"
 					placeholder="Notes"
 					bind:value={editedNotes}
 					onblur={updateTask}
 					rows="1"
 				></textarea>
-				{#snippet checklistItem(item: { completed: boolean; name: string }, isLast: boolean)}
+				{#snippet checklistItem(item: { completed: boolean; name: string }, index: number)}
 					<label
-						class="flex w-full items-center border-t !border-gray-200 {isLast ? 'border-b' : ''}"
+						class="flex w-full items-center border-t !border-gray-200 {index ===
+						checklist.length - 1
+							? 'border-b'
+							: ''}"
 					>
 						<input type="checkbox" class="mr-2" checked={item.completed} />
-						<input type="text" style="flex-grow: 1;" value={item.name} />
+						<input
+							type="text"
+							id="checklist-item-{index}"
+							style="flex-grow: 1;"
+							value={item.name}
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									addChecklistItem(index);
+								}
+								if (e.key === 'Backspace' && item.name === '') {
+									console.log('delete');
+								}
+							}}
+						/>
 					</label>
 				{/snippet}
 				{#each checklist as item, index}
-					{@render checklistItem(item, index === checklist.length - 1)}
+					{@render checklistItem(item, index)}
 				{/each}
-				<button onclick={addChecklistItem}>Add</button>
 			{:else}
 				<p class="task-notes-collapsed">{editedNotes}</p>
 			{/if}
