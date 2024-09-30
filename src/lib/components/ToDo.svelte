@@ -7,43 +7,9 @@
 	import TagCombobox from './TagCombobox.svelte';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
+	import type { Task, Tag, ChecklistItem } from '$lib/types'; // Import the Tag interface
 
 	dayjs.extend(relativeTime);
-
-	/**
-	 * * INTERFACES
-	 */
-
-	// Remove the Tags interface and use the Tag interface instead
-	// Tag interface: Defines the structure for tags.
-	interface Tag {
-		id: string; // Ensure this matches the Tag interface in types.ts
-		value: string;
-		color?: string;
-		description?: string;
-	}
-
-	// ChecklistItem interface: Defines a checklist item's properties.
-	interface ChecklistItem {
-		name: string;
-		completed: boolean;
-	}
-
-	// Task interface: Defines the structure for a task, including optional dates, priority, etc.
-	interface Task {
-		id: number;
-		name: string;
-		notes?: string;
-		selected?: boolean;
-		expanded?: boolean;
-		completed?: boolean;
-		when?: string; // When the task is due
-		dueDate?: Date; // Task deadline
-		tags?: Tag[]; // Ensure this matches the Tag interface
-		priority?: 'low' | 'medium' | 'high';
-		checklist?: ChecklistItem[];
-	}
-
 	/**
 	 * * PROPS AND STATE VARIABLES
 	 */
@@ -56,13 +22,13 @@
 		onUpdate: (updatedTask: Task) => void;
 		onComplete: (taskId: number, completed: boolean) => void;
 	}>();
-
 	// Instead, use local state variables:
 	let isCompleted = $state(task.completed ?? false);
 	let isSelected = $state(task.selected ?? false);
 	let isExpanded = $state(task.expanded ?? false);
 	let editedTaskName = $state(task.name);
 	let editedNotes = $state(task.notes ?? '');
+	let checklist = $state(task.checklist ?? []);
 
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
@@ -86,7 +52,7 @@
 		});
 	}
 
-	console.log(task.tags);
+	console.log(task.checklist);
 	// Toggle task selection
 	function selectTask() {
 		onSelect(task.id); // Notify parent that the task was selected.
@@ -163,6 +129,14 @@
 			onComplete(task.id, false);
 		}
 	};
+
+	function addChecklistItem() {
+		const newChecklistItem: ChecklistItem = {
+			name: '',
+			completed: false
+		};
+		checklist = [...checklist, newChecklistItem];
+	}
 
 	/**
 	 * * EFFECTS
@@ -294,13 +268,16 @@
 					onblur={updateTask}
 					rows="1"
 				></textarea>
-				{#snippet checklistItem()}
+				{#snippet checklistItem(item: { completed: boolean; name: string })}
 					<label class="flex w-full items-center border-y !border-gray-200">
-						<input type="checkbox" class="mr-2" />
-						<input type="text" placeholder="Enter your task" style="flex-grow: 1;" />
+						<input type="checkbox" class="mr-2" checked={item.completed} />
+						<input type="text" style="flex-grow: 1;" value={item.name} />
 					</label>
 				{/snippet}
-				{@render checklistItem()}
+				{#each checklist as item}
+					{@render checklistItem(item)}
+				{/each}
+				<button onclick={addChecklistItem}>Add</button>
 			{:else}
 				<p class="task-notes-collapsed">{editedNotes}</p>
 			{/if}

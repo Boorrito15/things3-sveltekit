@@ -2,6 +2,7 @@
 	import { createCombobox, createTagsInput, melt, type ComboboxOption } from '@melt-ui/svelte';
 	import { ChevronDown, ChevronUp, X, TagIcon } from '$lib/global-icons';
 	import { fly } from 'svelte/transition';
+	import { addNewTask } from '$lib/utils/taskUtils';
 
 	type Tag = {
 		id: string;

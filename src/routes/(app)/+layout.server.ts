@@ -20,7 +20,12 @@ export async function load() {
 			expanded: false,
 			completed: false,
 			when: dayjs().startOf('day').toISOString(),
-			tags: []
+			tags: [{ id: '1', value: 'Svelte' }],
+			checklist: [
+				{ name: 'Checklist Item 1', completed: false },
+				{ name: 'Checklist Item 2', completed: false },
+				{ name: 'Checklist Item 3', completed: false }
+			]
 		},
 		{
 			id: 3,
