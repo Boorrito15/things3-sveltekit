@@ -1,7 +1,7 @@
 <!-- src/routes/today/+page.svelte -->
 <script lang="ts">
 	import { Collapsible } from '$lib/global-components';
-	import ToDo from '$lib/components/ToDo.svelte';
+	import ToDo from '$lib/components/ToDo.svelte'; // Ensure this is correct
 	import type { Task } from '$lib/types';
 	import { filterTasks, addNewTask, handleTaskAction } from '$lib/utils/taskUtils';
 	import dayjs from 'dayjs';

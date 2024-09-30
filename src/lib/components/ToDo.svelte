@@ -14,17 +14,17 @@
 	 * * INTERFACES
 	 */
 
+	// Remove the Tags interface and use the Tag interface instead
 	// Tag interface: Defines the structure for tags.
-	interface Tags {
-		id: number;
-		name: string;
+	interface Tag {
+		id: string; // Ensure this matches the Tag interface in types.ts
+		value: string;
 		color?: string;
 		description?: string;
 	}
 
 	// ChecklistItem interface: Defines a checklist item's properties.
 	interface ChecklistItem {
-		id: number;
 		name: string;
 		completed: boolean;
 	}
@@ -39,7 +39,7 @@
 		completed?: boolean;
 		when?: string; // When the task is due
 		dueDate?: Date; // Task deadline
-		tags?: Tags[];
+		tags?: Tag[]; // Ensure this matches the Tag interface
 		priority?: 'low' | 'medium' | 'high';
 		checklist?: ChecklistItem[];
 	}
@@ -78,7 +78,7 @@
 		onUpdate({ ...task, when: date });
 	}
 
-	function updateTag(tag: Tags | null) {
+	function updateTag(tag: Tag | null) {
 		console.log('Updated tags:', tag);
 		onUpdate({
 			...task,
@@ -86,6 +86,7 @@
 		});
 	}
 
+	console.log(task.tags);
 	// Toggle task selection
 	function selectTask() {
 		onSelect(task.id); // Notify parent that the task was selected.
@@ -245,154 +246,166 @@
 	}}
 >
 	<div class="task-content">
-		<div>
-			<div class="task-header">
-				<div class="mr-2">
-					<input
-						checked={isCompleted}
-						onclick={toggleComplete}
-						type="checkbox"
-						class="h-5 w-5 rounded border-none accent-blue-600 focus:ring-0"
-					/>
-				</div>
-				{#if task.when && !isExpanded}
-					<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
-						>{formatDateTime(task.when)}</small
-					>
-				{/if}
-				{#if isExpanded}
-					<!-- Bind the input value to editableName -->
-					<input
-						type="text"
-						class="task-text focus:ring-0 focus:ring-offset-0"
-						bind:this={inputRef}
-						bind:value={editedTaskName}
-						onblur={updateTask}
-					/>
-				{:else}
-					<!-- Display the current value of editableName -->
-					<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
-						{editedTaskName}
-						{#each task.tags as tag}
-							<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
-								>{tag.value}</span
-							>
-						{/each}
-					</p>
-				{/if}
-				<button class="flex h-full items-center" onclick={deleteTask}
-					><span class="material-symbols-outlined"> backspace </span></button
+		<div class="task-header">
+			<div class="mr-2.5">
+				<input
+					checked={isCompleted}
+					onclick={toggleComplete}
+					type="checkbox"
+					class="h-5 w-5 rounded border-none accent-blue-600 focus:ring-0"
+				/>
+			</div>
+			{#if task.when && !isExpanded}
+				<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
+					>{formatDateTime(task.when)}</small
 				>
-			</div>
-			<div class="notes-container">
-				{#if isExpanded}
-					<textarea
-						name="task-notes"
-						class="task-notes-input mb-6 focus:ring-0 focus:ring-offset-0"
-						placeholder="Notes"
-						bind:value={editedNotes}
-						onblur={updateTask}
-						rows="1"
-					></textarea>
-				{:else}
-					<p class="task-notes-collapsed">{editedNotes}</p>
-				{/if}
-			</div>
-		</div>
-		{#if isExpanded}
-			<div class="ml-5 flex items-end justify-between">
-				<div class="flex flex-col">
-					<div>
-						{#if task.tags && task.tags.length > 0}
-							<TagCombobox
-								initialTags={task.tags}
-								onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
-							/>
-						{/if}
-					</div>
-					<div>
-						{#if task.when}
-							<div
-								class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
-							>
-								<Popover onOpenChange={handlePopoverOpenChange}>
-									{#snippet triggerElement()}
-										{@const TriggerElement = formatDateTime(task.when)}
-										<p class="leading-3">🗓️ {TriggerElement}</p>
-									{/snippet}
-									{#snippet contentBlock()}
-										{@const ContentComponent = Datepicker}
-										<div style="width: 250px">
-											<ContentComponent onDateSelected={updateWhen} />
-										</div>
-									{/snippet}
-								</Popover>
-								<button
-									onclick={deleteWhen}
-									onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
-									class="rounded-sm p-0.5 hover:bg-gray-200"
-									type="button"
-									aria-label="Delete"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="0.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										class="lucide lucide-x"
-									>
-										<path d="M18 6 6 18" />
-										<path d="m6 6 12 12" />
-									</svg>
-								</button>
-							</div>
-						{/if}
-					</div>
-				</div>
-
-				<div class="flex justify-end space-x-3">
-					{#each Object.entries(icons) as [key, icon]}
-						{@const shouldShowIcon =
-							(key !== 'calendar' || !task.when) &&
-							(key !== 'tag' || !task.tags || task.tags.length == 0)}
-						{#if shouldShowIcon}
-							<div
-								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
-							>
-								<Popover
-									message={icon.message}
-									onOpenChange={handlePopoverOpenChange}
-									placement={key === 'calendar' ? 'left-start' : 'left'}
-								>
-									{#snippet triggerElement()}
-										{@const TriggerElement = icon.svg}
-										<TriggerElement class="size-4" />
-									{/snippet}
-									{#snippet contentBlock()}
-										{@const ContentComponent = icon.content}
-										<div class="w-fit">
-											{#if ContentComponent == Datepicker}
-												<Datepicker onDateSelected={updateWhen} />
-											{/if}
-										</div>
-										<div>
-											{#if ContentComponent == TagCombobox}
-												<TagCombobox onTagSelected={(tag) => updateTag(tag as unknown as Tags)} />
-											{/if}
-										</div>
-									{/snippet}
-								</Popover>
-							</div>
-						{/if}
+			{/if}
+			{#if isExpanded}
+				<!-- Bind the input value to editableName -->
+				<input
+					type="text"
+					class="task-text focus:ring-0 focus:ring-offset-0"
+					bind:this={inputRef}
+					bind:value={editedTaskName}
+					onblur={updateTask}
+				/>
+			{:else}
+				<!-- Display the current value of editableName -->
+				<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
+					{editedTaskName}
+					{#each task.tags as tag}
+						<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
+							>{tag.value}</span
+						>
 					{/each}
+				</p>
+			{/if}
+			<button class="flex h-full items-center" onclick={deleteTask}
+				><span class="material-symbols-outlined"> backspace </span></button
+			>
+		</div>
+		<div class="notes-container ml-5 flex flex-col {isExpanded ? 'mb-6' : ''}">
+			{#if isExpanded}
+				<textarea
+					name="task-notes"
+					class="task-notes-input mb-2 focus:ring-0 focus:ring-offset-0"
+					placeholder="Notes"
+					bind:value={editedNotes}
+					onblur={updateTask}
+					rows="1"
+				></textarea>
+				{#snippet checklistItem()}
+					<label class="flex w-full items-center border-y !border-gray-200">
+						<input type="checkbox" class="mr-2" />
+						<input type="text" placeholder="Enter your task" style="flex-grow: 1;" />
+					</label>
+				{/snippet}
+				{@render checklistItem()}
+			{:else}
+				<p class="task-notes-collapsed">{editedNotes}</p>
+			{/if}
+		</div>
+
+		<div>
+			{#if isExpanded}
+				<div class="ml-5">
+					<div class="flex items-end justify-between">
+						<div class="flex flex-col">
+							<div>
+								{#if task.tags && task.tags.length > 0}
+									<TagCombobox
+										initialTags={task.tags}
+										onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+									/>
+								{/if}
+							</div>
+							<div>
+								{#if task.when}
+									<div
+										class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
+									>
+										<Popover onOpenChange={handlePopoverOpenChange} placement="bottom-start">
+											{#snippet triggerElement()}
+												{@const TriggerElement = formatDateTime(task.when)}
+												<p class="leading-3">🗓️ {TriggerElement}</p>
+											{/snippet}
+											{#snippet contentBlock()}
+												{@const ContentComponent = Datepicker}
+												<div>
+													<ContentComponent onDateSelected={updateWhen} />
+												</div>
+											{/snippet}
+										</Popover>
+										<button
+											onclick={deleteWhen}
+											onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
+											class="rounded-sm p-0.5 hover:bg-gray-200"
+											type="button"
+											aria-label="Delete"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="0.5"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												class="lucide lucide-x"
+											>
+												<path d="M18 6 6 18" />
+												<path d="m6 6 12 12" />
+											</svg>
+										</button>
+									</div>
+								{/if}
+							</div>
+						</div>
+						<div class="flex justify-end space-x-3">
+							{#each Object.entries(icons) as [key, icon]}
+								{@const shouldShowIcon =
+									(key !== 'calendar' || !task.when) &&
+									(key !== 'tag' || !task.tags || task.tags.length == 0)}
+								{#if shouldShowIcon}
+									<div
+										class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
+									>
+										<Popover
+											message={icon.message}
+											onOpenChange={handlePopoverOpenChange}
+											placement={key === 'calendar' ? 'left-start' : 'left'}
+										>
+											{#snippet triggerElement()}
+												{@const TriggerElement = icon.svg}
+												<TriggerElement class="size-4" />
+											{/snippet}
+											{#snippet contentBlock()}
+												{@const ContentComponent = icon.content}
+												<div class="w-fit">
+													{#if ContentComponent == Datepicker}
+														<Datepicker onDateSelected={updateWhen} />
+													{/if}
+												</div>
+												<div>
+													{#if ContentComponent == TagCombobox}
+														<TagCombobox
+															initialTags={task.tags}
+															onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+														/>
+													{/if}
+												</div>
+											{/snippet}
+										</Popover>
+									</div>
+								{/if}
+							{/each}
+						</div>
+					</div>
 				</div>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -491,7 +504,6 @@
 
 	/* Task Notes */
 	.task-notes-input {
-		margin-left: 1.25rem; /* Match margin with .task-text */
 		border: none;
 		box-sizing: border-box;
 		outline: none;
@@ -500,7 +512,6 @@
 		resize: none;
 		transition: height 0.6s linear;
 		height: auto;
-		min-height: 2rem;
 	}
 
 	.task-notes-collapsed {
@@ -515,16 +526,17 @@
 
 	textarea {
 		height: auto;
-		min-height: 2rem;
 		field-sizing: content;
+		padding-left: 0.125rem;
 	}
-	input[type='text'],
+
+	/* input[type='text'],
 	input[type='text']:focus {
 		background: none;
 		outline: none;
 		outline-offset: none;
 		border: none;
-	}
+	} */
 
 	/* Base checkbox style */
 	input[type='checkbox'] {

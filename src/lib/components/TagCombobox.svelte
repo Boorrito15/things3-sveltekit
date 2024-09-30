@@ -15,6 +15,8 @@
 		onTagSelected?: (tag: Tag | null) => void;
 	}>();
 
+	console.log(initialTags);
+
 	const {
 		elements: { root: tagsRoot, input: tagsInput, tag, deleteTrigger },
 		states: { tags }

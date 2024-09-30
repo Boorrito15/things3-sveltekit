@@ -1,9 +1,8 @@
-// src/routes/inbox/+page.server.ts
 import dayjs from 'dayjs';
 
 export async function load() {
 	// Mock tasks that will be used for the inbox
-	const inboxTasks = [
+	const tasks = [
 		{
 			id: 1,
 			name: 'Task 1',
@@ -11,8 +10,9 @@ export async function load() {
 			expanded: false,
 			completed: true,
 			when: dayjs().startOf('day').toISOString(),
-			tags: []
+			tags: [{ id: '1', value: 'Svelte' }] // Ensure tags are in the correct format
 		},
+
 		{
 			id: 2,
 			name: 'Task 2',
@@ -29,10 +29,11 @@ export async function load() {
 			expanded: false,
 			completed: false,
 			when: null,
-			tags: []
+			tags: [],
+			checklist: []
 		}
 	];
 
 	// Return the tasks to be used in the +page.svelte file
-	return { tasks: inboxTasks };
+	return { tasks: tasks };
 }

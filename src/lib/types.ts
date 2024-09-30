@@ -7,20 +7,18 @@ export interface Task {
 	completed?: boolean;
 	when?: string | undefined;
 	dueDate?: Date;
-	// tags?: Tag[];
+	tags?: Tag[]; // Ensure this is defined as an array of Tag
 	priority?: 'low' | 'medium' | 'high';
 	checklist?: ChecklistItem[];
 }
 
-// export interface Tag {
-// 	id: number;
-// 	name: string;
-// 	color?: string;
-// 	description?: string;
-// }
+// Define the Tag interface
+export interface Tag {
+	id: string; // or number, depending on your implementation
+	value: string;
+}
 
 export interface ChecklistItem {
-	id: number;
 	name: string;
 	completed: boolean;
 }
