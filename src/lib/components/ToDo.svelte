@@ -158,6 +158,30 @@
 		});
 	}
 
+	function removeChecklistItem(index: number) {
+		checklist = [...checklist.slice(0, index), ...checklist.slice(index + 1)];
+		onUpdate({
+			...task,
+			checklist: checklist
+		});
+
+		// Focus on the previous item after removal
+		setTimeout(() => {
+			const previousIndex = Math.max(0, index - 1);
+			const element = document.getElementById(`checklist-item-${previousIndex}`);
+			if (element) {
+				// Lock the scroll position
+				const scrollPosition = window.scrollY;
+
+				// Focus the element without causing any scroll
+				element.focus({ preventScroll: true });
+
+				// Restore the scroll position to prevent any layout shift
+				window.scrollTo({ top: scrollPosition });
+			}
+		}, 0); // Using 0 to defer after DOM has been updated
+	}
+
 	function updateChecklistItem(index: number, item: ChecklistItem) {
 		checklist = [...checklist.slice(0, index), item, ...checklist.slice(index + 1)];
 		onUpdate({
@@ -313,10 +337,9 @@
 								if (e.key === 'Enter') {
 									e.preventDefault();
 									addChecklistItem(index);
-									// focusChecklistItem(index);
 								}
 								if (e.key === 'Backspace' && item.name === '') {
-									console.log('delete');
+									removeChecklistItem(index);
 								}
 							}}
 						/>
