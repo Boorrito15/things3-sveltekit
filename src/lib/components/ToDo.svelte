@@ -163,9 +163,17 @@
 		onUpdate({ ...task });
 	}
 
-	function updateChecklistItem(index: number, name: string) {
+	function updateChecklistItemName(index: number, name: string) {
 		const updatedChecklist = task.checklist.map((item: ChecklistItem, i: number) =>
 			i === index ? { ...item, name } : item
+		);
+
+		onUpdate({ ...task, checklist: updatedChecklist });
+	}
+
+	function updateChecklistItemCompleted(index: number, completed: boolean) {
+		const updatedChecklist = task.checklist.map((item: ChecklistItem, i: number) =>
+			i === index ? { ...item, completed } : item
 		);
 
 		onUpdate({ ...task, checklist: updatedChecklist });
@@ -328,7 +336,12 @@
 							? 'border-b'
 							: ''}"
 					>
-						<input type="checkbox" class="mr-2" bind:checked={checklistItem.completed} />
+						<input
+							type="checkbox"
+							class="mr-2"
+							bind:checked={checklistItem.completed}
+							onchange={() => updateChecklistItemCompleted(index, checklistItem.completed)}
+						/>
 						<input
 							type="text"
 							id="checklist-item-{index}"
@@ -337,13 +350,13 @@
 							onkeydown={async (e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
-									await updateChecklistItem(index, checklistItem.name);
+									await updateChecklistItemName(index, checklistItem.name);
 									addChecklistItem(index);
 								} else if (e.key === 'Backspace' && checklistItem.name === '') {
 									removeChecklistItem(index);
 								}
 							}}
-							onblur={() => updateChecklistItem(index, checklistItem.name)}
+							onblur={() => updateChecklistItemName(index, checklistItem.name)}
 						/>
 					</label>
 				{/each}
