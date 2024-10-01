@@ -426,7 +426,9 @@
 							{#each Object.entries(icons) as [key, icon]}
 								{@const shouldShowIcon =
 									(key !== 'calendar' || !task.when) &&
-									(key !== 'tag' || !task.tags || task.tags.length == 0)}
+									(key !== 'tag' || !task.tags || task.tags.length == 0) &&
+									(key !== 'checklist' || !task.checklist || task.checklist.length == 0)}
+
 								{#if shouldShowIcon}
 									<div
 										class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
