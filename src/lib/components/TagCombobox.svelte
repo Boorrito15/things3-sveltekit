@@ -16,8 +16,6 @@
 		onTagSelected?: (tag: Tag | null) => void;
 	}>();
 
-	console.log(initialTags);
-
 	const {
 		elements: { root: tagsRoot, input: tagsInput, tag, deleteTrigger },
 		states: { tags }
@@ -60,8 +58,6 @@
 			}
 			$tags = [...$tags, { id: value, value: value }];
 		}
-		console.log('Updated tags:', $tags);
-		console.log(value, 'tag selected');
 
 		if (onTagSelected) {
 			onTagSelected({ id: value, value: value }); // Notify parent with the selected tag object

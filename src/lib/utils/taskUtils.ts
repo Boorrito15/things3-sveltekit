@@ -57,15 +57,15 @@ export function filterTasks(
 }
 
 export function createNewTask(tasks: Task[], when: string | null = null): Task {
+	const maxId = Math.max(0, ...tasks.map((t) => t.id));
 	return {
-		id: Math.max(...tasks.map((t) => t.id), 0) + 1,
+		id: maxId + 1,
 		name: '',
 		selected: false,
 		expanded: true,
 		completed: false,
 		when: when || '',
 		notes: '',
-		// tags: [],
 		checklist: []
 	};
 }
@@ -88,8 +88,12 @@ export function handleTaskAction(
 			break;
 		case 'update':
 			updatedTasks = tasks.map((task) =>
-				task.id === (taskData as Task).id ? { ...(taskData as Task), selected: false } : task
+				task.id === (taskData as Task).id ? { ...task, ...(taskData as Task) } : task
 			);
+			console.log('Task updated in taskUtils:', taskData);
+			// if ((taskData as Task).checklist) {
+			// 	console.log('Updated checklist:', (taskData as Task).checklist);
+			// }
 			break;
 		case 'complete':
 			updatedTasks = tasks.map((task) =>

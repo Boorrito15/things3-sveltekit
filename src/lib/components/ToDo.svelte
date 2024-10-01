@@ -15,7 +15,13 @@
 	 */
 
 	// Props: task, onSelect, and onDelete are passed from parent.
-	let { task, onSelect, onDelete, onUpdate, onComplete } = $props<{
+	let {
+		task = $bindable(),
+		onSelect,
+		onDelete,
+		onUpdate,
+		onComplete
+	} = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
@@ -26,40 +32,47 @@
 	let isCompleted = $state(task.completed ?? false);
 	let isSelected = $state(task.selected ?? false);
 	let isExpanded = $state(task.expanded ?? false);
-	let editedTaskName = $state(task.name);
 	let editedNotes = $state(task.notes ?? '');
-	let checklist = $state(task.checklist ?? []);
+	// let checklist = $state(task.checklist ?? []);
 
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
 
+	let editedTaskName = $state(task.name);
+
+	$effect(() => {
+		editedTaskName = task.name;
+	});
+
 	/**
 	 * * FUNCTIONS
 	 */
 
-	// Update the 'when' date for the task
-	function updateWhen(date: Date | null) {
-		onUpdate({ ...task, when: date });
+	// Core task operations
+	function updateTask() {
+		if (editedTaskName !== task.name) {
+			onUpdate({ ...task, name: editedTaskName });
+		}
 	}
 
-	function updateTag(tag: Tag | null) {
-		console.log('Updated tags:', tag);
-		onUpdate({
-			...task,
-			tags: [...task.tags, tag] // Ensure the property is 'tags' (lowercase 't')
-		});
+	function updateTaskV2(property: keyof Task, value: any) {
+		if (value !== task[property]) {
+			onUpdate({ ...task, [property]: value });
+		}
 	}
 
-	console.log(task.checklist);
-	// Toggle task selection
+	function deleteTask() {
+		onDelete(task.id);
+	}
+
+	// Task selection and expansion
 	function selectTask() {
-		onSelect(task.id); // Notify parent that the task was selected.
+		onSelect(task.id);
 		isSelected = true;
 	}
 
-	// Expand the task to enable editing
 	function editTask() {
 		if (!isExpanded) {
 			isExpanded = true;
@@ -72,14 +85,26 @@
 		}
 	}
 
-	// Delete the task
-	function deleteTask() {
-		onDelete(task.id);
+	// Task completion
+	const toggleComplete = () => {
+		if (!isCompleted) {
+			isCompleted = true;
+			setTimeout(() => {
+				onComplete(task.id, true);
+			}, 700);
+		} else {
+			isCompleted = false;
+			onComplete(task.id, false);
+		}
+	};
+
+	// Date and time operations
+	function updateWhen(date: Date | null) {
+		onUpdate({ ...task, when: date });
 	}
 
-	// Handle popover state changes (open/close)
-	function handlePopoverOpenChange(isOpen: boolean) {
-		isPopoverOpen = isOpen;
+	function deleteWhen() {
+		onUpdate({ ...task, when: null });
 	}
 
 	function formatDate(date: Date): string {
@@ -105,90 +130,66 @@
 		return `${formattedDate} at ${formattedTime}`;
 	}
 
-	function deleteWhen() {
-		onUpdate({ ...task, when: null });
-	}
-
-	function updateTask() {
+	// Tag operations
+	function updateTag(tag: Tag | null) {
 		onUpdate({
 			...task,
-			name: editedTaskName,
-			notes: editedNotes,
-			expanded: isExpanded
+			tags: [...task.tags, tag]
 		});
 	}
 
-	const toggleComplete = () => {
-		if (!isCompleted) {
-			isCompleted = true;
-			setTimeout(() => {
-				onComplete(task.id, true);
-			}, 700);
-		} else {
-			isCompleted = false;
-			onComplete(task.id, false);
-		}
-	};
-
-	function addChecklistItem(index: number) {
+	// Checklist operations
+	async function addChecklistItem(index: number) {
 		const newChecklistItem: ChecklistItem = {
 			name: '',
 			completed: false
 		};
 
-		checklist = [...checklist.slice(0, index + 1), newChecklistItem, ...checklist.slice(index + 1)];
+		task.checklist = [
+			...task.checklist.slice(0, index + 1),
+			newChecklistItem,
+			...task.checklist.slice(index + 1)
+		];
 
-		setTimeout(() => {
-			const element = document.getElementById(`checklist-item-${index + 1}`);
-			if (element) {
-				// Lock the scroll position
-				const scrollPosition = window.scrollY;
+		await tick();
 
-				// Focus the element without causing any scroll
-				element.focus({ preventScroll: true });
+		const element = document.getElementById(`checklist-item-${index + 1}`);
+		if (element) {
+			const scrollPosition = window.scrollY;
+			element.focus({ preventScroll: true });
+			window.scrollTo({ top: scrollPosition });
+		}
 
-				// Restore the scroll position to prevent any layout shift
-				window.scrollTo({ top: scrollPosition });
-			}
-		}, 0); // Using 0 to defer after DOM has been updated
+		onUpdate({ ...task });
+	}
 
-		onUpdate({
-			...task,
-			checklist: checklist
-		});
+	function updateChecklistItem(index: number, name: string) {
+		const updatedChecklist = task.checklist.map((item: ChecklistItem, i: number) =>
+			i === index ? { ...item, name } : item
+		);
+
+		onUpdate({ ...task, checklist: updatedChecklist });
 	}
 
 	function removeChecklistItem(index: number) {
-		// Remove the checklist item regardless of when it was added
-		checklist = [...checklist.slice(0, index), ...checklist.slice(index + 1)];
-		onUpdate({
-			...task,
-			checklist: checklist
-		});
+		task.checklist = [...task.checklist.slice(0, index), ...task.checklist.slice(index + 1)];
 
-		// Focus on the previous item after removal
 		setTimeout(() => {
 			const previousIndex = Math.max(0, index - 1);
 			const element = document.getElementById(`checklist-item-${previousIndex}`);
 			if (element) {
-				// Lock the scroll position
 				const scrollPosition = window.scrollY;
-
-				// Focus the element without causing any scroll
 				element.focus({ preventScroll: true });
-
-				// Restore the scroll position to prevent any layout shift
 				window.scrollTo({ top: scrollPosition });
 			}
-		}, 0); // Using 0 to defer after DOM has been updated
+		}, 0);
+
+		onUpdate({ ...task });
 	}
 
-	function updateChecklistItem(index: number, item: ChecklistItem) {
-		checklist = [...checklist.slice(0, index), item, ...checklist.slice(index + 1)];
-		onUpdate({
-			...task,
-			checklist: [...checklist, item]
-		});
+	// UI state management
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen;
 	}
 
 	/**
@@ -299,7 +300,7 @@
 			{:else}
 				<!-- Display the current value of editableName -->
 				<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
-					{editedTaskName}
+					{task.name}
 					{#each task.tags as tag}
 						<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
 							>{tag.value}</span
@@ -318,42 +319,33 @@
 					class="task-notes-input mb-4 focus:ring-0 focus:ring-offset-0"
 					placeholder="Notes"
 					bind:value={editedNotes}
-					onblur={updateTask}
 					rows="1"
 				></textarea>
-				{#snippet checklistItem(item: { completed: boolean; name: string }, index: number)}
+				{#each task.checklist as checklistItem, index}
 					<label
 						class="flex w-full items-center border-t !border-gray-200 {index ===
-						checklist.length - 1
+						task.checklist.length - 1
 							? 'border-b'
 							: ''}"
 					>
-						<input type="checkbox" class="mr-2" bind:checked={item.completed} />
+						<input type="checkbox" class="mr-2" bind:checked={checklistItem.completed} />
 						<input
 							type="text"
 							id="checklist-item-{index}"
 							style="flex-grow: 1;"
-							bind:value={item.name}
+							bind:value={checklistItem.name}
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
 									addChecklistItem(index);
 								}
-								if (e.key === 'Backspace') {
-									console.log(
-										`Backspace pressed for item at index ${index} with name: ${item.name}`
-									);
-									if (item.name === '') {
-										console.log(`Removing item at index ${index}`);
-										removeChecklistItem(index);
-									}
+								if (e.key === 'Backspace' && checklistItem.name === '') {
+									removeChecklistItem(index);
 								}
 							}}
+							onblur={() => updateChecklistItem(index, checklistItem.name)}
 						/>
 					</label>
-				{/snippet}
-				{#each checklist as item, index}
-					{@render checklistItem(item, index)}
 				{/each}
 			{:else}
 				<p class="task-notes-collapsed">{editedNotes}</p>

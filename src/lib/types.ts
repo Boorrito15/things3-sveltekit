@@ -21,6 +21,7 @@ export interface Tag {
 }
 
 export interface ChecklistItem {
+	// id: number;
 	name: string;
 	completed: boolean;
 }
