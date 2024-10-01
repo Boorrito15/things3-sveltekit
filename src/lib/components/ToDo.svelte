@@ -7,92 +7,72 @@
 	import TagCombobox from './TagCombobox.svelte';
 	import dayjs from 'dayjs';
 	import relativeTime from 'dayjs/plugin/relativeTime';
+	import type { Task, Tag, ChecklistItem } from '$lib/types'; // Import the Tag interface
 
 	dayjs.extend(relativeTime);
-
-	/**
-	 * * INTERFACES
-	 */
-
-	// Tag interface: Defines the structure for tags.
-	interface Tags {
-		id: number;
-		name: string;
-		color?: string;
-		description?: string;
-	}
-
-	// ChecklistItem interface: Defines a checklist item's properties.
-	interface ChecklistItem {
-		id: number;
-		name: string;
-		completed: boolean;
-	}
-
-	// Task interface: Defines the structure for a task, including optional dates, priority, etc.
-	interface Task {
-		id: number;
-		name: string;
-		notes?: string;
-		selected?: boolean;
-		expanded?: boolean;
-		completed?: boolean;
-		when?: string; // When the task is due
-		dueDate?: Date; // Task deadline
-		tags?: Tags[];
-		priority?: 'low' | 'medium' | 'high';
-		checklist?: ChecklistItem[];
-	}
-
 	/**
 	 * * PROPS AND STATE VARIABLES
 	 */
 
 	// Props: task, onSelect, and onDelete are passed from parent.
-	let { task, onSelect, onDelete, onUpdate, onComplete } = $props<{
+	let {
+		task = $bindable(),
+		onSelect,
+		onDelete,
+		onUpdate,
+		onComplete
+	} = $props<{
 		task: Task;
 		onSelect: (taskId: number) => void;
 		onDelete: (taskId: number) => void;
 		onUpdate: (updatedTask: Task) => void;
 		onComplete: (taskId: number, completed: boolean) => void;
 	}>();
-
 	// Instead, use local state variables:
 	let isCompleted = $state(task.completed ?? false);
 	let isSelected = $state(task.selected ?? false);
 	let isExpanded = $state(task.expanded ?? false);
-	let editedTaskName = $state(task.name);
 	let editedNotes = $state(task.notes ?? '');
+	// let checklist = $state(task.checklist ?? []);
 
 	// State variables
 	let taskRef = $state<HTMLElement | null>(null); // Reference to task element.
 	let inputRef = $state<HTMLInputElement | null>(null); // Reference to task name input field.
 	let isPopoverOpen = $state(false); // Manages the popover state (open/closed).
 
+	let editedTaskName = $state(task.name);
+
+	$effect(() => {
+		editedTaskName = task.name;
+	});
+
 	/**
 	 * * FUNCTIONS
 	 */
 
-	// Update the 'when' date for the task
-	function updateWhen(date: Date | null) {
-		onUpdate({ ...task, when: date });
+	// Core task operations
+	function updateTask() {
+		if (editedTaskName !== task.name) {
+			onUpdate({ ...task, name: editedTaskName });
+		}
 	}
 
-	function updateTag(tag: Tags | null) {
-		console.log('Updated tags:', tag);
-		onUpdate({
-			...task,
-			tags: [...task.tags, tag] // Ensure the property is 'tags' (lowercase 't')
-		});
+	function updateTaskV2(property: keyof Task, value: any) {
+		if (value !== task[property]) {
+			onUpdate({ ...task, [property]: value });
+		}
 	}
 
-	// Toggle task selection
+	function deleteTask() {
+		onDelete(task.id);
+	}
+
+	// Task selection and expansion
 	function selectTask() {
-		onSelect(task.id); // Notify parent that the task was selected.
+		onSelect(task.id);
 		isSelected = true;
 	}
 
-	// Expand the task to enable editing
 	function editTask() {
 		if (!isExpanded) {
 			isExpanded = true;
@@ -105,14 +85,26 @@
 		}
 	}
 
-	// Delete the task
-	function deleteTask() {
-		onDelete(task.id);
+	// Task completion
+	const toggleComplete = () => {
+		if (!isCompleted) {
+			isCompleted = true;
+			setTimeout(() => {
+				onComplete(task.id, true);
+			}, 700);
+		} else {
+			isCompleted = false;
+			onComplete(task.id, false);
+		}
+	};
+
+	// Date and time operations
+	function updateWhen(date: Date | null) {
+		onUpdate({ ...task, when: date });
 	}
 
-	// Handle popover state changes (open/close)
-	function handlePopoverOpenChange(isOpen: boolean) {
-		isPopoverOpen = isOpen;
+	function deleteWhen() {
+		onUpdate({ ...task, when: null });
 	}
 
 	function formatDate(date: Date): string {
@@ -138,30 +130,83 @@
 		return `${formattedDate} at ${formattedTime}`;
 	}
 
-	function deleteWhen() {
-		onUpdate({ ...task, when: null });
-	}
-
-	function updateTask() {
+	// Tag operations
+	function updateTag(tag: Tag | null) {
 		onUpdate({
 			...task,
-			name: editedTaskName,
-			notes: editedNotes,
-			expanded: isExpanded
+			tags: [...task.tags, tag]
 		});
 	}
 
-	const toggleComplete = () => {
-		if (!isCompleted) {
-			isCompleted = true;
-			setTimeout(() => {
-				onComplete(task.id, true);
-			}, 700);
+	// Checklist operations
+	async function addChecklistItem(index: number) {
+		const newChecklistItem: ChecklistItem = {
+			name: '',
+			completed: false
+		};
+
+		// If the checklist is empty, add the first item
+		if (task.checklist.length === 0) {
+			task.checklist = [newChecklistItem];
+			index = -1; // Set index to -1 to focus on the first item
 		} else {
-			isCompleted = false;
-			onComplete(task.id, false);
+			task.checklist = [
+				...task.checklist.slice(0, index + 1),
+				newChecklistItem,
+				...task.checklist.slice(index + 1)
+			];
 		}
-	};
+
+		await tick();
+
+		// Focus on the newly added item or the first item if it's the first in the list
+		const elementIndex = index === -1 ? 0 : index + 1;
+		const element = document.getElementById(`checklist-item-${elementIndex}`);
+		if (element) {
+			const scrollPosition = window.scrollY;
+			element.focus({ preventScroll: true });
+			window.scrollTo({ top: scrollPosition });
+		}
+
+		onUpdate({ ...task });
+	}
+
+	function updateChecklistItemName(index: number, name: string) {
+		const updatedChecklist = task.checklist.map((item: ChecklistItem, i: number) =>
+			i === index ? { ...item, name } : item
+		);
+
+		onUpdate({ ...task, checklist: updatedChecklist });
+	}
+
+	function updateChecklistItemCompleted(index: number, completed: boolean) {
+		const updatedChecklist = task.checklist.map((item: ChecklistItem, i: number) =>
+			i === index ? { ...item, completed } : item
+		);
+
+		onUpdate({ ...task, checklist: updatedChecklist });
+	}
+
+	function removeChecklistItem(index: number) {
+		task.checklist = [...task.checklist.slice(0, index), ...task.checklist.slice(index + 1)];
+
+		setTimeout(() => {
+			const previousIndex = Math.max(0, index - 1);
+			const element = document.getElementById(`checklist-item-${previousIndex}`);
+			if (element) {
+				const scrollPosition = window.scrollY;
+				element.focus({ preventScroll: true });
+				window.scrollTo({ top: scrollPosition });
+			}
+		}, 0);
+
+		onUpdate({ ...task });
+	}
+
+	// UI state management
+	function handlePopoverOpenChange(isOpen: boolean) {
+		isPopoverOpen = isOpen;
+	}
 
 	/**
 	 * * EFFECTS
@@ -245,154 +290,195 @@
 	}}
 >
 	<div class="task-content">
-		<div>
-			<div class="task-header">
-				<div class="mr-2">
-					<input
-						checked={isCompleted}
-						onclick={toggleComplete}
-						type="checkbox"
-						class="h-5 w-5 rounded border-none accent-blue-600 focus:ring-0"
-					/>
-				</div>
-				{#if task.when && !isExpanded}
-					<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
-						>{formatDateTime(task.when)}</small
-					>
-				{/if}
-				{#if isExpanded}
-					<!-- Bind the input value to editableName -->
-					<input
-						type="text"
-						class="task-text focus:ring-0 focus:ring-offset-0"
-						bind:this={inputRef}
-						bind:value={editedTaskName}
-						onblur={updateTask}
-					/>
-				{:else}
-					<!-- Display the current value of editableName -->
-					<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
-						{editedTaskName}
-						{#each task.tags as tag}
-							<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
-								>{tag.value}</span
-							>
-						{/each}
-					</p>
-				{/if}
-				<button class="flex h-full items-center" onclick={deleteTask}
-					><span class="material-symbols-outlined"> backspace </span></button
+		<div class="task-header">
+			<div class="mr-2.5">
+				<input
+					checked={isCompleted}
+					onclick={toggleComplete}
+					type="checkbox"
+					class="h-5 w-5 rounded border-none accent-blue-600 focus:ring-0"
+				/>
+			</div>
+			{#if task.when && !isExpanded}
+				<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
+					>{formatDateTime(task.when)}</small
 				>
-			</div>
-			<div class="notes-container">
-				{#if isExpanded}
-					<textarea
-						name="task-notes"
-						class="task-notes-input mb-6 focus:ring-0 focus:ring-offset-0"
-						placeholder="Notes"
-						bind:value={editedNotes}
-						onblur={updateTask}
-						rows="1"
-					></textarea>
-				{:else}
-					<p class="task-notes-collapsed">{editedNotes}</p>
-				{/if}
-			</div>
-		</div>
-		{#if isExpanded}
-			<div class="ml-5 flex items-end justify-between">
-				<div class="flex flex-col">
-					<div>
-						{#if task.tags && task.tags.length > 0}
-							<TagCombobox
-								initialTags={task.tags}
-								onTagSelected={(tag) => updateTag(tag as unknown as Tags)}
-							/>
-						{/if}
-					</div>
-					<div>
-						{#if task.when}
-							<div
-								class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
-							>
-								<Popover onOpenChange={handlePopoverOpenChange}>
-									{#snippet triggerElement()}
-										{@const TriggerElement = formatDateTime(task.when)}
-										<p class="leading-3">🗓️ {TriggerElement}</p>
-									{/snippet}
-									{#snippet contentBlock()}
-										{@const ContentComponent = Datepicker}
-										<div style="width: 250px">
-											<ContentComponent onDateSelected={updateWhen} />
-										</div>
-									{/snippet}
-								</Popover>
-								<button
-									onclick={deleteWhen}
-									onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
-									class="rounded-sm p-0.5 hover:bg-gray-200"
-									type="button"
-									aria-label="Delete"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="0.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										class="lucide lucide-x"
-									>
-										<path d="M18 6 6 18" />
-										<path d="m6 6 12 12" />
-									</svg>
-								</button>
-							</div>
-						{/if}
-					</div>
-				</div>
-
-				<div class="flex justify-end space-x-3">
-					{#each Object.entries(icons) as [key, icon]}
-						{@const shouldShowIcon =
-							(key !== 'calendar' || !task.when) &&
-							(key !== 'tag' || !task.tags || task.tags.length == 0)}
-						{#if shouldShowIcon}
-							<div
-								class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
-							>
-								<Popover
-									message={icon.message}
-									onOpenChange={handlePopoverOpenChange}
-									placement={key === 'calendar' ? 'left-start' : 'left'}
-								>
-									{#snippet triggerElement()}
-										{@const TriggerElement = icon.svg}
-										<TriggerElement class="size-4" />
-									{/snippet}
-									{#snippet contentBlock()}
-										{@const ContentComponent = icon.content}
-										<div class="w-fit">
-											{#if ContentComponent == Datepicker}
-												<Datepicker onDateSelected={updateWhen} />
-											{/if}
-										</div>
-										<div>
-											{#if ContentComponent == TagCombobox}
-												<TagCombobox onTagSelected={(tag) => updateTag(tag as unknown as Tags)} />
-											{/if}
-										</div>
-									{/snippet}
-								</Popover>
-							</div>
-						{/if}
+			{/if}
+			{#if isExpanded}
+				<!-- Bind the input value to editableName -->
+				<input
+					type="text"
+					class="task-text focus:ring-0 focus:ring-offset-0"
+					bind:this={inputRef}
+					bind:value={editedTaskName}
+					onblur={updateTask}
+				/>
+			{:else}
+				<!-- Display the current value of editableName -->
+				<p class="task-text {isCompleted ? 'text-gray-500' : ''}" data-placeholder="New To-Do...">
+					{task.name}
+					{#each task.tags as tag}
+						<span class="ml-1 rounded-lg border border-gray-400 px-1.5 text-xs text-gray-400"
+							>{tag.value}</span
+						>
 					{/each}
+				</p>
+			{/if}
+			<button class="flex h-full items-center" onclick={deleteTask}
+				><span class="material-symbols-outlined"> backspace </span></button
+			>
+		</div>
+		<div class="notes-container ml-5 flex flex-col {isExpanded ? 'mb-6' : ''}">
+			{#if isExpanded}
+				<textarea
+					name="task-notes"
+					class="task-notes-input mb-4 focus:ring-0 focus:ring-offset-0"
+					placeholder="Notes"
+					bind:value={editedNotes}
+					rows="1"
+				></textarea>
+				{#each task.checklist as checklistItem, index}
+					<label
+						class="flex w-full items-center border-t !border-gray-200 {index ===
+						task.checklist.length - 1
+							? 'border-b'
+							: ''}"
+					>
+						<input
+							type="checkbox"
+							class="mr-2"
+							bind:checked={checklistItem.completed}
+							onchange={() => updateChecklistItemCompleted(index, checklistItem.completed)}
+						/>
+						<input
+							type="text"
+							id="checklist-item-{index}"
+							style="flex-grow: 1;"
+							bind:value={checklistItem.name}
+							onkeydown={async (e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									await updateChecklistItemName(index, checklistItem.name);
+									addChecklistItem(index);
+								} else if (e.key === 'Backspace' && checklistItem.name === '') {
+									removeChecklistItem(index);
+								}
+							}}
+							onblur={() => updateChecklistItemName(index, checklistItem.name)}
+						/>
+					</label>
+				{/each}
+			{:else}
+				<p class="task-notes-collapsed">{editedNotes}</p>
+			{/if}
+		</div>
+
+		<div>
+			{#if isExpanded}
+				<div class="ml-5">
+					<div class="flex items-end justify-between">
+						<div class="flex flex-col">
+							<div>
+								{#if task.tags && task.tags.length > 0}
+									<TagCombobox
+										initialTags={task.tags}
+										onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+									/>
+								{/if}
+							</div>
+							<div>
+								{#if task.when}
+									<div
+										class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
+									>
+										<Popover onOpenChange={handlePopoverOpenChange} placement="bottom-start">
+											{#snippet triggerElement()}
+												{@const TriggerElement = formatDateTime(task.when)}
+												<p class="leading-3">🗓️ {TriggerElement}</p>
+											{/snippet}
+											{#snippet contentBlock()}
+												{@const ContentComponent = Datepicker}
+												<div>
+													<ContentComponent onDateSelected={updateWhen} />
+												</div>
+											{/snippet}
+										</Popover>
+										<button
+											onclick={deleteWhen}
+											onkeydown={(e) => e.key === 'Enter' && deleteWhen()}
+											class="rounded-sm p-0.5 hover:bg-gray-200"
+											type="button"
+											aria-label="Delete"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="0.5"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												class="lucide lucide-x"
+											>
+												<path d="M18 6 6 18" />
+												<path d="m6 6 12 12" />
+											</svg>
+										</button>
+									</div>
+								{/if}
+							</div>
+						</div>
+						<div class="flex justify-end space-x-3">
+							{#each Object.entries(icons) as [key, icon]}
+								{@const shouldShowIcon =
+									(key !== 'calendar' || !task.when) &&
+									(key !== 'tag' || !task.tags || task.tags.length == 0) &&
+									(key !== 'checklist' || !task.checklist || task.checklist.length == 0)}
+
+								{#if shouldShowIcon}
+									<div
+										class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
+									>
+										{#if key === 'checklist'}
+											<icon.svg onclick={() => addChecklistItem(-1)} class="size-4" />
+										{:else}
+											<Popover
+												message={icon.message}
+												onOpenChange={handlePopoverOpenChange}
+												placement={key === 'calendar' ? 'left-start' : 'left-'}
+											>
+												{#snippet triggerElement()}
+													{@const TriggerElement = icon.svg}
+													<TriggerElement class="size-4" />
+												{/snippet}
+												{#snippet contentBlock()}
+													{@const ContentComponent = icon.content}
+													<div class="w-fit">
+														{#if ContentComponent == Datepicker}
+															<Datepicker onDateSelected={updateWhen} />
+														{/if}
+													</div>
+													<div>
+														{#if ContentComponent == TagCombobox}
+															<TagCombobox
+																initialTags={task.tags}
+																onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+															/>
+														{/if}
+													</div>
+												{/snippet}
+											</Popover>
+										{/if}
+									</div>
+								{/if}
+							{/each}
+						</div>
+					</div>
 				</div>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -491,7 +577,6 @@
 
 	/* Task Notes */
 	.task-notes-input {
-		margin-left: 1.25rem; /* Match margin with .task-text */
 		border: none;
 		box-sizing: border-box;
 		outline: none;
@@ -500,7 +585,6 @@
 		resize: none;
 		transition: height 0.6s linear;
 		height: auto;
-		min-height: 2rem;
 	}
 
 	.task-notes-collapsed {
@@ -515,15 +599,12 @@
 
 	textarea {
 		height: auto;
-		min-height: 2rem;
 		field-sizing: content;
+		padding-left: 0.125rem;
 	}
-	input[type='text'],
+
 	input[type='text']:focus {
-		background: none;
 		outline: none;
-		outline-offset: none;
-		border: none;
 	}
 
 	/* Base checkbox style */

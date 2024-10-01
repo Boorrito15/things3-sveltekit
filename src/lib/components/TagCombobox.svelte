@@ -2,6 +2,7 @@
 	import { createCombobox, createTagsInput, melt, type ComboboxOption } from '@melt-ui/svelte';
 	import { ChevronDown, ChevronUp, X, TagIcon } from '$lib/global-icons';
 	import { fly } from 'svelte/transition';
+	import { addNewTask } from '$lib/utils/taskUtils';
 
 	type Tag = {
 		id: string;
@@ -57,8 +58,6 @@
 			}
 			$tags = [...$tags, { id: value, value: value }];
 		}
-		console.log('Updated tags:', $tags);
-		console.log(value, 'tag selected');
 
 		if (onTagSelected) {
 			onTagSelected({ id: value, value: value }); // Notify parent with the selected tag object

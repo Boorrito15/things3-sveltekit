@@ -24,6 +24,10 @@
 	function addNewTaskWrapper() {
 		tasks = addNewTask(tasks, today);
 	}
+
+	function updateTask(updatedTask: Task) {
+		tasks = handleTaskAction(tasks, 'update', updatedTask);
+	}
 </script>
 
 <h4 class="mb-8">⭐️ Today</h4>
@@ -35,7 +39,9 @@
 				{task}
 				onSelect={(id) => handleTaskActionWrapper('select', id)}
 				onDelete={(id) => handleTaskActionWrapper('delete', id)}
-				onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
+				onUpdate={(updatedTask) => {
+					updateTask(updatedTask);
+				}}
 				onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 			/>
 		{/each}
@@ -49,19 +55,19 @@
 		<Collapsible>
 			{#snippet heading()}
 				<p
-					class="leading-3 text-sm font-semibold text-gray-500 border border-transparent hover:border-gray-300 p-1"
+					class="border border-transparent p-1 text-sm font-semibold leading-3 text-gray-500 hover:border-gray-300"
 				>
 					Completed
 				</p>
 			{/snippet}
 
 			{#snippet items()}
-				{#each completedTasks as task (task.id)}
+				{#each completedTasks as task, index (task.id)}
 					<ToDo
 						{task}
 						onSelect={(id) => handleTaskActionWrapper('select', id)}
 						onDelete={(id) => handleTaskActionWrapper('delete', id)}
-						onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
+						onUpdate={(updatedTask) => updateTask(updatedTask)}
 						onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 					/>
 				{/each}
