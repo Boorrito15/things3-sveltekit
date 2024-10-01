@@ -145,15 +145,23 @@
 			completed: false
 		};
 
-		task.checklist = [
-			...task.checklist.slice(0, index + 1),
-			newChecklistItem,
-			...task.checklist.slice(index + 1)
-		];
+		// If the checklist is empty, add the first item
+		if (task.checklist.length === 0) {
+			task.checklist = [newChecklistItem];
+			index = -1; // Set index to -1 to focus on the first item
+		} else {
+			task.checklist = [
+				...task.checklist.slice(0, index + 1),
+				newChecklistItem,
+				...task.checklist.slice(index + 1)
+			];
+		}
 
 		await tick();
 
-		const element = document.getElementById(`checklist-item-${index + 1}`);
+		// Focus on the newly added item or the first item if it's the first in the list
+		const elementIndex = index === -1 ? 0 : index + 1;
+		const element = document.getElementById(`checklist-item-${elementIndex}`);
 		if (element) {
 			const scrollPosition = window.scrollY;
 			element.focus({ preventScroll: true });
@@ -433,32 +441,36 @@
 									<div
 										class="linear-in-out rounded-sm border border-transparent p-0.5 opacity-40 transition-all duration-150 hover:border hover:border-black"
 									>
-										<Popover
-											message={icon.message}
-											onOpenChange={handlePopoverOpenChange}
-											placement={key === 'calendar' ? 'left-start' : 'left'}
-										>
-											{#snippet triggerElement()}
-												{@const TriggerElement = icon.svg}
-												<TriggerElement class="size-4" />
-											{/snippet}
-											{#snippet contentBlock()}
-												{@const ContentComponent = icon.content}
-												<div class="w-fit">
-													{#if ContentComponent == Datepicker}
-														<Datepicker onDateSelected={updateWhen} />
-													{/if}
-												</div>
-												<div>
-													{#if ContentComponent == TagCombobox}
-														<TagCombobox
-															initialTags={task.tags}
-															onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
-														/>
-													{/if}
-												</div>
-											{/snippet}
-										</Popover>
+										{#if key === 'checklist'}
+											<icon.svg onclick={() => addChecklistItem(-1)} class="size-4" />
+										{:else}
+											<Popover
+												message={icon.message}
+												onOpenChange={handlePopoverOpenChange}
+												placement={key === 'calendar' ? 'left-start' : 'left-'}
+											>
+												{#snippet triggerElement()}
+													{@const TriggerElement = icon.svg}
+													<TriggerElement class="size-4" />
+												{/snippet}
+												{#snippet contentBlock()}
+													{@const ContentComponent = icon.content}
+													<div class="w-fit">
+														{#if ContentComponent == Datepicker}
+															<Datepicker onDateSelected={updateWhen} />
+														{/if}
+													</div>
+													<div>
+														{#if ContentComponent == TagCombobox}
+															<TagCombobox
+																initialTags={task.tags}
+																onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+															/>
+														{/if}
+													</div>
+												{/snippet}
+											</Popover>
+										{/if}
 									</div>
 								{/if}
 							{/each}
