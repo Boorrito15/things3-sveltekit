@@ -334,30 +334,16 @@
 							id="checklist-item-{index}"
 							style="flex-grow: 1;"
 							bind:value={checklistItem.name}
-							onkeydown={(e) => {
+							onkeydown={async (e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
-									const currentName = checklistItem.name;
-									const currentIndex = index;
-
-									// Use a Promise to ensure the update happens before adding a new item
-									Promise.resolve()
-										.then(() => {
-											{
-												updateChecklistItem(currentIndex, currentName);
-											}
-										})
-										.then(() => {
-											addChecklistItem(currentIndex);
-										});
-								}
-								if (e.key === 'Backspace' && checklistItem.name === '') {
+									await updateChecklistItem(index, checklistItem.name);
+									addChecklistItem(index);
+								} else if (e.key === 'Backspace' && checklistItem.name === '') {
 									removeChecklistItem(index);
 								}
 							}}
-							onblur={() => {
-								updateChecklistItem(index, checklistItem.name);
-							}}
+							onblur={() => updateChecklistItem(index, checklistItem.name)}
 						/>
 					</label>
 				{/each}

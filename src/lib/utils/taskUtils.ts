@@ -90,10 +90,10 @@ export function handleTaskAction(
 			updatedTasks = tasks.map((task) =>
 				task.id === (taskData as Task).id ? { ...task, ...(taskData as Task) } : task
 			);
-			console.log('Task updated in taskUtils:', taskData);
-			// if ((taskData as Task).checklist) {
-			// 	console.log('Updated checklist:', (taskData as Task).checklist);
-			// }
+			// console.log('Task updated in taskUtils:', taskData);
+			if ((taskData as Task).checklist) {
+				console.log('Updated checklist:', (taskData as Task).checklist);
+			}
 			break;
 		case 'complete':
 			updatedTasks = tasks.map((task) =>
