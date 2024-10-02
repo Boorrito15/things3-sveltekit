@@ -10,7 +10,7 @@ export async function load() {
 			expanded: false,
 			completed: true,
 			when: dayjs().startOf('day').toISOString(),
-			tags: [{ id: '1', value: 'Svelte' }] // Ensure tags are in the correct format
+			tags: [{ id: 'Svelte', value: 'Svelte' }] // Ensure tags are in the correct format
 		},
 
 		{

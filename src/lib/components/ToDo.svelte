@@ -131,10 +131,10 @@
 	}
 
 	// Tag operations
-	function updateTag(tag: Tag | null) {
+	function updateTags(newTags: Tag[]) {
 		onUpdate({
 			...task,
-			tags: [...task.tags, tag]
+			tags: newTags
 		});
 	}
 
@@ -380,13 +380,9 @@
 						<div class="flex flex-col">
 							<div>
 								{#if task.tags && task.tags.length > 0}
-									<TagCombobox
-										initialTags={task.tags}
-										onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
-									/>
+									<TagCombobox initialTags={task.tags} onTagsChange={updateTags} />
 								{/if}
-							</div>
-							<div>
+
 								{#if task.when}
 									<div
 										class="linear-in-out flex w-fit items-center space-x-2 rounded-md border border-transparent leading-none transition-all duration-150 hover:border hover:border-gray-200"
@@ -463,8 +459,8 @@
 													<div>
 														{#if ContentComponent == TagCombobox}
 															<TagCombobox
-																initialTags={task.tags}
-																onTagSelected={(tag) => updateTag(tag as unknown as Tag)}
+																initialTags={task.tags || []}
+																onTagsChange={updateTags}
 															/>
 														{/if}
 													</div>

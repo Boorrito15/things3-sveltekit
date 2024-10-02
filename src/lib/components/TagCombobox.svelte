@@ -11,9 +11,9 @@
 
 	let existingOptions = $state(['Svelte', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'React']);
 
-	let { initialTags = [], onTagSelected } = $props<{
+	let { initialTags = [], onTagsChange } = $props<{
 		initialTags?: Tag[];
-		onTagSelected?: (tag: Tag | null) => void;
+		onTagsChange?: (tags: Tag[]) => void;
 	}>();
 
 	const {
@@ -26,6 +26,9 @@
 		defaultTags: initialTags.map((tag: Tag) => tag.value), // Initialize with task.tags (from initialTags prop)
 		onTagsChange: ({ next }) => {
 			console.log('tags changed', next);
+			if (onTagsChange) {
+				onTagsChange(next);
+			}
 			return next;
 		}
 	});
@@ -50,17 +53,12 @@
 	);
 
 	function handleTagSelection(value: string) {
-		// console.log('handleTagSelection called with:', value);
 		const normalizedValue = value.toLowerCase();
 		if (!$tags.some((t) => t.value.toLowerCase() === normalizedValue)) {
 			if (!existingOptions.includes(value)) {
 				existingOptions = [...existingOptions, value];
 			}
 			$tags = [...$tags, { id: value, value: value }];
-		}
-
-		if (onTagSelected) {
-			onTagSelected({ id: value, value: value }); // Notify parent with the selected tag object
 		}
 		$inputValue = '';
 		$open = false;
@@ -150,7 +148,6 @@
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-1 size-3" />
 				</span>
-				<span class="inline-blockalign-middle">New Tag </span>
 				<span class=" max-w-full whitespace-normal break-words">"{$inputValue}"</span>
 			</li>
 		{/if}
