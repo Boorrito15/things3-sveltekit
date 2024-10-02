@@ -42,10 +42,6 @@
 
 	let editedTaskName = $state(task.name);
 
-	$effect(() => {
-		editedTaskName = task.name;
-	});
-
 	/**
 	 * * FUNCTIONS
 	 */
@@ -228,16 +224,32 @@
 					el.contains(event.target as Node)
 				);
 
-				if (clickedInsidePopover) return;
+				const clickedInsideTask = taskRef && taskRef.contains(event.target as Node);
+				const clickedInsideTagCombobox = document
+					.querySelector('.tag-combobox')
+					?.contains(event.target as Node);
+				const clickedInsideComboboxOption = (event.target as HTMLElement).closest(
+					'[data-melt-combobox-option]'
+				);
 
-				if (taskRef && !taskRef.contains(event.target as Node)) {
-					if (isPopoverOpen) {
-						isPopoverOpen = false;
-					} else {
-						isSelected = false;
-						isExpanded = false;
-						onUpdate({ ...task, selected: false, expanded: false });
-					}
+				if (
+					clickedInsidePopover ||
+					clickedInsideTask ||
+					clickedInsideTagCombobox ||
+					clickedInsideComboboxOption
+				)
+					return;
+
+				// Check if the click target is a child of the ToDo component
+				const clickedInsideToDo = taskRef && taskRef.contains(event.target as Node);
+				if (clickedInsideToDo) return;
+
+				if (isPopoverOpen) {
+					isPopoverOpen = false;
+				} else {
+					isSelected = false;
+					isExpanded = false;
+					onUpdate({ ...task, selected: false, expanded: false });
 				}
 			};
 
