@@ -9,8 +9,8 @@
 	const { data } = $props<{ data: { tasks: Task[] } }>();
 	let tasks = $state(data.tasks);
 
-	let availableTasks = $derived(filterTasks(tasks, null).availableTasks);
-	let completedTasks = $derived(filterTasks(tasks, null).completedTasks);
+	let availableTasks = $derived(filterTasks(tasks, 'inbox').availableTasks);
+	let completedTasks = $derived(filterTasks(tasks, 'inbox').completedTasks);
 
 	function handleTaskActionWrapper(
 		action: 'select' | 'delete' | 'update' | 'complete',

@@ -26,32 +26,43 @@ export function formatDateTime(date: Date | string | null): string {
 
 export function filterTasks(
 	tasks: Task[],
-	today: string | null
+	filter: 'all' | 'today' | 'inbox' | null = null
 ): {
 	availableTasks: Task[];
 	completedTasks: Task[];
 } {
-	const todayDate = today ? dayjs(today).startOf('day') : null;
+	const today = dayjs().startOf('day');
 
-	const availableTasks = tasks.filter((task) => {
-		if (todayDate) {
-			// Today view
-			return task.when && dayjs(task.when).startOf('day').isSame(todayDate) && !task.completed;
-		} else {
-			// Inbox view
-			return !task.when && !task.completed;
+	const filterFunction = (task: Task): boolean => {
+		switch (filter) {
+			case 'all':
+				return true;
+			case 'today':
+				return !!task.when && dayjs(task.when).startOf('day').isSame(today);
+			case 'inbox':
+				return !task.when;
+			default:
+				return true;
 		}
-	});
+	};
 
-	const completedTasks = tasks.filter((task) => {
-		if (todayDate) {
-			// Today view
-			return task.when && dayjs(task.when).startOf('day').isSame(todayDate) && task.completed;
-		} else {
-			// Inbox view
-			return !task.when && task.completed;
-		}
-	});
+	const availableTasks = tasks
+		.filter((task) => !task.completed && filterFunction(task))
+		.sort((a, b) => {
+			if (!a.when && !b.when) return 0;
+			if (!a.when) return 1;
+			if (!b.when) return -1;
+			return dayjs(a.when).diff(dayjs(b.when));
+		});
+
+	const completedTasks = tasks
+		.filter((task) => task.completed && filterFunction(task))
+		.sort((a, b) => {
+			if (!a.when && !b.when) return 0;
+			if (!a.when) return 1;
+			if (!b.when) return -1;
+			return dayjs(a.when).diff(dayjs(b.when));
+		});
 
 	return { availableTasks, completedTasks };
 }
