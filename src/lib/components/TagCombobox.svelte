@@ -78,8 +78,11 @@
 		}
 	}
 
-	function handleOptionClick(value: string) {
-		handleTagSelection(value);
+	function handleOptionClick() {
+		if ($selected) {
+			let selectedValue = $selected.value as unknown as string;
+			handleTagSelection(selectedValue);
+		}
 		$open = false; // Explicitly close the combobox
 	}
 </script>
@@ -128,7 +131,7 @@
 		{#each filteredTags as tag}
 			<li
 				use:melt={$option({ value: tag, label: tag })}
-				onclick={() => handleOptionClick(tag)}
+				onclick={handleOptionClick}
 				class="m-0 cursor-pointer rounded-md px-1 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
@@ -141,14 +144,14 @@
 		{#if $inputValue && !filteredTags.includes($inputValue) && !$tags.some((t) => t.value.toLowerCase() === $inputValue.toLowerCase())}
 			<li
 				use:melt={$option({ value: $inputValue, label: $inputValue })}
-				onclick={() => console.log('clicked', $inputValue)}
+				onclick={handleOptionClick}
 				class="m-0 cursor-pointer rounded-md px-1 py-1 hover:bg-[#5C9AFF] data-[highlighted]:bg-[#5C9AFF]"
 			>
 				<span class="inline-block align-middle">
 					<TagIcon class="mr-1 size-3" />
 				</span>
 				<span class="inline-block align-middle">New Tag </span>
-				<span class="max-w-full whitespace-normal break-words">"{$inputValue}"</span>
+				<span class="max-w-full whitespace-normal break-words align-middle">"{$inputValue}"</span>
 			</li>
 		{/if}
 	</ul>
