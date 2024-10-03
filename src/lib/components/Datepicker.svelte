@@ -43,11 +43,16 @@
 		return parsedResults.map((result) => {
 			const title = result.text;
 			const date = result.start.date();
-			const time =
-				result.start.get('hour') !== undefined ? dayjs(date).format('h:mm A') : '9:00 PM'; // Default time
+			const hasTime = result.start.isCertain('hour');
+
+			// Only include time in the description if it is specified
+			const description = hasTime
+				? `${formatDateForDisplay(date)} at ${dayjs(date).format('h:mm A')}`
+				: formatDateForDisplay(date);
+
 			return {
 				title: title.charAt(0).toUpperCase() + title.slice(1),
-				description: `${formatDateForDisplay(date)} at ${time}`
+				description: description
 			};
 		});
 	}
@@ -87,35 +92,30 @@
 		onValueChange: ({ next }) => {
 			if (next) {
 				const selectedDate = new Date(next.year, next.month - 1, next.day);
-				const selectedTime = currentDate ? dayjs(currentDate).format('HH:mm:ss') : '21:00:00'; // Default to 9:00 PM
+				const hadTimeSpecified =
+					currentDate !== null &&
+					(currentDate.getHours() !== 0 ||
+						currentDate.getMinutes() !== 0 ||
+						currentDate.getSeconds() !== 0);
 
 				if (!currentDate || currentDate.getTime() !== selectedDate.getTime()) {
-					const formattedDateTime = `${formatDateForDisplay(selectedDate)} at ${dayjs(selectedTime, 'HH:mm:ss').format('h:mm A')}`;
+					const formattedDateTime = formatDateForDisplay(selectedDate);
 					if ($inputValue !== formattedDateTime) {
 						$inputValue = formattedDateTime;
 					}
 
+					// Always set currentDate without time when selecting from calendar
 					currentDate = new Date(
 						selectedDate.getFullYear(),
 						selectedDate.getMonth(),
-						selectedDate.getDate(),
-						parseInt(selectedTime.split(':')[0]),
-						parseInt(selectedTime.split(':')[1]),
-						parseInt(selectedTime.split(':')[2])
+						selectedDate.getDate()
 					);
 
 					if (onDateSelected) {
 						onDateSelected(currentDate);
 					}
 
-					const calendarDateTime = new CalendarDateTime(
-						next.year,
-						next.month,
-						next.day,
-						currentDate.getHours(),
-						currentDate.getMinutes(),
-						currentDate.getSeconds()
-					);
+					const calendarDateTime = new CalendarDateTime(next.year, next.month, next.day);
 					value.set(calendarDateTime);
 				}
 			}
@@ -135,12 +135,40 @@
 	 * * FUNCTIONS
 	 */
 	function updateDateFromInput(input: string) {
-		parsedDate = chrono.parseDate(input);
-		if (parsedDate) {
-			currentDate = parsedDate;
-			if (onDateSelected) {
-				onDateSelected(parsedDate);
+		const parsedResults = chrono.parse(input);
+		if (parsedResults.length > 0) {
+			const result = parsedResults[0];
+			const hasTime = result.start.isCertain('hour');
+
+			let parsedDate;
+			if (hasTime) {
+				parsedDate = result.start.date();
+			} else {
+				// Set time to midnight if no time was specified
+				parsedDate = new Date(
+					result.start.get('year') ?? 0,
+					(result.start.get('month') ?? 1) - 1,
+					result.start.get('day') ?? 1,
+					0,
+					0,
+					0,
+					0
+				);
 			}
+
+			console.log('Datepicker - Parsed Date:', parsedDate);
+
+			currentDate = parsedDate;
+
+			if (onDateSelected) {
+				console.log('Datepicker - Passing to onDateSelected:', currentDate);
+				onDateSelected(currentDate);
+			}
+
+			// Update input value
+			$inputValue = hasTime
+				? `${formatDateForDisplay(parsedDate)} at ${dayjs(parsedDate).format('h:mm A')}`
+				: formatDateForDisplay(parsedDate);
 		}
 	}
 
@@ -289,7 +317,7 @@
 	}
 
 	[data-melt-calendar-cell] {
-		@apply mx-auto flex h-6 w-full cursor-pointer select-none items-center justify-center rounded-lg bg-transparent p-0.5 text-sm hover:bg-[#5A9BFE] data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-magnum-200 data-[selected]:bg-magnum-300 data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
+		@apply mx-auto flex h-6 w-full cursor-pointer select-none items-center justify-center rounded-lg bg-transparent p-0.5 text-sm hover:bg-[#5A9BFE] data-[outside-visible-months]:pointer-events-none data-[outside-visible-months]:cursor-default data-[range-highlighted]:bg-[#5A9BFE] data-[selected]:bg-[#5A9BFE] data-[selected]:text-magnum-900 data-[disabled]:opacity-40 data-[outside-visible-months]:opacity-40 data-[outside-visible-months]:hover:bg-transparent;
 	}
 
 	[data-melt-calendar-cell][data-outside-month='true'][data-outside-visible-months='true'] {
