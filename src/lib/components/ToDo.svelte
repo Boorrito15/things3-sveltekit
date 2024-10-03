@@ -103,6 +103,23 @@
 		onUpdate({ ...task, when: null });
 	}
 
+	function formatDateTime(date: Date): string {
+		console.log('ToDo - Formatting Date:', date);
+		const formattedDate = formatDate(date);
+		const formattedTime = dayjs(date).format('h:mm A');
+		console.log('ToDo - Formatted Time:', formattedTime);
+
+		// Only include time if it's not midnight (00:00)
+		if (date.getHours() !== 0 || date.getMinutes() !== 0) {
+			const result = `${formattedDate} at ${formattedTime}`;
+			console.log('ToDo - Returning date and time:', result);
+			return result;
+		} else {
+			console.log('ToDo - Returning only date:', formattedDate);
+			return formattedDate;
+		}
+	}
+
 	function formatDate(date: Date): string {
 		const today = dayjs().startOf('day');
 		const targetDate = dayjs(date).startOf('day');
@@ -115,15 +132,6 @@
 			return targetDate.format('D MMM YYYY');
 		}
 		return '';
-	}
-
-	function formatDateTime(date: Date): string {
-		const formattedDate = formatDate(date);
-		const formattedTime = dayjs(date).format('h:mm A');
-		if (formattedTime === '12:00 AM') {
-			return formattedDate;
-		}
-		return `${formattedDate} at ${formattedTime}`;
 	}
 
 	// Tag operations
@@ -261,6 +269,12 @@
 		}
 	});
 
+	$effect(() => {
+		if (task && task.when) {
+			console.log('ToDo - Task updated, new when value:', task.when);
+		}
+	});
+
 	/**
 	 * * ICON CONFIGURATION
 	 */
@@ -312,9 +326,13 @@
 				/>
 			</div>
 			{#if task.when && !isExpanded}
-				<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5"
-					>{formatDateTime(task.when)}</small
-				>
+				<small class="rounded-md bg-[#E6E8EC] px-2 font-light leading-5">
+					{#if task.when instanceof Date}
+						{formatDateTime(task.when)}
+					{:else}
+						No date set
+					{/if}
+				</small>
 			{/if}
 			{#if isExpanded}
 				<!-- Bind the input value to editableName -->

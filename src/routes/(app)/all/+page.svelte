@@ -1,7 +1,7 @@
 <!-- src/routes/today/+page.svelte -->
 <script lang="ts">
 	import { Collapsible } from '$lib/global-components';
-	import ToDo from '$lib/components/ToDo.svelte';
+	import ToDo from '$lib/components/ToDo.svelte'; // Ensure this is correct
 	import type { Task } from '$lib/types';
 	import { filterTasks, addNewTask, handleTaskAction } from '$lib/utils/taskUtils';
 	import dayjs from 'dayjs';
@@ -9,10 +9,8 @@
 	const { data } = $props<{ data: { tasks: Task[] } }>();
 	let tasks = $state(data.tasks);
 
-	let today = $state(dayjs().startOf('day').toISOString());
-
-	let availableTasks = $derived(filterTasks(tasks, 'today').availableTasks);
-	let completedTasks = $derived(filterTasks(tasks, 'today').completedTasks);
+	let availableTasks = $derived(filterTasks(tasks, 'all').availableTasks);
+	let completedTasks = $derived(filterTasks(tasks, 'all').completedTasks);
 
 	function handleTaskActionWrapper(
 		action: 'select' | 'delete' | 'update' | 'complete',
@@ -22,15 +20,11 @@
 	}
 
 	function addNewTaskWrapper() {
-		tasks = addNewTask(tasks, today);
-	}
-
-	function updateTask(updatedTask: Task) {
-		tasks = handleTaskAction(tasks, 'update', updatedTask);
+		tasks = addNewTask(tasks, '');
 	}
 </script>
 
-<h4 class="mb-8">⭐️ Today</h4>
+<h4 class="mb-8">🤯 All Tasks</h4>
 
 <div class="flex flex-col items-center">
 	{#if availableTasks.length > 0}
@@ -39,9 +33,7 @@
 				{task}
 				onSelect={(id) => handleTaskActionWrapper('select', id)}
 				onDelete={(id) => handleTaskActionWrapper('delete', id)}
-				onUpdate={(updatedTask) => {
-					updateTask(updatedTask);
-				}}
+				onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
 				onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 			/>
 		{/each}
@@ -62,12 +54,12 @@
 			{/snippet}
 
 			{#snippet items()}
-				{#each completedTasks as task, index (task.id)}
+				{#each completedTasks as task (task.id)}
 					<ToDo
 						{task}
 						onSelect={(id) => handleTaskActionWrapper('select', id)}
 						onDelete={(id) => handleTaskActionWrapper('delete', id)}
-						onUpdate={(updatedTask) => updateTask(updatedTask)}
+						onUpdate={(updatedTask) => handleTaskActionWrapper('update', updatedTask)}
 						onComplete={(id, completed) => handleTaskActionWrapper('complete', { id, completed })}
 					/>
 				{/each}
